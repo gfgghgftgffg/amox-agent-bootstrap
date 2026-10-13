@@ -1,4 +1,4 @@
-# amox-codex-bootstrap
+# amox-agent-bootstrap
 
 Give this file or repository to Codex on a new computer and ask:
 

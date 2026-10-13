@@ -14,5 +14,6 @@
 <!-- pi-task-router:start -->
 Task Router for Pi is opt-in. When the user invokes /skill:task-routing or applicable instructions explicitly enable it, the coordinating parent follows that skill and its generated tr_* role map. Otherwise keep the existing workflow.
 Installation alone does not authorize delegation. An assigned child follows its role contract and does not activate parent routing or launch further agents.
-Use @ssk_dev/pi-subagents-lean for execution, not builtin role substitutions or a separate runner. Supply exact model and thinking from the role map on every fresh launch; explicit task-scoped choices take precedence. Preserve host permissions and report unsupported routes.
+Use @gfgghgftgffg/pi-subagents-lean from amox_pi_extensions_lean for execution, not builtin role substitutions or a separate runner. Supply exact model and thinking from the role map on every fresh launch; explicit task-scoped choices take precedence. Preserve host permissions and report unsupported routes.
+Choose among available direct-subagent and workflow operations by decision structure and useful batching, not agent count or number of steps. If only one is available, use it for bounded phases; do not invent the other. Reassess at safe phase boundaries; independent coding acceptance remains required.
 <!-- pi-task-router:end -->

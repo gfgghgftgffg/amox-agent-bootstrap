@@ -11,7 +11,7 @@ model = "gpt-6-astra"
 effort = "medium"
 
 [roles.coding]
-model = "deepseek-flash"
+model = "glm-5.3"
 effort = "max"
 when = "Default implementation with clear boundaries; use a stronger candidate for complex judgment or cross-module coordination"
 options = [

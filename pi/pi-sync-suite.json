@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "repoUrl": "git@github.com:gfgghgftgffg/amox_pi_sessions.git",
+  "repoDir": "{{SYNC_REPO_DIR}}",
+  "autoMode": "manual",
+  "pullIntervalMinutes": 1440,
+  "pushDebounceMs": 2500,
+  "watchIntervalMs": 10000,
+  "chat": {
+    "autoExport": false,
+    "autoUpload": false,
+    "autoDownload": false,
+    "rawSessionSync": true,
+    "exportFormat": "both",
+    "includeMetadata": true
+  },
+  "environment": {
+    "autoPromptAfterPull": false
+  },
+  "retention": {
+    "keepChatExports": 100,
+    "keepBackups": 20,
+    "maxAgeDays": 180,
+    "autoApply": false
+  },
+  "policy": {
+    "safeRootFiles": [],
+    "safeDirs": [],
+    "optionalFiles": [
+      "AGENTS.md",
+      "CLAUDE.md"
+    ],
+    "optionalDirs": [
+      "extensions",
+      "sync-suite-chat-exports"
+    ],
+    "includedPaths": [
+      "missions",
+      "sessions"
+    ],
+    "excludedPaths": [],
+    "dangerouslyAllowedNames": [
+      "sessions"
+    ],
+    "neverSyncNames": [
+      "auth.json",
+      "sessions",
+      "git",
+      "npm",
+      "bin",
+      "node_modules",
+      ".env",
+      ".ssh",
+      "sync-suite-repo",
+      "pi-sync-suite.json",
+      "pi-sync-environment-ignore.json"
+    ],
+    "strippedSettingsKeys": [
+      "lastChangelogVersion"
+    ],
+    "syncLocalPackagePaths": false
+  }
+}
