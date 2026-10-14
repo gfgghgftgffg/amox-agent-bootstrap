@@ -1,5 +1,7 @@
 # amox-agent-bootstrap
 
+English | [简体中文](README.zh-CN.md)
+
 Personal Codex and Pi setup instructions for Windows, macOS, and Linux. Give the corresponding setup file to your agent and let it check the computer, install missing dependencies, and configure your tools and Skills.
 
 ## Codex Usage
