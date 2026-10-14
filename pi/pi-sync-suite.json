@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "repoUrl": "git@github.com:gfgghgftgffg/amox_pi_sessions.git",
+  "repoUrl": "git@github.com:YOUR_GITHUB_USERNAME/YOUR_PRIVATE_SESSIONS_REPO.git",
   "repoDir": "{{SYNC_REPO_DIR}}",
   "autoMode": "manual",
   "pullIntervalMinutes": 1440,

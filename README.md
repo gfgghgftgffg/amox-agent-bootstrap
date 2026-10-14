@@ -55,8 +55,14 @@ You can also clone this repository and ask Pi to follow the local [setup_for_pi.
 - Redacted [Sub2API configuration](pi/sub2api.json), preserving the relay URL and API mode with `YOUR_API_KEY` as the token placeholder.
 - Lean subagent configuration in [pi/subagents.json](pi/subagents.json), including 50 background slots, model display, strict role dispatch, and native workflows.
 
-- [Pi Sync configuration](pi/pi-sync-suite.json): manual-only session/mission sync to the user's SSH repository, with a machine-local checkout path rendered during setup. No sync or private-data upload is performed by bootstrap.
+- [Pi Sync configuration](pi/pi-sync-suite.json): manual-only session/mission sync. You must supply your own private repository's SSH URL and this computer's checkout path; see the [dedicated setup guide](pi/pi-sync-setup.md). No sync or private-data upload is performed by bootstrap.
 
 Pi routing is opt-in through `/skill:task-routing` and uses `@gfgghgftgffg/pi-subagents-lean` from the maintained amox repository for direct subagents and native workflows. Search roles use `@gfgghgftgffg/pi-web-access-lean`'s `web_access` interface. Model availability and relay/search credentials must be checked on the new computer; no credentials or session data are stored here.
 
 Edit [setup_for_pi.md](setup_for_pi.md) for installation behavior and the files in [pi/](pi/README.md) for personal Pi configuration. Codex and Pi have separate instruction templates and installation targets; do not overwrite one with the other's bundle.
+
+## Pi Sync: Your Own Sessions Repository Is Required
+
+Follow the [Pi Sync setup guide](pi/pi-sync-setup.md) before using synchronization. Create or choose a **private sessions repository you control**, then replace `YOUR_GITHUB_USERNAME` and `YOUR_PRIVATE_SESSIONS_REPO` in the template's `repoUrl`, and `{{SYNC_REPO_DIR}}` in `repoDir`. Do not use the author's personal repository or this bootstrap repository as the sync destination. Other computers use the same remote but their own local checkout paths; keep an already configured destination rather than overwriting it.
+
+The guide covers SSH access, local configuration, manual-mode checks and cross-computer use. Missing repository details leave Pi Sync pending configuration, not ready to sync. Raw sessions can contain secrets. Do not run `/sync-setup` as a setup check: it performs an initial pull and push with automatic-mode defaults. Run `/sync-push` or `/sync-pull` only when you explicitly intend to transfer data.
