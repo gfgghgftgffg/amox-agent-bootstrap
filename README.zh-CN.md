@@ -47,7 +47,7 @@ Codex 会选择适合当前平台的命令，复用兼容的安装，并保留�
 ## Pi 配置内容
 
 - 共享的 `codex` Conda 环境和 `pypdf`。
-- 10 个 Pi 包，全部从 npm 安装且不固定版本，包括 [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) 维护的 3 个 lean 包。通过 `pi update --extensions` 更新；安装来源和避免重复注册的迁移步骤见 [setup_for_pi.md](setup_for_pi.md)。[VPS 检查表](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.zh-CN.md#新-vps-检查表)区分日常安装和可选的每日维护部署；bootstrap 不发布包、不启动维护 timer。
+- 10 个 Pi 包，全部从 npm 安装且不固定版本，包括 [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) 维护的 3 个 lean 包。通过 `pi update --extensions` 更新；安装来源和避免重复注册的迁移步骤见 [setup_for_pi.md](setup_for_pi.md)。
 - 7 个用户 Skills：`design-taste-frontend`、`humanizer`、`meeting-summary-html`、`shuorenhua`、`grilling`、`ian-xiaohei-illustrations`，以及为 Pi 生成的 `task-routing`。
 - 文章配图：[Ian Xiaohei Illustrations](https://github.com/helloianneo/ian-xiaohei-illustrations)，包含参考资料和示例素材。生图需要宿主支持的工具和图像模型；装好 Skill 不代表已经验证生图可用。
 - 固定的 [Pi AGENTS.md](pi/AGENTS.md)、[settings](pi/settings.json)、路由配置，以及 [pi/](pi/README.md) 中不含敏感信息的插件配置。

@@ -48,7 +48,7 @@ You can also clone this repository and ask Pi to follow the local [setup_for_pi.
 ## Pi Included
 
 - The shared `codex` Conda environment and `pypdf`.
-- The 10 configured Pi packages, all installed from npm without version pins, including the three maintained lean packages from [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). Update them with `pi update --extensions`; installation sources and duplicate-free migration steps are listed in [setup_for_pi.md](setup_for_pi.md). See the [VPS checklist](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.md#new-vps-checklist) for ordinary installation versus optional daily maintenance. Bootstrap does not publish packages or start a maintenance timer.
+- The 10 configured Pi packages, all installed from npm without version pins, including the three maintained lean packages from [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). Update them with `pi update --extensions`; installation sources and duplicate-free migration steps are listed in [setup_for_pi.md](setup_for_pi.md).
 - Seven user Skills: `design-taste-frontend`, `humanizer`, `meeting-summary-html`, `shuorenhua`, `grilling`, `ian-xiaohei-illustrations`, and Pi's generated `task-routing`.
 - Article illustrations: [Ian Xiaohei Illustrations](https://github.com/helloianneo/ian-xiaohei-illustrations), with its references and example assets. Image generation requires a supported host tool and image model; installation does not verify generation.
 - Fixed [Pi AGENTS.md](pi/AGENTS.md), [settings](pi/settings.json), router configuration, and non-sensitive plugin configurations in [pi/](pi/README.md).
