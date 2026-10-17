@@ -5,9 +5,9 @@
     "npm:pi-open-tui",
     "npm:@narumitw/pi-statusline",
     "npm:@heyhuynhgiabuu/pi-pretty",
-    "../lean-packages/pi-web-access-lean/node_modules/@gfgghgftgffg/pi-web-access-lean",
-    "../lean-packages/rpiv-todo-lean/node_modules/@gfgghgftgffg/rpiv-todo-lean",
-    "../lean-packages/pi-subagents-lean/node_modules/@gfgghgftgffg/pi-subagents-lean",
+    "npm:@gfgghgftgffg/pi-web-access-lean",
+    "npm:@gfgghgftgffg/rpiv-todo-lean",
+    "npm:@gfgghgftgffg/pi-subagents-lean",
     "npm:@monotykamary/pi-retry",
     "npm:pi-sync-suite"
   ],

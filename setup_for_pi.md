@@ -28,7 +28,7 @@ Check that `pypdf` imports and install it only if missing. Install other depende
 
 ## 2. Pi Packages
 
-Configure these **10 user-level packages**: seven through `pi install npm:<name>` and three through the amox repository's independent installer below, without `--local`. Keep the order in [pi/settings.json](pi/settings.json), preserving unrelated declarations. Do not also copy their entrypoints into extension discovery directories.
+Configure these **10 user-level packages** through unversioned `pi install npm:<name>` sources, without `--local`. The three amox packages require first publication; use their Git fallback only on confirmed public-registry 404. Keep the order in [pi/settings.json](pi/settings.json), preserving unrelated declarations. Do not also copy their entrypoints into extension discovery directories.
 
 | Package source / identity | Purpose / source |
 | --- | --- |
@@ -37,17 +37,25 @@ Configure these **10 user-level packages**: seven through `pi install npm:<name>
 | `npm:pi-open-tui` | Terminal interface; [source](https://github.com/OldSuns/pi-open-tui) |
 | `npm:@narumitw/pi-statusline` | Status line; [source](https://github.com/narumiruna/pi-extensions/tree/main/packages/pi-statusline) |
 | `npm:@heyhuynhgiabuu/pi-pretty` | Tool/transcript presentation; [source](https://github.com/heyhuynhgiabuu/pi-pretty) |
-| Local `@gfgghgftgffg/pi-web-access-lean` | Search, fetch and source checking through `web_access`; [source](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/tree/main/packages/pi-web-access-lean) |
-| Local `@gfgghgftgffg/rpiv-todo-lean` | Task tracking through `todo`; [source](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/tree/main/packages/rpiv-todo-lean) |
-| Local `@gfgghgftgffg/pi-subagents-lean` | Subagents and native workflows through `subagent`; [source](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/tree/main/packages/pi-subagents-lean) |
+| `npm:@gfgghgftgffg/pi-web-access-lean` | Search, fetch and source checking through `web_access`; [source](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/tree/main/packages/pi-web-access-lean) |
+| `npm:@gfgghgftgffg/rpiv-todo-lean` | Task tracking through `todo`; [source](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/tree/main/packages/rpiv-todo-lean) |
+| `npm:@gfgghgftgffg/pi-subagents-lean` | Subagents and native workflows through `subagent`; [source](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/tree/main/packages/pi-subagents-lean) |
 | `npm:@monotykamary/pi-retry` | Automatic retry and continuation; [source](https://github.com/monotykamary/pi-retry) |
 | `npm:pi-sync-suite` | Manual session/mission sync; [source](https://github.com/MuratAitov/pi-sync) |
 
 ### Maintained Lean Packages and Migration
 
-Read [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) and the three package READMEs. Requires Pi >=1.1.0, Node >=22.19.0, npm and Git. Clone into a stable user-owned directory, or verify an existing clean checkout's remote and safely update it with `git pull --ff-only`. Preserve local changes; do not reset them.
+Read [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) and the three package READMEs. Requires Pi >=1.1.0, Node >=22.19.0 and npm. Check each package's public npm metadata first; do not interpret authentication/network errors as absence. After first publication, use:
 
-From the **amox extension checkout**, run:
+```text
+pi install npm:@gfgghgftgffg/pi-web-access-lean
+pi install npm:@gfgghgftgffg/rpiv-todo-lean
+pi install npm:@gfgghgftgffg/pi-subagents-lean
+```
+
+Do not append `@version`: user-level pins prevent later upgrades. Keep the packages' own exact reviewed upstream dependency pins. Later updates use `pi update --extensions`; this does not upgrade Pi itself.
+
+If a particular amox package returns **404** because it is not yet published, install that package through the Git fallback. Clone the amox repository into a stable user-owned directory, or verify an existing clean checkout's remote and update it with `git pull --ff-only`. Preserve local changes; do not reset them. Git is needed for this fallback. From that checkout, run only the corresponding scripts:
 
 ```text
 node scripts/install-extension.mjs pi-web-access-lean
@@ -55,11 +63,13 @@ node scripts/install-extension.mjs rpiv-todo-lean
 node scripts/install-extension.mjs pi-subagents-lean
 ```
 
-No root `npm ci` is needed. Each script creates a separate production prefix at `~/.pi/lean-packages/<extension>/`, installs reviewed dependencies without lifecycle scripts or bundled Pi peers, and registers the actual local package directory with Pi. The checkout is only the update source; Pi loads the installed copies. This project does not currently publish npm packages: do not use `npm:@gfgghgftgffg/*-lean`, and do not `pi install` the workspace root as a single git/local package.
+No root `npm ci` is needed. Each script creates a separate production prefix at `~/.pi/lean-packages/<extension>/`, installs reviewed dependencies without lifecycle scripts or bundled Pi peers, and registers the actual local package directory with Pi. The checkout is only the update source; Pi loads the installed copies. Do not `pi install` the workspace root as one git/local package. Record the source chosen for each package; in section 4 replace that package's template npm entry with its actual registered local path when using fallback, rather than declaring both.
 
-Use `pi list` to identify replaced registrations. Back up settings and remove only the corresponding old facades with `pi remove <exact-source>`, including versioned declarations such as `npm:@ssk_dev/pi-subagents-lean@0.19.4`. Replace all three old `@ssk_dev` facades, and check for competing direct upstream registrations; preserve provider, UI, permissions and unrelated extensions. Do not register upstream engines as additional extensions. Complete migration before reloading so each of `subagent`, `web_access` and `todo` loads exactly once.
+Use `pi list` to identify replaced registrations. Back up settings and remove only the corresponding old facades with `pi remove <exact-source>`, including local directory declarations and versioned entries such as `npm:@ssk_dev/pi-subagents-lean@0.19.4`. Replace all three old `@ssk_dev` facades, and check for competing direct upstream registrations; preserve provider, UI, permissions and unrelated extensions. Do not register upstream engines as additional extensions. Complete migration before reloading so each of `subagent`, `web_access` and `todo` loads exactly once.
 
-For later upgrades, safely update the amox checkout, rerun all three scripts, then regenerate Router files with the same routing configuration. `pi update --extensions` does not update local package contents.
+For local Git installations, safely update the checkout and rerun the corresponding script; `pi update --extensions` cannot update local package contents. Once npm packages are available, migrate each local registration to its unpinned npm source rather than appending a duplicate. After updating subagents/web, regenerate Router files with the same routing configuration.
+
+For a new VPS, normal Pi installation does not require a maintenance timer, GitHub PAT or npm publishing credentials. Optional daily-maintenance deployment and one-time npm account setup are documented in the amox [publishing/VPS guide](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.md) ([中文](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.zh-CN.md)). Do not run maintenance, publish packages or log in to npm as part of bootstrap.
 
 Use `pi list` and startup diagnostics to distinguish configured, installed, and loaded packages. Restart Pi after changes. UI/footer extensions may compete for host hooks; report actual conflicts rather than silently removing packages.
 
@@ -90,7 +100,7 @@ Verify all six intended Skills and their resources, allowing preserved unrelated
 
 ## 4. Fixed Settings and Plugin Configurations
 
-Merge [pi/settings.json](pi/settings.json) into the effective global settings, preserving unrelated keys. Its three relative local lean entries assume `<agent-dir> = ~/.pi/agent`; retain the actual paths registered by the amox installer, especially with `PI_CODING_AGENT_DIR`. Compare local entries by resolved path/package identity, not only source text, and keep one declaration for each facade. Preserve the template order without appending a second relative copy of an absolute installer entry. Apply these requested preferences:
+Merge [pi/settings.json](pi/settings.json) into the effective global settings, preserving unrelated keys. All ten template package entries are unversioned npm sources. For any amox package installed through the Git fallback in section 2, substitute its actual registered local path for its template npm entry; do not copy an unavailable npm source or add both. Respect `PI_CODING_AGENT_DIR`. Compare entries by source identity and resolved local paths, and keep one declaration per facade in template order. Apply these requested preferences:
 
 - `defaultProvider`: `sub2api`
 - `defaultModel`: `gpt-6.1-sol`
@@ -126,11 +136,11 @@ For a fresh installation with a confirmed destination, render `{{SYNC_REPO_DIR}}
 
 This snapshot deliberately uses `autoMode: "manual"`, disables all chat automation, environment prompts and automatic cleanup, and selects only `missions` and raw `sessions`. Empty `safeRootFiles`/`safeDirs` mean it does **not** sync settings, Skills or other default config paths. The `sessions` entry in `dangerouslyAllowedNames` is the explicit exception to `neverSyncNames`; leave other sensitive-name exclusions intact. Raw sessions and missions can contain prompts, tool output, paths and secrets: confirm the destination is a private repository the user controls before any later explicit sync. Bootstrap must not run `/sync-setup`, `/sync-push`, `/sync-pull`, cleanup or remote/session tests. `/sync-setup` defaults to full-auto and performs an initial pull and push, so it is not an inert setup command.
 
-Keep `syncLocalPackagePaths: false`. These lean packages use device-local paths, so install them separately on each computer; do not enable local-path syncing to make them portable. Do not include sync timestamps, repository contents, session files or backups in bootstrap Git. Verify config parsing and command registration without executing synchronization; report SSH access or remote privacy as unverified if not checked independently.
+Keep `syncLocalPackagePaths: false`. Install the lean packages separately on each computer through npm or the Git fallback; fallback local paths are device-specific and must not be synced. Do not enable local-path syncing to make them portable. Do not include sync timestamps, repository contents, session files or backups in bootstrap Git. Verify config parsing and command registration without executing synchronization; report SSH access or remote privacy as unverified if not checked independently.
 
 ## 5. Task Router for Pi
 
-Read the current [Task Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter documentation](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Its executor is **`@gfgghgftgffg/pi-subagents-lean` from amox_pi_extensions_lean over `@tintinweb/pi-subagents`**; search uses **`@gfgghgftgffg/pi-web-access-lean`**. Install those local facades first, not the old `@ssk_dev` npm packages. The reviewed Router baseline is amox v0.1.2 / subagents engine 0.22.0 / web-access engine 0.40.0; this is compatibility context, not an install pin or proof of live execution. Verify actual installed metadata and help/schema when updating.
+Read the current [Task Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter documentation](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Its executor is **`@gfgghgftgffg/pi-subagents-lean` from amox_pi_extensions_lean over `@tintinweb/pi-subagents`**; search uses **`@gfgghgftgffg/pi-web-access-lean`**. Install those facades first, using npm when available or the Git fallback, not the old `@ssk_dev` npm packages. The reviewed Router baseline is amox v0.1.2 / subagents engine 0.22.0 / web-access engine 0.40.0; this is compatibility context, not an install pin or proof of live execution. Verify actual installed metadata and help/schema when updating.
 
 Keep the source checkout and a working copy of [pi/routing.toml](pi/routing.toml) in a stable user-owned directory. Safely update the Router checkout to the current maintained source before installation, preserving local changes. Keep the existing `routing.toml` model choices: the repository's example defaults are not a migration target. The bootstrap configuration records the installed role-map models, selection hints, 30 requested concurrent children, and five repair follow-ups. Verify `glm-5.3`, `deepseek-flash`, `gpt-6.1-sol`, and `gpt-6-astra` and their exact Pi thinking support without paid generation. Omitted providers inherit the actual parent provider; do not rely on fuzzy matching, provider fallback, or clamping.
 
@@ -167,7 +177,7 @@ Retain installer-managed block protections. If a newer Router changes its policy
 ## 7. Verification and Report
 
 1. Verify Pi, Node, Git, shell, and the `codex` interpreter with a successful `pypdf` import.
-2. Verify all 10 package declarations, resources, actual amox package identities/dependency versions and startup diagnostics, including exactly one each of the lean `subagent`, `web_access`, and `todo` tools and `/retry status`. Check for duplicate facades; distinguish installed from loaded. Use the Router's optional `scripts/check-pi-runtime.mjs` with trusted installed Pi SDK/subagents/web package directories for offline schema, discovery and scope checks; it does not prove live model execution.
+2. Verify all 10 package declarations and their chosen npm/fallback sources, resources, actual amox package identities/dependency versions and startup diagnostics, including exactly one each of the lean `subagent`, `web_access`, and `todo` tools and `/retry status`. Check for duplicate facades; distinguish installed from loaded. Use the Router's optional `scripts/check-pi-runtime.mjs` with trusted installed Pi SDK/subagents/web package directories for offline schema, discovery and scope checks; it does not prove live model execution.
 3. Verify six user Skills with resources. Confirm `grilling` and `meeting-summary-html` have `disable-model-invocation: true`, and explicit Skill commands remain available.
 4. Run the meeting preparation helper on a temporary local text fixture without ASR or uploads.
 5. Parse deployed JSON and compare template-owned values with [pi/](pi/README.md), excluding real credential values from comparisons and reports. If the Sub2API token remains `YOUR_API_KEY`, report it as pending and give the user the deployed file's absolute path and the `sub2api.token` field to edit; do not collect or populate the key. Verify subagent concurrency, model display, fallback/strict-file/workflow settings and both main-model and BTW `medium` thinking. Distinguish saved defaults, model metadata, and live operation.

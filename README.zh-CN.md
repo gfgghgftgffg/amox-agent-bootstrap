@@ -47,7 +47,7 @@ Codex 会选择适合当前平台的命令，复用兼容的安装，并保留�
 ## Pi 配置内容
 
 - 共享的 `codex` Conda 环境和 `pypdf`。
-- 10 个 Pi 包：7 个 npm 包（包括 Sub2API、retry、Pi Sync 和 UI 包），以及从 [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) 独立安装的 3 个 lean 包。安装来源和更新步骤见 [setup_for_pi.md](setup_for_pi.md)。
+- 10 个 Pi 包使用不固定版本的 npm 来源，包括 Sub2API、retry、Pi Sync、UI 包，以及来自 [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) 的 3 个独立 lean 包。lean 包首次发布到 npm 前使用 Git 安装脚本回退。npm 来源通过 `pi update --extensions` 更新；[setup_for_pi.md](setup_for_pi.md) 说明了回退安装的更新方法，以及从本地来源迁移时如何避免重复注册。[VPS 检查表](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.zh-CN.md#新-vps-检查表)区分日常安装和可选的每日维护部署；bootstrap 不发布包、不启动维护 timer。
 - 6 个用户 Skills：`design-taste-frontend`、`humanizer`、`meeting-summary-html`、`shuorenhua`、`grilling`，以及为 Pi 生成的 `task-routing`。
 - 固定的 [Pi AGENTS.md](pi/AGENTS.md)、[settings](pi/settings.json)、路由配置，以及 [pi/](pi/README.md) 中不含敏感信息的插件配置。
 - 访谈 Skill：`grilling`，仅供手动调用。两份配置说明都要求为它和 `meeting-summary-html` 设置 `disable-model-invocation: true`。

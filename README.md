@@ -48,7 +48,7 @@ You can also clone this repository and ask Pi to follow the local [setup_for_pi.
 ## Pi Included
 
 - The shared `codex` Conda environment and `pypdf`.
-- The 10 configured Pi packages: seven npm packages (including Sub2API, retry, Pi Sync and UI packages) and three independently installed lean packages from [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). Installation sources and update steps are listed in [setup_for_pi.md](setup_for_pi.md).
+- The 10 configured Pi packages use unversioned npm sources, including Sub2API, retry, Pi Sync, UI packages, and three independent lean packages from [amox_pi_extensions_lean](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). The lean packages use the Git installer as a fallback before first npm publication. Update npm sources with `pi update --extensions`; [setup_for_pi.md](setup_for_pi.md) covers fallback updates and duplicate-free migration from local sources. See the [VPS checklist](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.md#new-vps-checklist) for ordinary installation versus optional daily maintenance. Bootstrap does not publish packages or start a maintenance timer.
 - Six user Skills: `design-taste-frontend`, `humanizer`, `meeting-summary-html`, `shuorenhua`, `grilling`, and Pi's generated `task-routing`.
 - Fixed [Pi AGENTS.md](pi/AGENTS.md), [settings](pi/settings.json), router configuration, and non-sensitive plugin configurations in [pi/](pi/README.md).
 - Interview Skill: `grilling`, for explicit use only. Both setup documents include the required `disable-model-invocation: true` setting for it and `meeting-summary-html`.
