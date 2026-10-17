@@ -46,7 +46,7 @@ Pi Sync 要求使用 SSH 地址，不接受 HTTPS 地址。不要在地址里填
 
 ## 3. 保留手动会话／任务同步策略
 
-完整模板只选择 `sessions` 和 `missions`。它使用 `autoMode: "manual"`，启用原始会话同步，关闭聊天自动化、环境工具安装提示和自动清理。`safeRootFiles`、`safeDirs` 留空，因此不会同步 settings、Skills 或默认配置路径。保持 `syncLocalPackagePaths: false`；本地 lean 包需要在每台电脑上分别安装。
+完整模板只选择 `sessions` 和 `missions`。它使用 `autoMode: "manual"`，启用原始会话同步，关闭聊天自动化、环境工具安装提示和自动清理。`safeRootFiles`、`safeDirs` 留空，因此不会同步 settings、Skills 或默认配置路径。保持 `syncLocalPackagePaths: false`；维护中的 lean 包现在使用可移植的 npm 来源，在每台电脑上安装，不同步本地包目录。
 
 原始会话和任务记录可能含有提示词、模型输出、工具日志、文件路径和密钥。私有仓库和 Pi Sync 的敏感信息扫描都不能保证排除所有敏感数据。上传前检查要同步的内容，保留其他敏感名称的排除规则。
 

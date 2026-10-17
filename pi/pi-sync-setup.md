@@ -46,7 +46,7 @@ Save the completed configuration to `<agent-dir>/pi-sync-suite.json`, not into t
 
 ## 3. Keep the manual session/mission policy
 
-The full template selects only `sessions` and `missions`. It keeps `autoMode: "manual"`, enables raw session sync, and disables chat automation, environment-install prompts and automatic cleanup. Empty `safeRootFiles` and `safeDirs` mean it does not sync settings, Skills or the default configuration paths. Keep `syncLocalPackagePaths: false`; install local lean packages separately on each computer.
+The full template selects only `sessions` and `missions`. It keeps `autoMode: "manual"`, enables raw session sync, and disables chat automation, environment-install prompts and automatic cleanup. Empty `safeRootFiles` and `safeDirs` mean it does not sync settings, Skills or the default configuration paths. Keep `syncLocalPackagePaths: false`; the maintained lean packages now install from portable npm sources on each computer, not synced local package directories.
 
 Raw sessions and missions can contain prompts, model output, tool logs, file paths and secrets. A private repository and Pi Sync's secret scan do not guarantee that all sensitive data is excluded. Review what you intend to upload and keep the other sensitive-name exclusions intact.
 
