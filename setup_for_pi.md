@@ -69,7 +69,7 @@ Use `pi list` to identify replaced registrations. Back up settings and remove on
 
 For local Git installations, safely update the checkout and rerun the corresponding script; `pi update --extensions` cannot update local package contents. Once npm packages are available, migrate each local registration to its unpinned npm source rather than appending a duplicate. After updating subagents/web, regenerate Router files with the same routing configuration.
 
-For a new VPS, normal Pi installation does not require a maintenance timer, GitHub PAT or npm publishing credentials. Optional daily-maintenance deployment and one-time npm account setup are documented in the amox [publishing/VPS guide](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.md) ([中文](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.zh-CN.md)). Do not run maintenance, publish packages or log in to npm as part of bootstrap.
+For a new VPS, normal Pi installation does not require a maintenance timer, GitHub PAT or npm publishing credentials. Optional daily-maintenance deployment and maintainer-side npm publishing configuration are documented in the amox [publishing/VPS guide](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.md) ([中文](https://github.com/gfgghgftgffg/amox_pi_extensions_lean/blob/main/docs/npm-publishing.zh-CN.md)). Do not run maintenance, publish packages or log in to npm as part of bootstrap.
 
 Use `pi list` and startup diagnostics to distinguish configured, installed, and loaded packages. Restart Pi after changes. UI/footer extensions may compete for host hooks; report actual conflicts rather than silently removing packages.
 
