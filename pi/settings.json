@@ -2,19 +2,19 @@
   "packages": [
     "npm:@indexyz/pi-provider-sub2api",
     "npm:@narumitw/pi-btw",
-    "npm:pi-open-tui",
-    "npm:@narumitw/pi-statusline",
     "npm:@heyhuynhgiabuu/pi-pretty",
     "npm:@gfgghgftgffg/pi-web-access-lean",
     "npm:@gfgghgftgffg/rpiv-todo-lean",
     "npm:@gfgghgftgffg/pi-subagents-lean",
     "npm:@monotykamary/pi-retry",
-    "npm:pi-sync-suite"
+    "npm:pi-sync-suite",
+    "npm:pi-open-tui"
   ],
   "defaultProvider": "sub2api",
   "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "medium",
   "enabledModels": ["sub2api/*"],
   "tuiMode": "fullscreen",
-  "theme": "dark"
+  "theme": "dark",
+  "hideThinkingBlock": false
 }
