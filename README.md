@@ -29,7 +29,7 @@ that still needs my input.
 
 [setup_for_pi.md](setup_for_pi.md) covers nine packages, seven Skills (including explicit-only `ian-xiaohei-illustrations`), Task Router, Conda and the [Pi configuration templates](pi/README.md), with pi-pretty's `claudecode` tool style. The three amox lean packages are public on npm; install unpinned sources and run `pi update --extensions` when needed. Existing local-source migration requires approval and must replace, not duplicate, registrations.
 
-Statusline is no longer included. Keep the package order in [settings.json](pi/settings.json), with open-tui last so pi-pretty does not replace its inline-footer editor. [Open-tui preferences](pi/open-tui.json) enable the inline footer, Chinese settings UI and session names, hide extension-status lines, and disable telemetry cost while retaining cumulative footer cost.
+Statusline is no longer installed by default; preserve existing installations and ask whether to remove them only after all installation and verification steps are complete. Removal or disabling requires explicit approval. Keep the package order in [settings.json](pi/settings.json), with open-tui last so pi-pretty does not replace its inline-footer editor. [Open-tui preferences](pi/open-tui.json) enable the inline footer, Chinese settings UI and session names, hide extension-status lines, and disable telemetry cost while retaining cumulative footer cost.
 
 Task routing is opt-in through `/skill:task-routing`. Pi Sync uses manual session/mission sync and requires [your own private repository](pi/pi-sync-setup.md). Bootstrap does not run sync or paid model/image tests.
 

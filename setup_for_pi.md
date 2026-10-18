@@ -32,7 +32,7 @@ Install these nine user-level packages through unversioned `pi install npm:<name
 | `npm:pi-sync-suite` | Manual session/mission sync |
 | `npm:pi-open-tui` | Terminal interface; load last |
 
-Remove any `@narumitw/pi-statusline` declaration, including disabled object-form entries, using `pi remove <actual-source>` when present; do not delete unrelated packages or preferences. Check for separately discovered copies too. Open-tui owns the footer and editor, so do not load another footer extension.
+Statusline is not installed by this template. Preserve any existing `@narumitw/pi-statusline` declarations, resource filters, preferences and discovered copies; do not remove or disable them automatically. After all installation and verification steps are complete, explain any footer/editor conflicts and ask whether the user wants to remove statusline. Only explicit approval authorizes `pi remove <actual-source>` or corresponding registration changes. If the user declines or does not answer, keep it and report any display conflict as unresolved.
 
 Retain the exact relative order of the nine packages in [settings.json](pi/settings.json), placing open-tui last after preserved unrelated packages. Do not alphabetize or rely on install-command order; verify the final saved array. Both pi-pretty styles (`default` and `claudecode`) install an editor. Open-tui must load afterward so its editor can draw the inline footer; otherwise the regular footer is hidden but the replacement editor cannot display the inline information. Additional editor/footer extensions need a compatibility check. Restart fully and verify the actual terminal; ordering is not a guarantee against future hook changes.
 
@@ -100,10 +100,11 @@ On a fresh installation deploy the rendered template; otherwise update its corre
 ## 7. Verification and report
 
 - Verify Pi, Node, Git, shell, the `codex` interpreter and a successful `pypdf` import.
-- Check nine package declarations in template order with open-tui last and no statusline registration, actual installed versions/sources and startup diagnostics. Confirm one lean tool per name, no upstream duplicates and `/retry status`. Distinguish configured, installed and loaded.
+- Check the nine requested package declarations in template order with open-tui last, actual installed versions/sources and startup diagnostics. Preserve existing unrelated registrations, including statusline, unless the user explicitly approves removal after setup. Confirm one lean tool per name, no upstream duplicates and `/retry status`. Distinguish configured, installed and loaded.
 - Verify seven complete Skills and the three explicit-only settings, including parsed flags and Xiaohei's absence from the startup Skill prompt. Run meeting preparation on a temporary local text fixture, without ASR or uploads.
 - Parse deployed JSON and compare template-owned values without exposing secrets. Report effective main/BTW/subagent model settings, pi-pretty style/path, project overrides and any pending provider or Sync configuration.
 - After a full restart, inspect open-tui's editor and inline footer with pretty's Claude Code tool grouping. Check the display preferences against `open-tui.json`, including hidden extension-status lines and telemetry cost but visible cumulative footer cost. Independent plugin widgets are not controlled by the extension-status toggle.
 - Verify generated Router roles, selectors, model/thinking policies and one AGENTS block. Keep static validation separate from live execution; no paid inference or delegation for setup.
 - Check Pi Sync command registration and manual configuration without transfers. Verify repository privacy/access only through non-transfer checks; report anything not checked.
+- After all installation and verification steps, if an existing statusline was found, explain that it competes with open-tui for the footer and ask whether to remove it. Wait for explicit approval; declining or no response means no removal or disabling. If approved, remove only the confirmed registration, then recheck startup and display.
 - Report each component as installed, reused, pending or failed, with effective paths, versions, source commits and restart requirements. Repeated setup must not duplicate registrations.
