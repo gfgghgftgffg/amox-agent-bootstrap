@@ -30,6 +30,8 @@
 
 不再默认安装 statusline，但保留用户已有的安装；全部安装和验证完成后，再询问是否删除，未经明确同意不得删除或禁用。保留 [settings.json](pi/settings.json) 中的插件顺序，open-tui 最后加载，避免承载内联底栏的输入框被 pretty 替换。[Open-tui 配置](pi/open-tui.json) 开启内联底栏、中文设置界面和会话名，隐藏扩展状态行，关闭单轮遥测费用（底栏累计费用仍显示）。
 
+Pi 的[搜索配置](pi/README.md#search-routing)默认优先使用 Sub2API 转发的 Codex/OpenAI 搜索，遇到可恢复故障时回退 Exa。搜索模型与主对话模型独立，读取本机现有 relay token，不另存一份密钥；部署时适配凭据脚本路径和网关地址，实测搜索须另行获得同意。
+
 任务路由通过 `/skill:task-routing` 显式启用。Pi Sync 仅手动同步会话和任务，需要[你自己的私有仓库](pi/pi-sync-setup.zh-CN.md)。bootstrap 不执行同步或付费模型、生图测试。
 
 ## 配置维护

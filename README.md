@@ -31,6 +31,8 @@ that still needs my input.
 
 Statusline is no longer installed by default; preserve existing installations and ask whether to remove them only after all installation and verification steps are complete. Removal or disabling requires explicit approval. Keep the package order in [settings.json](pi/settings.json), with open-tui last so pi-pretty does not replace its inline-footer editor. [Open-tui preferences](pi/open-tui.json) enable the inline footer, Chinese settings UI and session names, hide extension-status lines, and disable telemetry cost while retaining cumulative footer cost.
 
+Pi's [search configuration](pi/README.md#search-routing) defaults to Sub2API-hosted Codex/OpenAI search, with Exa fallback for recoverable failures. It reuses the locally configured relay token without storing a second key, and works independently of the main conversation model. Deployment renders the credential helper path and relay endpoint; live search tests require separate approval.
+
 Task routing is opt-in through `/skill:task-routing`. Pi Sync uses manual session/mission sync and requires [your own private repository](pi/pi-sync-setup.md). Bootstrap does not run sync or paid model/image tests.
 
 ## Configuration

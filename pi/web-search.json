@@ -1,0 +1,12 @@
+{
+  "workflow": "none",
+  "openaiResponsesUrl": "https://sub2api.amox.cc:18443/v1/responses",
+  "openaiSearchProviders": [],
+  "openaiApiKey": "!node \"{{SUB2API_SEARCH_KEY_SCRIPT}}\"",
+  "openaiSearchModel": "gpt-6.1-sol",
+  "openaiUseAlphaSearch": false,
+  "searchRouting": {
+    "providers": ["openai", "exa"],
+    "fallbackOn": ["unsupported", "transient", "quota", "network", "invalid-response"]
+  }
+}
