@@ -24,6 +24,12 @@ This template does not install `@narumitw/pi-statusline`; it must not remove or 
 
 Generate Router roles on each host; do not copy generated agents. Skill installation, including explicit-only Xiaohei illustrations, is specified in the setup document. Resolve pi-pretty's actual config directory before deployment: its default is not necessarily a custom Pi home. Preserve unrelated preferences and restart for the tool style to apply. Follow the [Pi Sync guide](pi-sync-setup.md) ([中文](pi-sync-setup.zh-CN.md)) for its manual-only policy; bootstrap must not synchronize data.
 
+## Codemode and Skills
+
+[settings.json](settings.json) enables built-in codemode with `"defaultTools": ["+codemode"]`, retaining the usual tools. Keep the default `codemode.mode: "on"`; `"only"` would hide the other tools from direct model use. Merge existing tool selections without dropping unrelated choices. Check project and CLI overrides and disabled built-in extensions; `/reload` enables a newly selected default tool unless an override prevents it.
+
+The [setup guide](../setup_for_pi.md#3-skills) installs eight Skills. `create-readme` comes from only `skills/create-readme/` in [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme) and remains automatically invocable. Preserve its short description: startup includes its name, description and path, while the full instructions load on demand. Use it for README structure and `humanizer` / `shuorenhua` for English and Chinese editing. The three explicit-only Skills remain unchanged.
+
 ## Search routing
 
 [web-search.json](web-search.json) routes `web_access` searches through the configured Sub2API/OpenAI Responses search first, then Exa for the listed recoverable errors. It uses `gpt-6.1-sol` independently of the main conversation model; Claude and other tool-capable conversation models can use the same search route. No Codex CLI or official Codex login is required when the relay provides search. The relay must accept the `web_search` tool, not just ordinary text requests.

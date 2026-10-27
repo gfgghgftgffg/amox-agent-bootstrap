@@ -16,5 +16,6 @@
   "enabledModels": ["sub2api/*"],
   "tuiMode": "fullscreen",
   "theme": "dark",
+  "defaultTools": ["+codemode"],
   "hideThinkingBlock": false
 }

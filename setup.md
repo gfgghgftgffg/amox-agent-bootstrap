@@ -38,11 +38,14 @@ Respect `CODEX_HOME` and existing global Skill locations. Avoid registering the 
 | task-router | https://github.com/gfgghgftgffg/task-router | Use the Codex native installer for roles, profile, global entry, and the `task-routing` Skill. Copying the Skill alone is insufficient; do not install the Pi bundle into Codex home. |
 | meeting-summary-html | https://github.com/gfgghgftgffg/meeting-summary-html | Include its scripts and references. Run Python helpers through the `codex` environment. |
 | shuorenhua | https://github.com/MrGeDiao/shuorenhua | Follow its Codex installation instructions and include the full Skill and reference files. |
+| create-readme | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only the complete `skills/create-readme/` directory, not the whole collection. Preserve its short description and leave `disable-model-invocation` absent or `false` for automatic use. |
 | humanizer | https://github.com/blader/humanizer | Install the complete Skill and its referenced resources. |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | Install the primary frontend design Skill, currently named `design-taste-frontend` in its frontmatter under `skills/taste-skill/`, with its referenced resources. Select this Skill explicitly; the repository also contains optional variants that are not required by this setup. |
 | grilling | https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md | This URL is documentation. Locate the actual Skill, currently `skills/productivity/grilling/`. |
 
 After downloading `grilling` and `meeting-summary-html`, add `disable-model-invocation: true` below `description` in each installed `SKILL.md`, inside the opening `---` block. If the field already exists, set it to `true`.
+
+For README work, use `create-readme` for structure, then `humanizer` or `shuorenhua` to edit English and Chinese prose while preserving technical facts, commands and links.
 
 ### Task Router
 
@@ -107,7 +110,7 @@ These values are explicitly requested defaults and should replace existing value
 Verify the following after installation:
 
 1. Python runs from the `codex` environment and can import `pypdf`; confirm the interpreter's location.
-2. All six project / Skill entries and required resources are present, and `grilling` and `meeting-summary-html` have `disable-model-invocation: true`.
+2. All seven project / Skill entries and required resources are present, and `grilling` and `meeting-summary-html` have `disable-model-invocation: true`.
 3. Task Router's installation checks pass. Distinguish static configuration checks, host support, and live model verification; do not make paid model calls for this check.
 4. The meeting preparation helper processes a temporary text fixture locally without credentials or media uploads.
 5. Global instructions match `templates/AGENTS.md` after path substitution, contain no unresolved placeholders or duplicate router blocks, and preserve unrelated user instructions. Verify no automatic interview trigger or automatic Skill inventory has been added.
