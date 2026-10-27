@@ -42,15 +42,7 @@ that still needs my input.
 | Task Router | Activated explicitly with `/skill:task-routing` |
 | Pi Sync | Manual session/mission sync to your own private repository |
 
-`create-readme` is installed from [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), without the rest of the collection. Pi includes only its name, short description and path at startup, then reads the full instructions when needed. README work uses that Skill for structure and `humanizer` / `shuorenhua` for English and Chinese editing.
-
-Keep the package order in [settings.json](pi/settings.json), with starline last. [starline.json](pi/starline.json) supplies Mocha pastel pills, a compact editor and no repeated model metadata. Session name follows directory; thinking-level colors follow the theme. Tidy handles tool groups and diffs, while starline draws user-message frames. Token/cache details are available by clicking the context pill; the working spinner lives in the model pill.
-
-Applying this setup replaces pi-pretty, pi-open-tui and pi-statusline with tidy + starline. Remove those confirmed old package installations/registrations after backing up settings, preserving their preferences for rollback and leaving unrelated packages alone. Pi Sync's independent status panel remains visible; the setup does not patch package sources to hide it.
-
-Pi automatically receives the [portable Mocha theme](pi/themes/catppuccin-mocha.json). Terminal appearance is manual: select **Catppuccin Mocha**, install **Maple Mono NF CN** from [Maple Mono releases](https://github.com/subframe7536/maple-font/releases/latest), and set **95% opacity (5% transparency)**. Follow the [appearance guide](pi/appearance.md) for Windows, macOS and Linux; font installation and terminal profiles are not modified by bootstrap.
-
-[Search routing](pi/README.md#search-routing) uses a model independent of the conversation model and reads the existing local relay token without storing another key. Deployment adapts the credential-helper path and relay endpoint. Live search tests require separate approval.
+See [Pi setup](setup_for_pi.md) for package order, UI migration and Skill installation, and [Pi configuration](pi/README.md) for credential paths and search routing. Follow the [appearance guide](pi/appearance.md) to set fonts and terminal appearance manually; bootstrap does not modify terminal profiles.
 
 > [!IMPORTANT]
 > Provide missing credentials locally, not in chat. Pi Sync needs [your own private SSH repository](pi/pi-sync-setup.md). Bootstrap does not run synchronization or paid model/image tests; missing credentials or destinations remain pending.

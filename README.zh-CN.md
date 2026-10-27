@@ -41,15 +41,7 @@
 | Task Router | 通过 `/skill:task-routing` 显式启用 |
 | Pi Sync | 仅手动同步会话和任务，目标为用户自己的私有仓库 |
 
-`create-readme` 来自 [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme)，只安装该 Skill，不安装整个合集。Pi 启动时只加入它的名称、简短 description 和路径，完整指令按需读取。编写 README 时用它安排结构，再用 `humanizer` / `shuorenhua` 优化中英文表达。
-
-保留 [settings.json](pi/settings.json) 中的插件顺序，starline 最后加载。[starline.json](pi/starline.json) 配置 Mocha 粉彩胶囊、紧凑输入框，并隐藏重复的模型信息。会话名紧跟目录，思考等级按主题自动变色。Tidy 负责工具分组和 diff，starline 绘制用户消息边框。点击上下文胶囊可查看 token 和缓存详情，Working 转圈位于模型胶囊内。
-
-应用这套配置时，用 tidy + starline 替换 pi-pretty、pi-open-tui 和 pi-statusline。先备份设置，再卸载已确认的旧包及注册项，保留旧偏好文件用于回退，不改无关包。Pi Sync 的独立状态面板继续显示；安装过程不通过修改包源码来隐藏它。
-
-Pi 会自动部署[跨平台 Mocha 主题](pi/themes/catppuccin-mocha.json)。终端外观由使用者手动设置：选择 **Catppuccin Mocha**，从 [Maple Mono 下载页](https://github.com/subframe7536/maple-font/releases/latest)安装 **Maple Mono NF CN**，背景设为 **95% 不透明度，即 5% 透明度**。Windows、macOS 和 Linux 的操作见[外观指南](pi/appearance.zh-CN.md)；bootstrap 不安装系统字体，也不修改终端配置。
-
-[搜索配置](pi/README.md#search-routing)使用独立于主对话的模型，读取本机现有 relay token，不另存一份密钥。部署时适配凭据脚本路径和网关地址，实测搜索须另行获得同意。
+包顺序、界面替换和 Skills 安装见 [Pi 部署说明](setup_for_pi.md)；凭据路径与搜索路由见 [Pi 配置模板](pi/README.md)。系统字体和终端外观按[外观指南](pi/appearance.zh-CN.md)手动设置，bootstrap 不修改终端配置。
 
 > [!IMPORTANT]
 > 缺少的凭据在本机填写，不在聊天中传递。Pi Sync 需要[你自己的私有 SSH 仓库](pi/pi-sync-setup.zh-CN.md)。bootstrap 不执行同步或付费模型、生图测试；凭据或同步目标缺失时，对应组件保留为待配置。
