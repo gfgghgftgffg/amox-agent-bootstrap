@@ -2,20 +2,27 @@
   "packages": [
     "npm:@indexyz/pi-provider-sub2api",
     "npm:@narumitw/pi-btw",
-    "npm:@heyhuynhgiabuu/pi-pretty",
     "npm:@gfgghgftgffg/pi-web-access-lean",
     "npm:@gfgghgftgffg/rpiv-todo-lean",
     "npm:@gfgghgftgffg/pi-subagents-lean",
     "npm:@monotykamary/pi-retry",
     "npm:pi-sync-suite",
-    "npm:pi-open-tui"
+    "npm:pi-tidy",
+    "npm:pi-starline"
   ],
   "defaultProvider": "sub2api",
   "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "medium",
   "enabledModels": ["sub2api/*"],
   "tuiMode": "fullscreen",
-  "theme": "dark",
+  "theme": "catppuccin-mocha",
   "defaultTools": ["+codemode"],
-  "hideThinkingBlock": false
+  "tidy": {
+    "frameMessages": true,
+    "frameUserMessages": false,
+    "messageBorderColors": {
+      "user": "syntaxKeyword"
+    }
+  },
+  "hideThinkingBlock": true
 }

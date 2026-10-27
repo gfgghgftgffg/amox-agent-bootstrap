@@ -35,16 +35,19 @@
 | 工具 | 通过 `defaultTools: ["+codemode"]` 启用内置 codemode，保留常用工具 |
 | Skills | `create-readme` 允许自动调用；`humanizer` 和 `shuorenhua` 用于文字编辑 |
 | 仅显式调用的 Skills | `grilling`、`meeting-summary-html` 和 `ian-xiaohei-illustrations` |
-| 界面 | pi-pretty 使用 `claudecode` 工具样式；open-tui 最后加载，提供输入框和内联底栏 |
+| 界面 | pi-tidy 负责工具折叠和 diff；pi-starline 最后加载，提供输入框、用户消息边框和可点击的胶囊底栏 |
+| 外观 | Catppuccin Mocha、Maple Mono NF CN、终端背景 95% 不透明度 |
 | 搜索 | 优先使用 Sub2API 转发的 Codex/OpenAI 搜索，遇到指定的可恢复故障时回退 Exa |
 | Task Router | 通过 `/skill:task-routing` 显式启用 |
 | Pi Sync | 仅手动同步会话和任务，目标为用户自己的私有仓库 |
 
 `create-readme` 来自 [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme)，只安装该 Skill，不安装整个合集。Pi 启动时只加入它的名称、简短 description 和路径，完整指令按需读取。编写 README 时用它安排结构，再用 `humanizer` / `shuorenhua` 优化中英文表达。
 
-保留 [settings.json](pi/settings.json) 中的插件顺序，open-tui 最后加载，避免承载内联底栏的输入框被 pretty 替换。[Open-tui 配置](pi/open-tui.json) 开启内联底栏、中文设置界面和会话名，隐藏扩展状态行，关闭单轮遥测费用，底栏累计费用仍显示。独立插件组件不受扩展状态行开关控制。
+保留 [settings.json](pi/settings.json) 中的插件顺序，starline 最后加载。[starline.json](pi/starline.json) 配置 Mocha 粉彩胶囊、紧凑输入框，并隐藏重复的模型信息。会话名紧跟目录，思考等级按主题自动变色。Tidy 负责工具分组和 diff，starline 绘制用户消息边框。点击上下文胶囊可查看 token 和缓存详情，Working 转圈位于模型胶囊内。
 
-不默认安装 statusline。保留用户已有的安装，全部安装和验证完成后再询问是否删除；未经明确同意，不删除或禁用。
+应用这套配置时，用 tidy + starline 替换 pi-pretty、pi-open-tui 和 pi-statusline。先备份设置，再卸载已确认的旧包及注册项，保留旧偏好文件用于回退，不改无关包。Pi Sync 的独立状态面板继续显示；安装过程不通过修改包源码来隐藏它。
+
+Pi 会自动部署[跨平台 Mocha 主题](pi/themes/catppuccin-mocha.json)。终端外观由使用者手动设置：选择 **Catppuccin Mocha**，从 [Maple Mono 下载页](https://github.com/subframe7536/maple-font/releases/latest)安装 **Maple Mono NF CN**，背景设为 **95% 不透明度，即 5% 透明度**。Windows、macOS 和 Linux 的操作见[外观指南](pi/appearance.zh-CN.md)；bootstrap 不安装系统字体，也不修改终端配置。
 
 [搜索配置](pi/README.md#search-routing)使用独立于主对话的模型，读取本机现有 relay token，不另存一份密钥。部署时适配凭据脚本路径和网关地址，实测搜索须另行获得同意。
 

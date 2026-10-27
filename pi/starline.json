@@ -1,0 +1,68 @@
+{
+  "palette": {
+    "base": "#1e1e2e",
+    "pink": "#f38ba8",
+    "peach": "#fab387",
+    "green": "#a6e3a1",
+    "yellow": "#f9e2af",
+    "blue": "#89b4fa",
+    "lavender": "#b4befe",
+    "teal": "#94e2d5",
+    "muted": "#7f849c",
+    "mauve": "#cba6f7"
+  },
+  "pill": {
+    "segments": [
+      "model",
+      "thinking",
+      "subagents",
+      "cwd",
+      "sessionName",
+      "runtime",
+      "git",
+      "context",
+      "cost",
+      "sessionDuration",
+      "time",
+      "extensionStatus"
+    ],
+    "separator": "powerline",
+    "bold": true,
+    "caps": "round",
+    "bubbleAnimation": true
+  },
+  "editorMetadataFormat": "",
+  "editorPaddingY": 0,
+  "pathDisplay": {
+    "mode": "full",
+    "depth": 0
+  },
+  "icons": {
+    "mode": "nerd"
+  },
+  "colorSources": {
+    "starship": "theme",
+    "editor": "theme",
+    "userMessages": "theme"
+  },
+  "colors": {
+    "model": "bg:$pink fg:$base",
+    "cwd": "bg:$peach fg:$base",
+    "runtimePrefix": "bg:$green fg:$base",
+    "gitBranch": "bg:$yellow fg:$base",
+    "contextNormal": "bg:$blue fg:$base",
+    "contextWarning": "bg:$yellow fg:$base",
+    "contextError": "bg:$pink fg:$base",
+    "cost": "bg:$lavender fg:$base",
+    "sessionDuration": "bg:$muted fg:$base",
+    "sessionName": "bg:$mauve fg:$base",
+    "time": "bg:$teal fg:$base",
+    "queue": "bg:$yellow fg:$base",
+    "subagents": "bg:$green fg:$base",
+    "extensionStatus": "bg:$teal fg:$base",
+    "editorAccent": "$mauve",
+    "editorBorder": "#45475a",
+    "userMessageBorder": "#45475a",
+    "userMessageText": "#cdd6f4"
+  }
+}

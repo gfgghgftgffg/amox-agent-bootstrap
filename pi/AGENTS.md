@@ -5,6 +5,7 @@
 
 # Requirement Alignment
 - Look up anything findable in the code, configs, or available tools yourself.
+- Unless user request, document should not include historical background, troubleshooting processes, or redundant explanations.
 
 # Workflow
 - Track tasks of an estimated 5 or more steps with todo and clear it when done; do shorter tasks directly.

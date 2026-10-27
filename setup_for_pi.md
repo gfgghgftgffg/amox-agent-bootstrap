@@ -1,87 +1,94 @@
-# amox-agent-bootstrap — Pi
+# Pi setup
 
-On Windows, macOS or Linux, configure this computer using these instructions and the [pi/ templates](pi/README.md). Read current upstream instructions, choose commands for the actual OS and verify the result.
-
-## General rules
-
-- Check before installing; reuse compatible software. Back up changed files and preserve unrelated packages, instructions and credentials.
-- Respect `PI_CODING_AGENT_DIR` (default `~/.pi/agent`). Do not replace the whole agent directory or duplicate registrations.
-- Use current unpinned user-level package sources; preserve each amox package's reviewed upstream dependency pins.
-- Keep secrets, sessions, caches and backups out of Git and reports. Do not make paid model calls, launch agents or upload private files to verify setup.
-- Missing credentials or models leave that component pending; continue independent steps and report the actual paths and blockers.
+Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md). Respect `PI_CODING_AGENT_DIR` (default `~/.pi/agent`), back up changed files and preserve unrelated settings and credentials. Use unpinned user-level package sources. Do not make paid model calls, launch agents or transfer private data for setup checks.
 
 ## 1. Runtime and Python
 
-Reuse compatible Pi, Node.js, Git and shell installations. If needed, install the latest Pi using its [official instructions](https://github.com/earendil-works/pi); the npm alternative is `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Current packages require Node >=22.19. Verify `pi --version` and supported Bash availability, including on Windows.
-
-Find Conda through PATH, environment variables and common locations; install official Miniforge into a user-owned directory only if absent. Reuse the shared `codex` environment, or create it with Python 3.12. Use its interpreter for **all Python execution and dependencies**, never system Python, base or `pip --user`. Verify `pypdf` imports and install it only if missing. Install other dependencies only when required below.
+- Reuse compatible Pi, Node.js, Git and Bash. Install Pi using its [official instructions](https://github.com/earendil-works/pi) if absent. Current packages require Node >=22.19; tidy's bash/write previews require Pi >=1.3. Check current package requirements.
+- Reuse Conda, or install official Miniforge in a user-owned directory.
+- Reuse the `codex` environment, or create it with Python 3.12. Use its interpreter for all Python scripts and dependencies, not system Python, base or `pip --user`.
+- Install `pypdf` if absent and verify its import.
 
 ## 2. Packages
 
-Install these nine user-level packages through unversioned `pi install npm:<name>` sources, without `--local`. Keep [settings.json](pi/settings.json) order and preserve unrelated entries.
+Install these nine packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json), placing starline last after preserved unrelated packages.
 
 | Package | Purpose |
 | --- | --- |
 | `npm:@indexyz/pi-provider-sub2api` | Relay provider and model discovery |
 | `npm:@narumitw/pi-btw` | Side conversation |
-| `npm:@heyhuynhgiabuu/pi-pretty` | Tool/transcript presentation |
 | `npm:@gfgghgftgffg/pi-web-access-lean` | `web_access` |
 | `npm:@gfgghgftgffg/rpiv-todo-lean` | `todo` |
 | `npm:@gfgghgftgffg/pi-subagents-lean` | `subagent` and native workflows |
 | `npm:@monotykamary/pi-retry` | Retry and continuation |
 | `npm:pi-sync-suite` | Manual session/mission sync |
-| `npm:pi-open-tui` | Terminal interface; load last |
+| `npm:pi-tidy` | Tool folding and diff presentation |
+| `npm:pi-starline` | Editor, user messages and pill footer |
 
-Statusline is not installed by this template. Preserve any existing `@narumitw/pi-statusline` declarations, resource filters, preferences and discovered copies; do not remove or disable them automatically. After all installation and verification steps are complete, explain any footer/editor conflicts and ask whether the user wants to remove statusline. Only explicit approval authorizes `pi remove <actual-source>` or corresponding registration changes. If the user declines or does not answer, keep it and report any display conflict as unresolved.
+This setup replaces `@heyhuynhgiabuu/pi-pretty`, `pi-open-tui` and `@narumitw/pi-statusline`. Back up settings, remove those confirmed old packages with `pi remove <actual-source>`, and preserve their preference files. Leave unrelated extensions unchanged.
 
-Retain the exact relative order of the nine packages in [settings.json](pi/settings.json), placing open-tui last after preserved unrelated packages. Do not alphabetize or rely on install-command order; verify the final saved array. Both pi-pretty styles (`default` and `claudecode`) install an editor. Open-tui must load afterward so its editor can draw the inline footer; otherwise the regular footer is hidden but the replacement editor cannot display the inline information. Additional editor/footer extensions need a compatibility check. Restart fully and verify the actual terminal; ordering is not a guarantee against future hook changes.
-
-Read the [amox README](https://github.com/gfgghgftgffg/amox_pi_extensions_lean) and package configuration requirements. All three packages are public on npm and require Pi >=1.1.0. Verify current npm `latest` metadata and host requirements; report authentication/network errors instead of treating them as package absence. Install without `@version`; later updates use `pi update --extensions`, which neither upgrades Pi nor schedules automatic updates. Normal installation needs no amox checkout, root `npm ci` or local installation scripts.
-
-On an existing installation, obtain approval before source migration. Back up settings, identify exact old entries with `pi list`, remove only the replaced `@ssk_dev` or local facades using `pi remove <exact-source>`, then install the npm sources. Resolve local paths relative to their settings file before using the CLI from another directory. Do not delete old checkouts or prefixes just to unregister them. Keep one each of `web_access`, `todo` and `subagent`; do not separately load upstream engines or copy entrypoints into discovery directories. Preserve provider, UI, permissions and unrelated extensions. Restart Pi and report actual hook conflicts rather than removing packages silently.
+Read the [amox package instructions](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). For existing `@ssk_dev` or local facades, obtain approval before source migration and remove only the replaced registrations. Keep one tool per name; do not separately load upstream engines. Normal npm installation needs no amox checkout. Update packages later with `pi update --extensions`.
 
 ## 3. Skills
 
-Install complete Skills, including referenced resources, under `<agent-dir>/skills/`; reuse compatible copies without duplicates.
+Install complete Skills, including scripts, references and assets, under `<agent-dir>/skills/`. Reuse existing copies without duplicates.
 
 | Skill | Source / installation |
 | --- | --- |
-| `design-taste-frontend` | [taste-skill](https://github.com/Leonxlnx/taste-skill), primary `skills/taste-skill/` only |
-| `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), only the complete `skills/create-readme/` directory, not the whole collection |
+| `design-taste-frontend` | [taste-skill](https://github.com/Leonxlnx/taste-skill), only `skills/taste-skill/` |
+| `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), only `skills/create-readme/`, not the whole collection |
 | `humanizer` | [blader/humanizer](https://github.com/blader/humanizer) |
 | `meeting-summary-html` | [meeting-summary-html](https://github.com/gfgghgftgffg/meeting-summary-html), including preparation scripts |
 | `shuorenhua` | [MrGeDiao/shuorenhua](https://github.com/MrGeDiao/shuorenhua) |
-| `task-routing` | Generate through the Pi installer in section 5 |
+| `task-routing` | Generate through the installer in section 5 |
 | `grilling` | [source](https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md), actual Skill at `skills/productivity/grilling/` |
-| `ian-xiaohei-illustrations` | [Ian Xiaohei Illustrations](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` directory with references, example assets and Ian attribution |
+| `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
 
-Set `disable-model-invocation: true` in `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations` frontmatter, including reused copies and after upstream updates. Keep them discoverable for explicit `/skill:<name>` invocation; do not add automatic interview instructions. Reuse a complete nested Xiaohei installation instead of creating a duplicate. Verify parsed `disableModelInvocation: true` and absence from the default startup Skill prompt; reload does not erase existing conversation context. Xiaohei image generation requires an actual supported host tool/model; installation alone does not prove generation works, and setup must not generate or upload images.
+Set `disable-model-invocation: true` in `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
 
-Keep `create-readme` available for automatic model invocation: preserve its short upstream description and leave `disable-model-invocation` absent or `false`. Pi advertises only the Skill's name, description and path at startup; it reads the full instructions when needed. Do not copy its body into AGENTS.md or install other awesome-copilot Skills. For README work, use `create-readme` for structure, then `humanizer` or `shuorenhua` to edit English and Chinese prose without changing technical facts, commands or links.
+For `create-readme`, preserve its short description and leave `disable-model-invocation` absent or `false`. Pi loads its full instructions on demand. Use it for README structure, then `humanizer` or `shuorenhua` for prose.
 
-Run meeting preparation scripts with the `codex` interpreter. Text preparation needs no ASR key; media transcription needs `DASHSCOPE_API_KEY`, but verification must not upload media.
+Run meeting preparation with the `codex` interpreter. Text needs no ASR key; media transcription requires `DASHSCOPE_API_KEY`. Leave transcription/image generation pending if credentials or supported tools are unavailable.
 
 ## 4. Configuration
 
-Deploy files according to the [pi/ file map](pi/README.md). Merge template-owned settings while recursively preserving unrelated object keys; arrays use the requested template values except package entries retain unrelated registrations and `defaultTools` preserves existing tool choices while adding codemode. Omit machine-generated `lastChangelogVersion`, version pins and sync timestamps. Use each package's npm source and remove superseded facade registrations with approval.
+Deploy the [file map](pi/README.md). Merge template-owned values while preserving unrelated object keys. Preserve unrelated package registrations and tool choices; do not copy machine-generated changelog versions or sync timestamps.
 
-Keep the model/provider/thinking preferences in `settings.json`, `pi-btw.json` and `routing.toml`; do not substitute models when unavailable. Apply `hideThinkingBlock: false` from settings. Enable built-in codemode with `defaultTools: ["+codemode"]` on a fresh installation, keeping the normal tools available (`codemode.mode` defaults to `"on"`, not `"only"`). On an existing installation, merge codemode into the effective selection instead of discarding unrelated tool choices; remove a conflicting `-codemode` only as part of this requested enablement. Check project settings, CLI tool overrides and disabled built-in extensions, and report blockers rather than broadening permissions. `/reload` can enable a newly added default tool; a full restart may be needed for extension or CLI changes. Apply the full `subagents.json`; project `.pi/subagents.json` may override global defaults, so report effective differences. Do not migrate package-source patches or runtime records.
+### Main settings
 
-Apply the full [open-tui.json](pi/open-tui.json): enabled, inline footer, Chinese settings UI, block cursor and automatic icons. Show directory, session name, Git branch/status, runtime, context, tokens and cumulative cost; hide hostname, the optional Git commit segment and extension-status lines. Enable TPS, TTFT, duration, tokens and stalls telemetry, but disable its cost field. The one-line thinking preview requires hidden thinking; the saved `hideThinkingBlock: false` keeps full thinking visible. The extension-status toggle hides `setStatus` text, not independent widgets such as Pi Sync's below-editor panel. Do not patch package sources to hide those panels.
+Apply [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json) and [subagents.json](pi/subagents.json):
 
-Apply `toolStyle: "claudecode"` from `pi-pretty.json`, preserving other preferences. Keep open-tui last for the editor and inline footer while pretty supplies tool/transcript grouping. Check `PRETTY_CONFIG_DIR` and the installed extension's path resolution: its default is `<home>/.pi/agent`, not automatically a custom `PI_CODING_AGENT_DIR`. Do not broaden file indexing. Restart Pi and check actual terminal compatibility; JSON parsing alone does not verify its private host-rendering APIs.
+- Keep the specified provider, model and thinking preferences; report unavailable models without substitution.
+- Enable codemode with `defaultTools: ["+codemode"]`, retaining existing tools and the default `codemode.mode: "on"`.
+- Set `hideThinkingBlock: true` and `theme: "catppuccin-mocha"`.
+- Apply the full subagent template and report project-level overrides.
 
-Preserve existing Sub2API credentials; otherwise leave `YOUR_API_KEY` in deployed `sub2api.json` and tell the user its absolute path and `sub2api.token` field to edit privately. Do not collect the token or enable paid priority modes. Keep retry defaults and inspect `/retry status` without causing failures or adding another scheduler.
+### Interface
 
-Deploy [web-search.json](pi/web-search.json) and [read-sub2api-search-key.cjs](pi/read-sub2api-search-key.cjs) using the [search routing instructions](pi/README.md#search-routing). Default `web_access` search to Sub2API-hosted Codex/OpenAI search with `gpt-6.1-sol`, then Exa for the configured recoverable errors. This search model is independent of the conversation model and needs no separate Codex CLI/login. Render the helper's absolute deployed path and derive the full `/v1/responses` URL from the preserved relay address; never copy populated keys or machine-specific paths into Git. The helper reads the adjacent provider token (literal or `${ENV_VAR_NAME}`); command-backed credentials require a separately approved search credential source. Missing credentials leave search pending, not verified. Preserve unrelated fetch settings. Existing `provider`/`searchProvider` overrides or native `serverTools.responses` search injection conflict with this default/fallback policy; explain them and obtain approval before removing only the conflicting settings. Preserve other hosted tools and use no alpha-search endpoint. Bootstrap must not run the key helper in a recorded terminal or make paid search calls.
+Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/themes/catppuccin-mocha.json) to the same relative paths under `<agent-dir>` before selecting the theme.
 
-Configure Pi Sync through its [dedicated guide](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)). It requires the user's own private SSH repository and an absolute local checkout path. Preserve existing destinations. Keep manual mode, sessions/missions-only scope and `syncLocalPackagePaths: false`. Missing destination details leave it pending. Bootstrap must not run synchronization, `/sync-setup` or cleanup.
+- Tidy: message frames on, `frameUserMessages: false`; other features use upstream defaults.
+- Theme: keep `toolSuccessBg: "base"` for red/green diff backgrounds.
+- Starline: Nerd Font icons, Mocha pastel pills, `editorPaddingY: 0`, `editorMetadataFormat: ""`.
+- Keep `colors.thinking` absent for automatic thinking-level colors; remove an existing fixed override.
+- Directory: `pathDisplay: { "mode": "full", "depth": 0 }`.
+- Pill order: model, thinking, subagents, cwd, sessionName, runtime, git, context, cost, sessionDuration, time, extensionStatus.
+- Queue pill off, leaving Pi's native pending-message text visible. `/starline queue` opens queue details from the keyboard.
+
+Give users the [appearance guide](pi/appearance.md) ([中文](pi/appearance.zh-CN.md)): **Catppuccin Mocha**, **Maple Mono NF CN**, **95% opacity**. Bootstrap must not install fonts, edit terminal profiles, write Windows registry entries or copy machine-specific terminal paths.
+
+### Provider, search and sync
+
+- Deploy [sub2api.json](pi/sub2api.json), preserving existing credentials. If absent, leave `YOUR_API_KEY` and tell the user the local file and `sub2api.token` field to edit privately.
+- Deploy [web-search.json](pi/web-search.json) and its credential helper using the [search routing instructions](pi/README.md#search-routing): Sub2API/OpenAI first, Exa fallback. Render the helper path and relay endpoint; preserve unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
+- Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Keep manual mode, sessions/missions-only scope and `syncLocalPackagePaths: false`. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
+- Keep retry defaults and inspect `/retry status`.
 
 ## 5. Task Router
 
-Read the current [Task Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter guide](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Use the amox `pi-subagents-lean` executor and `pi-web-access-lean` search facade, not old `@ssk_dev` packages. Verify installed metadata and schema without launching children.
+Read the current [Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter guide](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Keep a stable checkout and working copy of [routing.toml](pi/routing.toml), preserving its model choices.
 
-Keep a maintained Router checkout and a working copy of [routing.toml](pi/routing.toml) in stable user-owned directories. Preserve its model choices and selection hints; do not replace them with upstream example defaults. From the Router checkout, use the actual absolute configuration path:
+From the Router checkout, use the actual absolute configuration path:
 
 ```text
 npm ci
@@ -90,27 +97,21 @@ node cli.mjs install --host pi --config <absolute-routing-config>
 node cli.mjs install --host pi --config <absolute-routing-config> --apply
 ```
 
-Respect `PI_CODING_AGENT_DIR` or use a matching `--pi-home`. The installer manages flat `agents/tr_*.md`, the complete `skills/task-routing/` and one `pi-task-router` AGENTS block. Preserve its backups and conflict protections; do not hand-edit generated files or mix Codex and Pi homes.
+Respect `PI_CODING_AGENT_DIR` or pass a matching `--pi-home`. Let the installer generate `agents/tr_*.md`, `skills/task-routing/` and one managed AGENTS block. Preserve its backups and conflict protections.
 
-Check `/agents`, lean help and `pi --list-models` without dispatch. `doctor` is static; without verified host metadata, report model availability/thinking as unverified rather than inventing a catalog. Search-role selectors use `ext:pi-web-access-lean/web_access`, without the npm scope, and must not allow shell or mutation tools. Do not broaden project trust or disable discovery to force acceptance.
-
-Restart Pi or `/reload` after installation. Routing is activated only by `/skill:task-routing`; installation does not authorize delegation. Its orchestrator preference does not replace the normal Pi default.
+Use the lean executor and `ext:pi-web-access-lean/web_access` search selector. Verify roles/model settings without dispatch. Routing activates only through `/skill:task-routing` or an explicit instruction, not merely by installation.
 
 ## 6. Global instructions
 
-Use [pi/AGENTS.md](pi/AGENTS.md), not the Codex template. Render `{{CONDA_PATH}}` with the verified Conda executable and `{{PYTHON_PATH}}` with the `codex` interpreter. Respect effective context-file precedence, including `AGENTS.override.md`.
+Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and `{{PYTHON_PATH}}`. On existing installations, update the corresponding sections while preserving unrelated instructions and exactly one Router block. Respect `AGENTS.override.md`. Use the optional `127.0.0.1:7897` proxy only if it exists and networking needs it.
 
-On a fresh installation deploy the rendered template; otherwise update its corresponding instruction sections while preserving unrelated instructions and exactly one installer-managed Router block. Report conflicts rather than overwriting newer managed content. Use `127.0.0.1:7897` only if that proxy exists and networking is slow or failing; do not set a permanent system proxy.
+## 7. Verification
 
-## 7. Verification and report
+- Verify Pi, Node, Git, Bash, the `codex` interpreter and `pypdf`.
+- Check the nine packages and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
+- Verify eight complete Skills, the three explicit-only flags and automatically available `create-readme`. Test meeting preparation on a temporary local text fixture.
+- Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
+- Restart Pi; check tidy diffs, starline layout and native queue text. Keep Pi Sync manual and its status panel unchanged.
+- Report installed/reused/pending/failed items, effective paths and restart requirements. Terminal/font setup remains user-managed.
 
-- Verify Pi, Node, Git, shell, the `codex` interpreter and a successful `pypdf` import.
-- Check the nine requested package declarations in template order with open-tui last, actual installed versions/sources and startup diagnostics. Preserve existing unrelated registrations, including statusline, unless the user explicitly approves removal after setup. Confirm one lean tool per name, no upstream duplicates and `/retry status`. Distinguish configured, installed and loaded.
-- Verify eight complete Skills and the three explicit-only settings, including parsed flags and Xiaohei's absence from the startup Skill prompt. Confirm `create-readme` is automatically invocable and appears once in the startup Skill prompt with its short description, without its full body. Run meeting preparation on a temporary local text fixture, without ASR or uploads.
-- Parse deployed JSON and compare template-owned values without exposing secrets. Verify codemode is selected alongside the existing tools and distinguish saved defaults from a loaded callable tool after reload/restart; report project or CLI overrides. Report effective main/BTW/subagent model settings, pi-pretty style/path, project overrides and any pending provider or Sync configuration.
-- Statically verify `web-search.json`: rendered absolute helper path, helper beside `sub2api.json`, relay Responses URL, pinned search model, `openaiSearchProviders: []`, alpha search disabled and ordered `openai` → `exa` fallback. Check for conflicting default-provider overrides and native search injection without exposing credentials. Missing or unsupported credential sources leave search pending. Do not infer live search/fallback success from parsing or tool registration; no paid calls during bootstrap. Repository maintainers can run the offline fixture and template tests with `node --test tests/*.test.cjs`.
-- After a full restart, inspect open-tui's editor and inline footer with pretty's Claude Code tool grouping. Check the display preferences against `open-tui.json`, including hidden extension-status lines and telemetry cost but visible cumulative footer cost. Independent plugin widgets are not controlled by the extension-status toggle.
-- Verify generated Router roles, selectors, model/thinking policies and one AGENTS block. Keep static validation separate from live execution; no paid inference or delegation for setup.
-- Check Pi Sync command registration and manual configuration without transfers. Verify repository privacy/access only through non-transfer checks; report anything not checked.
-- After all installation and verification steps, if an existing statusline was found, explain that it competes with open-tui for the footer and ask whether to remove it. Wait for explicit approval; declining or no response means no removal or disabling. If approved, remove only the confirmed registration, then recheck startup and display.
-- Report each component as installed, reused, pending or failed, with effective paths, versions, source commits and restart requirements. Repeated setup must not duplicate registrations.
+Repository checks: `node --test tests/*.test.cjs`.

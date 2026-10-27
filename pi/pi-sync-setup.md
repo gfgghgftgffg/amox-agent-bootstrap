@@ -2,42 +2,29 @@
 
 English | [简体中文](pi-sync-setup.zh-CN.md)
 
-`npm:pi-sync-suite` needs your own private sessions repository with SSH read/write access. Do not use this bootstrap repository, the extension source or the author's personal repository. Install the package separately on every computer.
+Install `npm:pi-sync-suite` on each computer. Use your own **private repository with SSH read/write access**, not this bootstrap repository.
 
 ## Configuration
 
-Deploy the full [pi-sync-suite.json](pi-sync-suite.json) to `<agent-dir>/pi-sync-suite.json`. `<agent-dir>` is `PI_CODING_AGENT_DIR`, otherwise `~/.pi/agent`.
+Deploy [pi-sync-suite.json](pi-sync-suite.json) to `<agent-dir>/pi-sync-suite.json`, where `<agent-dir>` is `PI_CODING_AGENT_DIR` or `~/.pi/agent`.
 
-| Field | Required value |
+| Field | Value |
 | --- | --- |
-| `repoUrl` | Your private repository's SSH URL, replacing `YOUR_GITHUB_USERNAME` and `YOUR_PRIVATE_SESSIONS_REPO`; HTTPS is unsupported |
-| `repoDir` | Replace `{{SYNC_REPO_DIR}}` with an absolute dedicated checkout path, normally `<agent-dir>/sync-suite-repo` |
+| `repoUrl` | Your private repository's SSH URL; replace both `YOUR_*` placeholders |
+| `repoDir` | Replace `{{SYNC_REPO_DIR}}` with a dedicated absolute checkout path, normally `<agent-dir>/sync-suite-repo` |
+| Sync policy | Manual; only `sessions` and `missions` |
+| Automatic chat sync / cleanup | Disabled |
+| `syncLocalPackagePaths` | `false` |
 
-Resolve paths before writing JSON; use escaped backslashes or forward slashes on Windows. Back up an existing configuration and preserve its valid remote, checkout and sync timestamps. A populated checkout must match the intended remote and must not be this project or an unrelated repository. Other computers use the same remote with their own local paths. Missing repository/path details leave Pi Sync pending configuration.
+Back up existing configuration and preserve its valid remote, checkout and timestamps. Each computer uses the same remote but its own local path. Keep all other template policy values unchanged. Missing repository details leave sync pending.
 
-Keep the template's manual policy: only raw `sessions` and `missions`, no automatic chat sync or cleanup, empty `safeRootFiles`/`safeDirs`, and `syncLocalPackagePaths: false`. Preserve other sensitive-name exclusions. The local configuration is not synced and must be deployed separately on each host. Install the maintained lean packages from npm on each computer rather than syncing local package directories.
+## Verification and use
 
-## Verification
+Check repository privacy and write permission in GitHub settings. Test SSH/read access with `ssh -T git@github.com` and `git ls-remote <your-ssh-repo-url>`. Reload Pi and inspect `/sync-settings` → `View Status`.
 
-Set up SSH access without exposing private keys. Replace placeholders before running:
+- `/sync-push`: upload the source computer's selected snapshot.
+- `/sync-pull`: apply the snapshot on another computer; files in scope can be replaced.
 
-```sh
-ssh -T git@github.com
-git ls-remote git@github.com:YOUR_GITHUB_USERNAME/YOUR_PRIVATE_SESSIONS_REPO.git
-```
-
-GitHub's successful SSH greeting may exit 1. `git ls-remote` verifies read access, not write permission or privacy; an empty repository may return no refs. Confirm **Private** and write permission in GitHub settings. Restart Pi or `/reload`, then inspect `/sync-settings` → `View Status` without transferring data.
-
-## Manual use
-
-Bootstrap must not create repositories, change SSH keys, synchronize or clean up data without a separate request. Do not run `/sync-setup` as verification: its full-auto defaults perform an initial pull and push.
-
-Before an explicit transfer, review the selected data and take local backups. Raw sessions/missions may contain secrets; private Git and secret scanning cannot guarantee their exclusion.
-
-- `/sync-push` uploads the source computer's selected snapshot.
-- `/sync-pull` applies it on another computer and can replace local files in scope.
-- Avoid simultaneous uploads. Review conflicts; do not force-push or delete the checkout to bypass them.
-
-Keep populated credentials, sessions, missions, checkouts and backups out of this bootstrap repository.
+Review sessions for secrets and back up local data before transfers. Avoid simultaneous pushes. Bootstrap does not run transfers or cleanup; do not run `/sync-setup` for verification because it performs an initial pull/push. Keep credentials, sessions, checkouts and backups out of this repository.
 
 [README](../README.md) · [Pi deployment](../setup_for_pi.md)

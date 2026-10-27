@@ -36,16 +36,19 @@ that still needs my input.
 | Tools | Built-in codemode enabled with `defaultTools: ["+codemode"]`, alongside the usual tools |
 | Skills | `create-readme` available automatically; `humanizer` and `shuorenhua` for prose editing |
 | Explicit-only Skills | `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations` |
-| Interface | pi-pretty's `claudecode` tool style; open-tui loads last for its editor and inline footer |
+| Interface | pi-tidy for tool folding/diffs; pi-starline loads last for the editor, user-message frames and clickable pill footer |
+| Appearance | Catppuccin Mocha, Maple Mono NF CN and 95% terminal opacity |
 | Search | Sub2API-hosted Codex/OpenAI search first, Exa fallback for configured recoverable errors |
 | Task Router | Activated explicitly with `/skill:task-routing` |
 | Pi Sync | Manual session/mission sync to your own private repository |
 
 `create-readme` is installed from [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), without the rest of the collection. Pi includes only its name, short description and path at startup, then reads the full instructions when needed. README work uses that Skill for structure and `humanizer` / `shuorenhua` for English and Chinese editing.
 
-Keep the package order in [settings.json](pi/settings.json), with open-tui last so pi-pretty does not replace its inline-footer editor. [Open-tui preferences](pi/open-tui.json) enable the inline footer, Chinese settings UI and session names, hide extension-status lines, and disable telemetry cost while retaining cumulative footer cost. Independent plugin widgets remain separate.
+Keep the package order in [settings.json](pi/settings.json), with starline last. [starline.json](pi/starline.json) supplies Mocha pastel pills, a compact editor and no repeated model metadata. Session name follows directory; thinking-level colors follow the theme. Tidy handles tool groups and diffs, while starline draws user-message frames. Token/cache details are available by clicking the context pill; the working spinner lives in the model pill.
 
-Statusline is not installed by default. Preserve existing installations; after setup and verification, ask whether to remove them. Removal or disabling requires explicit approval.
+Applying this setup replaces pi-pretty, pi-open-tui and pi-statusline with tidy + starline. Remove those confirmed old package installations/registrations after backing up settings, preserving their preferences for rollback and leaving unrelated packages alone. Pi Sync's independent status panel remains visible; the setup does not patch package sources to hide it.
+
+Pi automatically receives the [portable Mocha theme](pi/themes/catppuccin-mocha.json). Terminal appearance is manual: select **Catppuccin Mocha**, install **Maple Mono NF CN** from [Maple Mono releases](https://github.com/subframe7536/maple-font/releases/latest), and set **95% opacity (5% transparency)**. Follow the [appearance guide](pi/appearance.md) for Windows, macOS and Linux; font installation and terminal profiles are not modified by bootstrap.
 
 [Search routing](pi/README.md#search-routing) uses a model independent of the conversation model and reads the existing local relay token without storing another key. Deployment adapts the credential-helper path and relay endpoint. Live search tests require separate approval.
 
