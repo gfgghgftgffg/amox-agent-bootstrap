@@ -34,7 +34,11 @@ Use the nine unpinned npm packages in `settings.json`, with starline last. Repla
 | Queue pill | Off; keep native pending-message text |
 | Pill order | Model, thinking, subagents, directory, session name, runtime, Git, context, cost, session duration, time, extension statuses |
 
-Restart Pi after deployment. `/starline` adjusts layout/colors; `/starline queue` opens queued messages from the keyboard. Font and terminal settings are manual: **Catppuccin Mocha**, **Maple Mono NF CN**, **95% opacity**. See [English](appearance.md) / [中文](appearance.zh-CN.md).
+Restart Pi after deployment. `/starline` adjusts layout/colors; `/starline queue` opens queued messages from the keyboard.
+
+**Apply Catppuccin Mocha to both Pi and the active terminal profile.** Deploy the Pi theme, then detect the terminal and import/select its official Mocha scheme after backing up the profile. Check both separately; a Pi-only change or an imported-but-unselected terminal scheme is incomplete. Report an inaccessible terminal as pending.
+
+Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**. See [English](appearance.md) / [中文](appearance.zh-CN.md).
 
 ## Search routing
 

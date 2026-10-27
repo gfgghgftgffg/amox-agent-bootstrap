@@ -41,7 +41,7 @@
 | Task Router | 通过 `/skill:task-routing` 显式启用 |
 | Pi Sync | 仅手动同步会话和任务，目标为用户自己的私有仓库 |
 
-包顺序、界面替换和 Skills 安装见 [Pi 部署说明](setup_for_pi.md)；凭据路径与搜索路由见 [Pi 配置模板](pi/README.md)。系统字体和终端外观按[外观指南](pi/appearance.zh-CN.md)手动设置，bootstrap 不修改终端配置。
+包顺序、界面替换和 Skills 安装见 [Pi 部署说明](setup_for_pi.md)；凭据路径与搜索路由见 [Pi 配置模板](pi/README.md)。Bootstrap 将 **Pi 和当前终端都设为 Catppuccin Mocha**。字体安装和不透明度由使用者设置，具体见[外观指南](pi/appearance.zh-CN.md)。
 
 > [!IMPORTANT]
 > 缺少的凭据在本机填写，不在聊天中传递。Pi Sync 需要[你自己的私有 SSH 仓库](pi/pi-sync-setup.zh-CN.md)。bootstrap 不执行同步或付费模型、生图测试；凭据或同步目标缺失时，对应组件保留为待配置。

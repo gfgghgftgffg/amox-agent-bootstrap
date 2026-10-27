@@ -75,7 +75,9 @@ Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/t
 - Pill order: model, thinking, subagents, cwd, sessionName, runtime, git, context, cost, sessionDuration, time, extensionStatus.
 - Queue pill off, leaving Pi's native pending-message text visible. `/starline queue` opens queue details from the keyboard.
 
-Give users the [appearance guide](pi/appearance.md) ([中文](pi/appearance.zh-CN.md)): **Catppuccin Mocha**, **Maple Mono NF CN**, **95% opacity**. Bootstrap must not install fonts, edit terminal profiles, write Windows registry entries or copy machine-specific terminal paths.
+Apply **Catppuccin Mocha to both Pi and the current terminal** using the [appearance guide](pi/appearance.md) ([中文](pi/appearance.zh-CN.md)). Deploy the Pi theme, detect the actual terminal, back up its configuration, and import/select the official Mocha scheme for the active profile. Preserve unrelated settings. Registering a scheme without selecting it is not complete. If the terminal cannot be configured from this host, report terminal theme as pending, not complete.
+
+Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**. Bootstrap must not install fonts, write font registry entries or copy machine-specific terminal paths.
 
 ### Provider, search and sync
 
@@ -112,6 +114,7 @@ Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and 
 - Verify eight complete Skills, the three explicit-only flags and automatically available `create-readme`. Test meeting preparation on a temporary local text fixture.
 - Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
 - Restart Pi; check tidy diffs, starline layout and native queue text. Keep Pi Sync manual and its status panel unchanged.
-- Report installed/reused/pending/failed items, effective paths and restart requirements. Terminal/font setup remains user-managed.
+- Verify Pi's `catppuccin-mocha` theme and the active terminal profile's Catppuccin Mocha scheme separately. Report both states; applying only the Pi theme does not complete theme setup.
+- Report installed/reused/pending/failed items, effective paths and restart requirements. Font installation and opacity remain user-managed.
 
 Repository checks: `node --test tests/*.test.cjs`.

@@ -133,7 +133,7 @@ test('Mocha resolves variables and provides a concrete base for tidy diff tints'
   assert.notEqual(resolve(theme.colors.thinkingMedium), resolve(theme.colors.thinkingHigh));
 });
 
-test('appearance instructions give manual cross-platform targets, not OS automation', () => {
+test('appearance requires both Pi and terminal themes while leaving fonts user-managed', () => {
   for (const file of ['pi/appearance.md', 'pi/appearance.zh-CN.md']) {
     const text = read(file);
     for (const value of [
@@ -143,7 +143,22 @@ test('appearance instructions give manual cross-platform targets, not OS automat
     ]) assert.ok(text.includes(value), `${file}: ${value}`);
   }
   const guide = read('setup_for_pi.md');
-  assert.match(guide, /must not install fonts, edit terminal profiles, write Windows registry entries/);
+  assert.match(guide, /Apply \*\*Catppuccin Mocha to both Pi and the current terminal\*\*/);
+  assert.match(guide, /import\/select the official Mocha scheme for the active profile/);
+  assert.match(guide, /report terminal theme as pending, not complete/);
+  assert.match(guide, /must not install fonts, write font registry entries/);
+  for (const file of ['README.md', 'pi/README.md', 'pi/appearance.md']) {
+    assert.ok(read(file).includes('both Pi and the active terminal profile'), file);
+  }
+  for (const file of ['README.zh-CN.md', 'pi/appearance.zh-CN.md']) {
+    assert.match(read(file), /Pi 和当前终端都设为 Catppuccin Mocha/, file);
+  }
+  const appearance = read('pi/appearance.md');
+  assert.match(appearance, /effective `colorScheme` to `Catppuccin Mocha`/);
+  assert.match(appearance, /Importing an unused scheme or changing only Pi is incomplete/);
+  for (const file of ['README.md', 'README.zh-CN.md', 'pi/README.md', 'pi/appearance.md', 'pi/appearance.zh-CN.md', 'setup_for_pi.md']) {
+    assert.doesNotMatch(read(file), /Terminal appearance is manual|Font and terminal settings are manual|does not.*modify terminal profiles|must not.*edit terminal profiles|不修改终端配置|字体与终端设置由使用者自行完成/, file);
+  }
   assert.match(guide, /Keep `colors.thinking` absent/);
   assert.match(guide, /placing starline last/);
   assert.doesNotMatch(guide, /open-tui last|hideThinkingBlock: false|pi-pretty\.json/);

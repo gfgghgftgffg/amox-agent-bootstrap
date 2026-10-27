@@ -42,7 +42,7 @@ that still needs my input.
 | Task Router | Activated explicitly with `/skill:task-routing` |
 | Pi Sync | Manual session/mission sync to your own private repository |
 
-See [Pi setup](setup_for_pi.md) for package order, UI migration and Skill installation, and [Pi configuration](pi/README.md) for credential paths and search routing. Follow the [appearance guide](pi/appearance.md) to set fonts and terminal appearance manually; bootstrap does not modify terminal profiles.
+See [Pi setup](setup_for_pi.md) for package order, UI migration and Skill installation, and [Pi configuration](pi/README.md) for credential paths and search routing. Bootstrap applies **Catppuccin Mocha to both Pi and the active terminal profile**. Font installation and opacity remain user-managed; see the [appearance guide](pi/appearance.md).
 
 > [!IMPORTANT]
 > Provide missing credentials locally, not in chat. Pi Sync needs [your own private SSH repository](pi/pi-sync-setup.md). Bootstrap does not run synchronization or paid model/image tests; missing credentials or destinations remain pending.
