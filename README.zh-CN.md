@@ -26,7 +26,7 @@
 完成安装、验证结果，并说明还有哪些事项需要我提供信息或处理。
 ```
 
-[setup_for_pi.md](setup_for_pi.md) 包含九个包、八个 Skills、Task Router、Python 依赖和 [Pi 配置模板](pi/README.md)。Pi 需要兼容的 Node.js 和 Bash；Agent 会先核对当前上游要求，再决定是否安装。
+[setup_for_pi.md](setup_for_pi.md) 包含扩展、Skills、Task Router、Python 依赖和 [Pi 配置模板](pi/README.md)。Pi 需要兼容的 Node.js 和 Bash；Agent 会先核对当前上游要求，再决定是否安装。
 
 ## Pi 默认配置
 

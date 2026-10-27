@@ -27,7 +27,7 @@ complete the installation, verify the results, and report anything
 that still needs my input.
 ```
 
-[setup_for_pi.md](setup_for_pi.md) covers nine packages, eight Skills, Task Router, Python dependencies and the [Pi configuration templates](pi/README.md). Pi needs a compatible Node.js runtime and Bash; the agent checks current upstream requirements before installing.
+[setup_for_pi.md](setup_for_pi.md) covers extensions, Skills, Task Router, Python dependencies and the [Pi configuration templates](pi/README.md). Pi needs a compatible Node.js runtime and Bash; the agent checks current upstream requirements before installing.
 
 ## Pi defaults
 
