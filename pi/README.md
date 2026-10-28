@@ -60,6 +60,6 @@ Preserve unrelated fetch settings. With approval, remove conflicting top-level `
 ## Other configuration
 
 - Install the Skills listed in [setup_for_pi.md](../setup_for_pi.md#3-skills), including complete resources and explicit-only flags. `anti-defensive-writing` is explicit-only; `humanizer` and `design-taste-frontend` remain available automatically.
-- Generate Router roles on each host using `routing.toml`; do not copy generated agents. Maintain shared rules in the stable Router checkout’s `AGENTS.md`, render local paths and preserve custom edits. Generated Pi roles enable Skills and scoped codemode without widening tool permissions. Do not add a Router block to global Pi instructions.
+- Generate Router roles on each host using `routing.toml`; do not copy generated agents. Maintain shared rules in the stable Router checkout’s `AGENTS.md`, keep environment requirements portable without personal paths or unresolved placeholders, and preserve custom edits. Generated Pi roles enable Skills and scoped codemode without widening tool permissions. Do not add a Router block to global Pi instructions.
 - Keep Pi Sync manual and follow [English](pi-sync-setup.md) / [中文](pi-sync-setup.zh-CN.md). Bootstrap does not transfer data.
 - Keep credentials, sessions, caches and backups out of Git.

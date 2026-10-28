@@ -32,7 +32,7 @@ For README work, use `create-readme` for structure, then `humanizer` or `shuoren
 
 ### Task Router
 
-Read the current upstream installation instructions. All Router parents and roles read the live `<router-checkout>/AGENTS.md`. On first setup, initialize it from the rendered common rules in [templates/AGENTS.md](templates/AGENTS.md), excluding Router activation text and managed Router blocks. Render local Conda/Python paths. If the shared file is already customized or used by Pi, preserve it and merge only requested common-rule changes; do not reset it or mirror later global edits automatically. Keep the checkout stable; moving it requires reinstalling the generated absolute references.
+Read the current upstream installation instructions. All Router parents and roles read the live `<router-checkout>/AGENTS.md`. Keep its common rules portable, excluding Router activation text and managed Router blocks from [templates/AGENTS.md](templates/AGENTS.md). Use the local Conda `codex` environment and resolve paths before use; do not copy personal absolute paths or unresolved placeholders into the shared file. Render local Conda/Python paths only in the deployed host-global file. If the shared file is already customized or used by Pi, preserve it and merge only requested common-rule changes; do not reset it or mirror later global edits automatically. Keep the checkout stable; moving it requires reinstalling the generated absolute references.
 
 From its stable checkout, run:
 

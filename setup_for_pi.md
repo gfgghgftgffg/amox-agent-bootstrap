@@ -93,7 +93,7 @@ Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% o
 
 Read the current [Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter guide](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Keep a stable checkout and working copy of [routing.toml](pi/routing.toml), preserving its model choices.
 
-Use `<router-checkout>/AGENTS.md` as the single shared rule file read by all Router parents and roles. On first setup, initialize it from the rendered [Pi global instruction template](pi/AGENTS.md) with verified local Conda/Python paths. On existing setups, preserve independently edited shared rules and merge only requested changes; do not reset the file on reruns. It is a separate editable copy, not a continuing mirror of global instructions. Generated roles reference its absolute path, so moving the checkout requires reinstalling Router. Do not replace it with another machine's unrendered paths.
+Use `<router-checkout>/AGENTS.md` as the single shared rule file read by all Router parents and roles. Keep environment requirements in shared rules portable: use the local Conda `codex` environment and resolve executable/interpreter paths before use. Do not copy personal absolute paths or unresolved placeholders from the [Pi global instruction template](pi/AGENTS.md); only the deployed host-global file needs rendered local paths. On existing setups, preserve independently edited shared rules and merge only requested changes; do not reset the file on reruns. It is a separate editable copy, not a continuing mirror of global instructions. Generated roles reference its absolute path, so moving the checkout requires reinstalling Router. Do not replace it with another machine's unrendered paths.
 
 From the Router checkout, use the actual absolute configuration path:
 
@@ -117,7 +117,7 @@ Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and 
 - Verify Pi, Node, Git, Bash, the `codex` interpreter and `pypdf`.
 - Check the nine packages and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
 - Verify nine complete Skills, the four explicit-only flags and automatically available `create-readme`, `design-taste-frontend`, `humanizer` and `shuorenhua`. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
-- Verify Router's shared `AGENTS.md` has local paths and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
+- Verify Router's shared `AGENTS.md` has portable environment requirements, no personal paths or unresolved placeholders, and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
 - Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
 - Restart Pi; check tidy diffs, starline layout and native queue text. Keep Pi Sync manual and its status panel unchanged.
 - Verify Pi's `catppuccin-mocha` theme and the active terminal profile's Catppuccin Mocha scheme separately. Report both states; applying only the Pi theme does not complete theme setup.
