@@ -50,9 +50,9 @@ Install complete Skills, including scripts, references and assets, under `<agent
 
 Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
 
-Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer` so they remain discoverable for applicable tasks. Do not install `humanizer-zh` as an additional default.
+Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`.
 
-For `create-readme`, preserve its short description and leave `disable-model-invocation` absent or `false`. Pi loads its full instructions on demand. Use it for README structure, then `humanizer` for prose. Keep current introduction, usage and required deployment/maintenance instructions; link detailed configuration rather than duplicating it. Keep history and troubleshooting narratives out of README.
+For `create-readme`, leave `disable-model-invocation` absent or `false`.
 
 Run meeting preparation with the `codex` interpreter. Text needs no ASR key; media transcription requires `DASHSCOPE_API_KEY`. Leave transcription/image generation pending if credentials or supported tools are unavailable.
 

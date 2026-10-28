@@ -25,9 +25,9 @@ Install complete Skills with their scripts, references and assets into the effec
 
 Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling` and `meeting-summary-html`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
 
-Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`. Do not install `humanizer-zh` as an additional default.
+Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`.
 
-For README work, use `create-readme` for structure, then `humanizer` for prose. Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
+Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
 
 ### Task Router
 
