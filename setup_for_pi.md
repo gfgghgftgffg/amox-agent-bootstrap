@@ -11,7 +11,7 @@ Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md).
 
 ## 2. Packages
 
-Install these ten packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json), placing starline last after preserved unrelated packages.
+Install the following packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json), placing starline last after preserved unrelated packages.
 
 | Package | Purpose |
 | --- | --- |
@@ -37,9 +37,9 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | Skill | Source / installation |
 | --- | --- |
 | `design-taste-frontend` | [taste-skill](https://github.com/Leonxlnx/taste-skill), only `skills/taste-skill/` |
-| `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), only `skills/create-readme/`, not the whole collection |
+| `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), only `skills/create-readme/` |
 | `humanizer` | [blader/humanizer](https://github.com/blader/humanizer) |
-| `anti-defensive-writing` | [Kiterlin/anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing), install only the root `SKILL.md` and license, not both duplicate Skill trees |
+| `anti-defensive-writing` | [Kiterlin/anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing), install only the root `SKILL.md` and license |
 | `meeting-summary-html` | [meeting-summary-html](https://github.com/gfgghgftgffg/meeting-summary-html), including preparation scripts |
 | `task-routing` | Generate through the installer in section 5 |
 | `autoresearch-create` | Render an explicit-only wrapper; see below |
@@ -48,13 +48,11 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | `grilling` | [source](https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md), actual Skill at `skills/productivity/grilling/` |
 | `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies.
 
-Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`.
+Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
 
-For `create-readme`, leave `disable-model-invocation` absent or `false`.
-
-Run meeting preparation with the `codex` interpreter. Text needs no ASR key; media transcription requires `DASHSCOPE_API_KEY`. Leave transcription/image generation pending if credentials or supported tools are unavailable.
+Media transcription for `meeting-summary-html` requires `DASHSCOPE_API_KEY`; text preparation requires no ASR key.
 
 ### Autoresearch Skills
 
@@ -62,9 +60,9 @@ Keep the `pi-autoresearch` package entry in object form with `skills: []` as in 
 
 For each of `autoresearch-create`, `autoresearch-finalize` and `autoresearch-hooks`, render [autoresearch-skill.md](pi/autoresearch-skill.md) to `<agent-dir>/skills/<name>/SKILL.md`. Replace `{{SKILL_NAME}}` with that name and `{{UPSTREAM_SKILL_PATH}}` with the verified absolute path to `skills/<name>/SKILL.md` in the installed `pi-autoresearch` package. For managed npm installs the package normally lives at `<agent-dir>/npm/node_modules/pi-autoresearch`; verify rather than copying another host's path. Keep `disable-model-invocation: true` and preserve unrelated custom instructions in reused wrappers.
 
-Read workflows and supporting files from the installed package; do not copy upstream Skills or hook examples into the wrappers. This keeps them current on package updates and avoids duplicate Skill discovery.
+The wrappers read upstream files from the installed package, so package updates also update their workflows. Do not edit the npm Skill files directly.
 
-The extension registers `/autoresearch` independently of Skill discovery. `skills: []` disables direct loading of the bundled Skills; the wrappers restore their original names with `disable-model-invocation: true`. This hides them from automatic model selection while keeping explicit `/skill:` calls and the extension's internal Skill calls available. Do not edit installed npm Skill files: package updates can overwrite those edits.
+The extension registers `/autoresearch` independently of Skill discovery. The wrappers keep the original Skill names available to explicit `/skill:` calls and the extension's internal calls, while `disable-model-invocation: true` hides them from automatic model selection.
 
 | Bundled Skill | Purpose |
 | --- | --- |
@@ -74,7 +72,7 @@ The extension registers `/autoresearch` independently of Skill discovery. `skill
 
 Use `/autoresearch <goal>` to activate experiment mode and start setup, or resume when `.auto/prompt.md` exists. Use `/autoresearch dashboard` to inspect results, `/autoresearch off` to stop while preserving records, and `/autoresearch finalize` to stop the mode before loading the finalize Skill. Do not substitute direct `/skill:autoresearch-create` or `/skill:autoresearch-finalize` calls for these lifecycle commands: the Skill calls alone do not activate or stop experiment mode. Invoke `/skill:autoresearch-hooks <request>` explicitly when hook configuration is needed.
 
-Start experiments only on explicit request. Do not start a loop, run benchmarks or create/revert commits during bootstrap checks.
+Do not start a loop, run benchmarks or create/revert commits during bootstrap checks.
 
 ## 4. Configuration
 
@@ -98,12 +96,11 @@ Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/t
 - Starline: Nerd Font icons, Mocha pastel pills, `editorPaddingY: 0`, `editorMetadataFormat: ""`.
 - Keep `colors.thinking` absent for automatic thinking-level colors; remove an existing fixed override.
 - Directory: `pathDisplay: { "mode": "full", "depth": 0 }`.
-- Pill order: model, thinking, subagents, cwd, sessionName, runtime, git, context, cost, sessionDuration, time, extensionStatus.
-- Queue pill off, leaving Pi's native pending-message text visible. `/starline queue` opens queue details from the keyboard.
+- Queue pill off, leaving Pi's native pending-message text visible.
 
 Apply **Catppuccin Mocha to both Pi and the current terminal** using the [appearance guide](pi/appearance.md) ([中文](pi/appearance.zh-CN.md)). Deploy the Pi theme, detect the actual terminal, back up its configuration, and import/select the official Mocha scheme for the active profile. Preserve unrelated settings. Registering a scheme without selecting it is not complete. If the terminal cannot be configured from this host, report terminal theme as pending, not complete.
 
-Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**. Bootstrap must not install fonts, write font registry entries or copy machine-specific terminal paths.
+Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**.
 
 ### Provider, search and sync
 
@@ -138,13 +135,13 @@ Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and 
 ## 7. Verification
 
 - Verify Pi, Node, Git, Bash, the `codex` interpreter and `pypdf`.
-- Check the ten packages and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
-- Verify eight complete Skills and three autoresearch wrappers, the four original explicit-only flags and automatically available `create-readme`, `design-taste-frontend` and `humanizer`. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
+- Check the packages in `settings.json` and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
+- Verify the listed Skills, their required resources and invocation flags. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
 - Verify the three autoresearch wrappers are explicit-only, point to existing installed upstream Skills and retain original relative-reference resolution. Confirm the package has `skills: []`, no duplicate autoresearch Skills are loaded and no experiment loop was started.
 - Verify Router's shared `AGENTS.md` has portable environment requirements, no personal paths or unresolved placeholders, and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
 - Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
-- Restart Pi; check tidy diffs, starline layout and native queue text. Keep Pi Sync manual and its status panel unchanged.
+- Restart Pi; check tidy diffs, starline layout and native queue text.
 - Verify Pi's `catppuccin-mocha` theme and the active terminal profile's Catppuccin Mocha scheme separately. Report both states; applying only the Pi theme does not complete theme setup.
-- Report installed/reused/pending/failed items, effective paths and restart requirements. Font installation and opacity remain user-managed.
+- Report installed/reused/pending/failed items, effective paths and restart requirements.
 
 Repository checks: `node --test tests/*.test.cjs`.

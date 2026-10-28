@@ -17,15 +17,15 @@ Install complete Skills with their scripts, references and assets into the effec
 | --- | --- | --- |
 | task-router | https://github.com/gfgghgftgffg/task-router | Install the Codex roles, `task-routing` profile and Skill through its native installer |
 | meeting-summary-html | https://github.com/gfgghgftgffg/meeting-summary-html | Include preparation scripts; use the `codex` Python interpreter |
-| create-readme | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only `skills/create-readme/`, not the whole collection; leave `disable-model-invocation` absent or `false` |
+| create-readme | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only `skills/create-readme/` |
 | humanizer | https://github.com/blader/humanizer | Include the complete Skill |
-| anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license; set `disable-model-invocation: true` |
+| anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/`, named `design-taste-frontend` |
 | grilling | https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md | Install the actual Skill at `skills/productivity/grilling/` |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling` and `meeting-summary-html`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling` and `meeting-summary-html`, including reused copies.
 
-Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`.
+Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
 
 Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
 
@@ -42,7 +42,7 @@ node cli.mjs install
 node cli.mjs install --apply
 ```
 
-Use the effective Codex home and a stable routing configuration (`--codex-home` / `--config` when needed). Preserve existing model choices, installer backups and exactly one managed Router block. Do not install the Pi bundle into Codex home.
+Use the effective Codex home and a stable routing configuration (`--codex-home` / `--config` when needed). Preserve existing model choices, installer backups and exactly one managed Router block.
 
 Use V1 child communication: `multi_agent = true`, `multi_agent_v2 = false`. If a custom `model_catalog_json` is configured, its orchestrator and child models must also declare `"multi_agent_version": "v1"`. Report unsupported models/settings without substituting others.
 
@@ -57,7 +57,7 @@ Deploy [templates/AGENTS.md](templates/AGENTS.md) to the effective Codex global 
 - `{{TASK_ROUTER_CONFIG_PATH}}`: routing configuration.
 - `{{TASK_ROUTER_SOURCE_PATH}}`: Router checkout.
 
-On existing installations, update the corresponding sections while preserving unrelated instructions and one installer-managed Router block. Respect `AGENTS.override.md`. Do not add a Skill inventory or automatic interview trigger.
+On existing installations, update the corresponding sections while preserving unrelated instructions and one installer-managed Router block. Respect `AGENTS.override.md`.
 
 ## 4. Global config.toml
 
@@ -81,7 +81,7 @@ On **Windows only**, also set `daemon_auto_start = false` under `[features]`. Ke
 ## 5. Verification
 
 - Verify the `codex` interpreter and `pypdf` import.
-- All seven project / Skill entries and required resources must be present, with the three explicit-only flags set. Verify the shared Router `AGENTS.md` and generated references.
+- Verify the listed projects and Skills, their required resources and invocation flags. Verify the shared Router `AGENTS.md` and generated references.
 - Run Router's static checks and meeting preparation on a temporary local text fixture.
 - Parse `config.toml`; check template values, rendered paths and one Router block.
-- Report installed/reused/pending/failed components, effective paths and required restart/profile activation. Do not run paid model tests or media uploads.
+- Report installed/reused/pending/failed components, effective paths and required restart/profile activation.

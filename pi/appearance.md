@@ -27,4 +27,4 @@ Verify both settings separately. Importing an unused scheme or changing only Pi 
 
 ## User steps
 
-Install all `.ttf` weights/italics from the font archive: Windows **Install**, macOS **Font Book**, or a Linux user font manager/directory. Restart the terminal and select **Maple Mono NF CN**. Set background opacity to **95%**. Font size and supported blur effects are personal choices; bootstrap does not install system fonts.
+Install all `.ttf` weights/italics from the font archive: Windows **Install**, macOS **Font Book**, or a Linux user font manager/directory. Restart the terminal and select **Maple Mono NF CN**. Set background opacity to **95%**.

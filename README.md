@@ -50,9 +50,9 @@ See [Pi setup](setup_for_pi.md) for package order, UI migration and Skill instal
 
 ## Maintain the setup
 
-Edit the matching setup document and templates to change future deployments. Codex and Pi have separate instruction files and installation targets; these templates are not a live inventory of any computer. Keep credentials, sessions, caches and backups out of Git.
+Edit the matching setup document and templates to change future deployments. Keep credentials, sessions, caches and backups out of Git.
 
-The three amox lean packages are public on npm. Install unpinned package sources and run `pi update --extensions` when needed; this does not update Pi itself. Migrating an existing local source requires approval and must replace its registration without creating duplicates. Reload or restart Pi after configuration changes, then check the actual tool and terminal behavior.
+Update Pi packages with `pi update --extensions`; this does not update Pi itself. Reload or restart Pi after configuration changes. Installation and migration instructions are in [Pi setup](setup_for_pi.md).
 
 Run the offline repository checks from the repository root with Node.js:
 

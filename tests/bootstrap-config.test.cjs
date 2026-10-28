@@ -35,15 +35,9 @@ test('both setup guides install create-readme without making it explicit-only', 
   for (const file of ['setup.md', 'setup_for_pi.md']) {
     const guide = read(file);
     assert.ok(guide.includes(skillUrl), file);
-    assert.match(guide, /leave `disable-model-invocation` absent or `false`/, file);
-    assert.match(guide, /not the whole collection/, file);
-    assert.match(guide, /humanizer/, file);
+    assert.match(guide, /Leave `disable-model-invocation` absent or `false` in `create-readme`/, file);
+    assert.match(guide, /only `skills\/create-readme\/`/, file);
   }
-  const piGuide = read('setup_for_pi.md');
-  const skills = piGuide.split('## 3. Skills')[1].split('### Autoresearch Skills')[0];
-  assert.equal((skills.match(/^\| `/gm) || []).length, 11);
-  assert.match(piGuide, /Verify eight complete Skills and three autoresearch wrappers/);
-  assert.match(read('setup.md'), /All seven project \/ Skill entries/);
 });
 
 test('autoresearch wrappers stay explicit-only and resolve upstream resources', () => {
@@ -160,7 +154,7 @@ test('appearance requires both Pi and terminal themes while leaving fonts user-m
   assert.match(guide, /Apply \*\*Catppuccin Mocha to both Pi and the current terminal\*\*/);
   assert.match(guide, /import\/select the official Mocha scheme for the active profile/);
   assert.match(guide, /report terminal theme as pending, not complete/);
-  assert.match(guide, /must not install fonts, write font registry entries/);
+  assert.match(guide, /Font installation and opacity remain user-managed/);
   for (const file of ['README.md', 'pi/README.md', 'pi/appearance.md']) {
     assert.ok(read(file).includes('both Pi and the active terminal profile'), file);
   }

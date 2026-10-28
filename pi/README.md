@@ -21,25 +21,9 @@ Deploy through [setup_for_pi.md](../setup_for_pi.md). `<agent-dir>` is `PI_CODIN
 
 ## Interface
 
-Use the ten unpinned npm packages in `settings.json`, with starline last. Replace pi-pretty, pi-open-tui and pi-statusline with pi-tidy + pi-starline; preserve old preferences for rollback. Update packages with `pi update --extensions`.
+Deploy the values in [settings.json](settings.json), [starline.json](starline.json) and the [theme](themes/catppuccin-mocha.json). See [interface settings](../setup_for_pi.md#interface) and [package migration](../setup_for_pi.md#2-packages).
 
-| Setting | Value |
-| --- | --- |
-| Tools | `defaultTools: ["+codemode"]`; retain existing tools |
-| Theme | `catppuccin-mocha`; deploy the theme before selecting it |
-| Diff backgrounds | `toolSuccessBg: "base"` for red/green highlights |
-| Tidy | Message frames on, `frameUserMessages: false` |
-| Starline editor | `editorPaddingY: 0`, `editorMetadataFormat: ""` |
-| Directory | `pathDisplay: { "mode": "full", "depth": 0 }` |
-| Thinking colors | Leave `colors.thinking` unset |
-| Queue pill | Off; keep native pending-message text |
-| Pill order | Model, thinking, subagents, directory, session name, runtime, Git, context, cost, session duration, time, extension statuses |
-
-Restart Pi after deployment. `/starline` adjusts layout/colors; `/starline queue` opens queued messages from the keyboard.
-
-**Apply Catppuccin Mocha to both Pi and the active terminal profile.** Deploy the Pi theme, then detect the terminal and import/select its official Mocha scheme after backing up the profile. Check both separately; a Pi-only change or an imported-but-unselected terminal scheme is incomplete. Report an inaccessible terminal as pending.
-
-Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**. See [English](appearance.md) / [中文](appearance.zh-CN.md).
+Apply Catppuccin Mocha to both Pi and the active terminal profile using the [appearance guide](appearance.md) ([中文](appearance.zh-CN.md)). Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**.
 
 ## Search routing
 
@@ -60,7 +44,6 @@ Preserve unrelated fetch settings. With approval, remove conflicting top-level `
 
 ## Other configuration
 
-- Install the Skills listed in [setup_for_pi.md](../setup_for_pi.md#3-skills), including complete resources and explicit-only flags. `anti-defensive-writing` is explicit-only; `humanizer` and `design-taste-frontend` remain available automatically.
-- Generate Router roles on each host using `routing.toml`; do not copy generated agents. Maintain shared rules in the stable Router checkout’s `AGENTS.md`, keep environment requirements portable without personal paths or unresolved placeholders, and preserve custom edits. Generated Pi roles enable Skills and scoped codemode without widening tool permissions. Do not add a Router block to global Pi instructions.
+- Install [Skills](../setup_for_pi.md#3-skills) and generate [Router roles](../setup_for_pi.md#5-task-router) using the deployment instructions.
 - Keep Pi Sync manual and follow [English](pi-sync-setup.md) / [中文](pi-sync-setup.zh-CN.md). Bootstrap does not transfer data.
 - Keep credentials, sessions, caches and backups out of Git.
