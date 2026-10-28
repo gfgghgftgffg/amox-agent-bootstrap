@@ -17,7 +17,6 @@ Install complete Skills with their scripts, references and assets into the effec
 | --- | --- | --- |
 | task-router | https://github.com/gfgghgftgffg/task-router | Install the Codex roles, `task-routing` profile and Skill through its native installer |
 | meeting-summary-html | https://github.com/gfgghgftgffg/meeting-summary-html | Include preparation scripts; use the `codex` Python interpreter |
-| shuorenhua | https://github.com/MrGeDiao/shuorenhua | Include the complete Skill and references |
 | create-readme | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only `skills/create-readme/`, not the whole collection; leave `disable-model-invocation` absent or `false` |
 | humanizer | https://github.com/blader/humanizer | Include the complete Skill |
 | anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license; set `disable-model-invocation: true` |
@@ -26,9 +25,9 @@ Install complete Skills with their scripts, references and assets into the effec
 
 Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling` and `meeting-summary-html`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
 
-Leave `disable-model-invocation` absent or `false` in `design-taste-frontend`, `humanizer` and `shuorenhua`. Do not install `humanizer-zh` as an additional default.
+Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`. Do not install `humanizer-zh` as an additional default.
 
-For README work, use `create-readme` for structure, then `humanizer` or `shuorenhua` for prose. Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
+For README work, use `create-readme` for structure, then `humanizer` for prose. Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
 
 ### Task Router
 
@@ -82,7 +81,7 @@ On **Windows only**, also set `daemon_auto_start = false` under `[features]`. Ke
 ## 5. Verification
 
 - Verify the `codex` interpreter and `pypdf` import.
-- All eight project / Skill entries and required resources must be present, with the three explicit-only flags set. Verify the shared Router `AGENTS.md` and generated references.
+- All seven project / Skill entries and required resources must be present, with the three explicit-only flags set. Verify the shared Router `AGENTS.md` and generated references.
 - Run Router's static checks and meeting preparation on a temporary local text fixture.
 - Parse `config.toml`; check template values, rendered paths and one Router block.
 - Report installed/reused/pending/failed components, effective paths and required restart/profile activation. Do not run paid model tests or media uploads.

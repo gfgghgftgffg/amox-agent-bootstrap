@@ -19,6 +19,7 @@ test('codemode is additive and does not hide direct tools', () => {
     'npm:@gfgghgftgffg/pi-subagents-lean',
     'npm:@monotykamary/pi-retry',
     'npm:pi-sync-suite',
+    { source: 'npm:pi-autoresearch', skills: [] },
     'npm:pi-tidy',
     'npm:pi-starline',
   ]);
@@ -36,13 +37,26 @@ test('both setup guides install create-readme without making it explicit-only', 
     assert.ok(guide.includes(skillUrl), file);
     assert.match(guide, /leave `disable-model-invocation` absent or `false`/, file);
     assert.match(guide, /not the whole collection/, file);
-    assert.match(guide, /humanizer.*shuorenhua/, file);
+    assert.match(guide, /humanizer/, file);
   }
   const piGuide = read('setup_for_pi.md');
-  const skills = piGuide.split('## 3. Skills')[1].split('## 4. Configuration')[0];
-  assert.equal((skills.match(/^\| `/gm) || []).length, 9);
-  assert.match(piGuide, /Verify nine complete Skills/);
-  assert.match(read('setup.md'), /All eight project \/ Skill entries/);
+  const skills = piGuide.split('## 3. Skills')[1].split('### Autoresearch Skills')[0];
+  assert.equal((skills.match(/^\| `/gm) || []).length, 11);
+  assert.match(piGuide, /Verify eight complete Skills and three autoresearch wrappers/);
+  assert.match(read('setup.md'), /All seven project \/ Skill entries/);
+});
+
+test('autoresearch wrappers stay explicit-only and resolve upstream resources', () => {
+  const template = read('pi/autoresearch-skill.md');
+  assert.match(template, /^name: \{\{SKILL_NAME\}\}$/m);
+  assert.match(template, /^disable-model-invocation: true$/m);
+  assert.ok(template.includes('Read `{{UPSTREAM_SKILL_PATH}}` in full'));
+  assert.match(template, /original SKILL\.md directory, not this wrapper directory/);
+  const guide = read('setup_for_pi.md');
+  for (const name of ['autoresearch-create', 'autoresearch-finalize', 'autoresearch-hooks']) {
+    assert.ok(guide.includes('`' + name + '`'), name);
+  }
+  assert.match(guide, /Do not start a loop, run benchmarks or create\/revert commits/);
 });
 
 test('instruction templates end Requirement Alignment with the document rule', () => {

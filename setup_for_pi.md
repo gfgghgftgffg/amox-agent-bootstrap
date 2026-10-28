@@ -11,7 +11,7 @@ Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md).
 
 ## 2. Packages
 
-Install these nine packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json), placing starline last after preserved unrelated packages.
+Install these ten packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json), placing starline last after preserved unrelated packages.
 
 | Package | Purpose |
 | --- | --- |
@@ -22,6 +22,7 @@ Install these nine packages with `pi install npm:<name>`, without `--local` or v
 | `npm:@gfgghgftgffg/pi-subagents-lean` | `subagent` and native workflows |
 | `npm:@monotykamary/pi-retry` | Retry and continuation |
 | `npm:pi-sync-suite` | Manual session/mission sync |
+| `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
 | `npm:pi-tidy` | Tool folding and diff presentation |
 | `npm:pi-starline` | Editor, user messages and pill footer |
 
@@ -40,18 +41,40 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | `humanizer` | [blader/humanizer](https://github.com/blader/humanizer) |
 | `anti-defensive-writing` | [Kiterlin/anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing), install only the root `SKILL.md` and license, not both duplicate Skill trees |
 | `meeting-summary-html` | [meeting-summary-html](https://github.com/gfgghgftgffg/meeting-summary-html), including preparation scripts |
-| `shuorenhua` | [MrGeDiao/shuorenhua](https://github.com/MrGeDiao/shuorenhua) |
 | `task-routing` | Generate through the installer in section 5 |
+| `autoresearch-create` | Render an explicit-only wrapper; see below |
+| `autoresearch-finalize` | Render an explicit-only wrapper; see below |
+| `autoresearch-hooks` | Render an explicit-only wrapper; see below |
 | `grilling` | [source](https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md), actual Skill at `skills/productivity/grilling/` |
 | `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
 
 Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
 
-Leave `disable-model-invocation` absent or `false` in `design-taste-frontend`, `humanizer` and `shuorenhua` so they remain discoverable for applicable tasks. Do not install `humanizer-zh` as an additional default.
+Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer` so they remain discoverable for applicable tasks. Do not install `humanizer-zh` as an additional default.
 
-For `create-readme`, preserve its short description and leave `disable-model-invocation` absent or `false`. Pi loads its full instructions on demand. Use it for README structure, then `humanizer` or `shuorenhua` for prose. Keep current introduction, usage and required deployment/maintenance instructions; link detailed configuration rather than duplicating it. Keep history and troubleshooting narratives out of README.
+For `create-readme`, preserve its short description and leave `disable-model-invocation` absent or `false`. Pi loads its full instructions on demand. Use it for README structure, then `humanizer` for prose. Keep current introduction, usage and required deployment/maintenance instructions; link detailed configuration rather than duplicating it. Keep history and troubleshooting narratives out of README.
 
 Run meeting preparation with the `codex` interpreter. Text needs no ASR key; media transcription requires `DASHSCOPE_API_KEY`. Leave transcription/image generation pending if credentials or supported tools are unavailable.
+
+### Autoresearch Skills
+
+Keep the `pi-autoresearch` package entry in object form with `skills: []` as in [settings.json](pi/settings.json). Load its extension, but expose its three Skills only through explicit-only wrappers.
+
+For each of `autoresearch-create`, `autoresearch-finalize` and `autoresearch-hooks`, render [autoresearch-skill.md](pi/autoresearch-skill.md) to `<agent-dir>/skills/<name>/SKILL.md`. Replace `{{SKILL_NAME}}` with that name and `{{UPSTREAM_SKILL_PATH}}` with the verified absolute path to `skills/<name>/SKILL.md` in the installed `pi-autoresearch` package. For managed npm installs the package normally lives at `<agent-dir>/npm/node_modules/pi-autoresearch`; verify rather than copying another host's path. Keep `disable-model-invocation: true` and preserve unrelated custom instructions in reused wrappers.
+
+Read workflows and supporting files from the installed package; do not copy upstream Skills or hook examples into the wrappers. This keeps them current on package updates and avoids duplicate Skill discovery.
+
+The extension registers `/autoresearch` independently of Skill discovery. `skills: []` disables direct loading of the bundled Skills; the wrappers restore their original names with `disable-model-invocation: true`. This hides them from automatic model selection while keeping explicit `/skill:` calls and the extension's internal Skill calls available. Do not edit installed npm Skill files: package updates can overwrite those edits.
+
+| Bundled Skill | Purpose |
+| --- | --- |
+| `autoresearch-create` | Define the objective, metric, commands and scope; prepare session files and begin experiments |
+| `autoresearch-finalize` | Organize kept experiments into reviewable branches |
+| `autoresearch-hooks` | Author optional before/after iteration hooks, such as notifications or research fetching |
+
+Use `/autoresearch <goal>` to activate experiment mode and start setup, or resume when `.auto/prompt.md` exists. Use `/autoresearch dashboard` to inspect results, `/autoresearch off` to stop while preserving records, and `/autoresearch finalize` to stop the mode before loading the finalize Skill. Do not substitute direct `/skill:autoresearch-create` or `/skill:autoresearch-finalize` calls for these lifecycle commands: the Skill calls alone do not activate or stop experiment mode. Invoke `/skill:autoresearch-hooks <request>` explicitly when hook configuration is needed.
+
+Start experiments only on explicit request. Do not start a loop, run benchmarks or create/revert commits during bootstrap checks.
 
 ## 4. Configuration
 
@@ -115,8 +138,9 @@ Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and 
 ## 7. Verification
 
 - Verify Pi, Node, Git, Bash, the `codex` interpreter and `pypdf`.
-- Check the nine packages and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
-- Verify nine complete Skills, the four explicit-only flags and automatically available `create-readme`, `design-taste-frontend`, `humanizer` and `shuorenhua`. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
+- Check the ten packages and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
+- Verify eight complete Skills and three autoresearch wrappers, the four original explicit-only flags and automatically available `create-readme`, `design-taste-frontend` and `humanizer`. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
+- Verify the three autoresearch wrappers are explicit-only, point to existing installed upstream Skills and retain original relative-reference resolution. Confirm the package has `skills: []`, no duplicate autoresearch Skills are loaded and no experiment loop was started.
 - Verify Router's shared `AGENTS.md` has portable environment requirements, no personal paths or unresolved placeholders, and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
 - Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
 - Restart Pi; check tidy diffs, starline layout and native queue text. Keep Pi Sync manual and its status panel unchanged.

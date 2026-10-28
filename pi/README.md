@@ -14,13 +14,14 @@ Deploy through [setup_for_pi.md](../setup_for_pi.md). `<agent-dir>` is `PI_CODIN
 | [web-search.json](web-search.json) | `<agent-dir>/web-search.json`; render helper path and relay URL |
 | [read-sub2api-search-key.cjs](read-sub2api-search-key.cjs) | Beside the deployed `sub2api.json` |
 | [pi-btw.json](pi-btw.json) | `<agent-dir>/pi-btw.json` |
+| [autoresearch-skill.md](autoresearch-skill.md) | Render three `<agent-dir>/skills/autoresearch-*/SKILL.md` wrappers; see [setup](../setup_for_pi.md#autoresearch-skills) |
 | [subagents.json](subagents.json) | `<agent-dir>/subagents.json` |
 | [pi-sync-suite.json](pi-sync-suite.json) | `<agent-dir>/pi-sync-suite.json`; supply a private SSH remote and absolute checkout path |
 | [routing.toml](routing.toml) | Stable configuration path for the Router installer |
 
 ## Interface
 
-Use the nine unpinned npm packages in `settings.json`, with starline last. Replace pi-pretty, pi-open-tui and pi-statusline with pi-tidy + pi-starline; preserve old preferences for rollback. Update packages with `pi update --extensions`.
+Use the ten unpinned npm packages in `settings.json`, with starline last. Replace pi-pretty, pi-open-tui and pi-statusline with pi-tidy + pi-starline; preserve old preferences for rollback. Update packages with `pi update --extensions`.
 
 | Setting | Value |
 | --- | --- |

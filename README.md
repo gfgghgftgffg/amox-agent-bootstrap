@@ -34,13 +34,14 @@ that still needs my input.
 | Component | Configuration |
 | --- | --- |
 | Tools | Built-in codemode enabled with `defaultTools: ["+codemode"]`, alongside the usual tools |
-| Skills | `create-readme` available automatically; `humanizer` and `shuorenhua` for prose editing |
+| Skills | `create-readme` available automatically; `humanizer` for prose editing |
 | Explicit-only Skills | `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations` |
 | Interface | pi-tidy for tool folding/diffs; pi-starline loads last for the editor, user-message frames and clickable pill footer |
 | Appearance | Catppuccin Mocha, Maple Mono NF CN and 95% terminal opacity |
 | Search | Sub2API-hosted Codex/OpenAI search first, Exa fallback for configured recoverable errors |
 | Task Router | Explicit `/skill:task-routing`; shared rules in the Router checkout, Skills and scoped codemode enabled for children; no global Pi Router block |
 | Pi Sync | Manual session/mission sync to your own private repository |
+| Autoresearch | pi-autoresearch with three explicit-only Skill wrappers; experiment loops start only on request |
 
 See [Pi setup](setup_for_pi.md) for package order, UI migration and Skill installation, and [Pi configuration](pi/README.md) for credential paths and search routing. Bootstrap applies **Catppuccin Mocha to both Pi and the active terminal profile**. Font installation and opacity remain user-managed; see the [appearance guide](pi/appearance.md).
 

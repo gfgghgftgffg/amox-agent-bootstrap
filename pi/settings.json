@@ -7,6 +7,10 @@
     "npm:@gfgghgftgffg/pi-subagents-lean",
     "npm:@monotykamary/pi-retry",
     "npm:pi-sync-suite",
+    {
+      "source": "npm:pi-autoresearch",
+      "skills": []
+    },
     "npm:pi-tidy",
     "npm:pi-starline"
   ],

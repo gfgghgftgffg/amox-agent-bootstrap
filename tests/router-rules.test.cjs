@@ -12,7 +12,7 @@ test('both hosts install anti-defensive-writing as explicit-only without duplica
     assert.ok(text.includes('https://github.com/Kiterlin/anti-defensive-writing'), name);
     assert.match(text, /Set `disable-model-invocation: true` in `anti-defensive-writing`/);
     assert.match(text, /only the root `SKILL.md` and license/);
-    assert.match(text, /Leave `disable-model-invocation` absent or `false` in `design-taste-frontend`, `humanizer` and `shuorenhua`/i);
+    assert.match(text, /Leave `disable-model-invocation` absent or `false` in `design-taste-frontend` and `humanizer`/i);
     assert.match(text, /Do not install `humanizer-zh` as an additional default/);
   }
 });
