@@ -20,16 +20,21 @@ Install complete Skills with their scripts, references and assets into the effec
 | shuorenhua | https://github.com/MrGeDiao/shuorenhua | Include the complete Skill and references |
 | create-readme | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only `skills/create-readme/`, not the whole collection; leave `disable-model-invocation` absent or `false` |
 | humanizer | https://github.com/blader/humanizer | Include the complete Skill |
+| anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license; set `disable-model-invocation: true` |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/`, named `design-taste-frontend` |
 | grilling | https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md | Install the actual Skill at `skills/productivity/grilling/` |
 
-Set `disable-model-invocation: true` in `grilling` and `meeting-summary-html`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling` and `meeting-summary-html`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
+
+Leave `disable-model-invocation` absent or `false` in `design-taste-frontend`, `humanizer` and `shuorenhua`. Do not install `humanizer-zh` as an additional default.
 
 For README work, use `create-readme` for structure, then `humanizer` or `shuorenhua` for prose. Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
 
 ### Task Router
 
-Read the current upstream installation instructions. From its stable checkout, run:
+Read the current upstream installation instructions. All Router parents and roles read the live `<router-checkout>/AGENTS.md`. On first setup, initialize it from the rendered common rules in [templates/AGENTS.md](templates/AGENTS.md), excluding Router activation text and managed Router blocks. Render local Conda/Python paths. If the shared file is already customized or used by Pi, preserve it and merge only requested common-rule changes; do not reset it or mirror later global edits automatically. Keep the checkout stable; moving it requires reinstalling the generated absolute references.
+
+From its stable checkout, run:
 
 ```sh
 npm ci
@@ -77,7 +82,7 @@ On **Windows only**, also set `daemon_auto_start = false` under `[features]`. Ke
 ## 5. Verification
 
 - Verify the `codex` interpreter and `pypdf` import.
-- All seven project / Skill entries and required resources must be present, with the two explicit-only flags set.
+- All eight project / Skill entries and required resources must be present, with the three explicit-only flags set. Verify the shared Router `AGENTS.md` and generated references.
 - Run Router's static checks and meeting preparation on a temporary local text fixture.
 - Parse `config.toml`; check template values, rendered paths and one Router block.
 - Report installed/reused/pending/failed components, effective paths and required restart/profile activation. Do not run paid model tests or media uploads.

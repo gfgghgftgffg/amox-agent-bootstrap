@@ -34,11 +34,11 @@
 | --- | --- |
 | 工具 | 通过 `defaultTools: ["+codemode"]` 启用内置 codemode，保留常用工具 |
 | Skills | `create-readme` 允许自动调用；`humanizer` 和 `shuorenhua` 用于文字编辑 |
-| 仅显式调用的 Skills | `grilling`、`meeting-summary-html` 和 `ian-xiaohei-illustrations` |
+| 仅显式调用的 Skills | `anti-defensive-writing`、`grilling`、`meeting-summary-html` 和 `ian-xiaohei-illustrations` |
 | 界面 | pi-tidy 负责工具折叠和 diff；pi-starline 最后加载，提供输入框、用户消息边框和可点击的胶囊底栏 |
 | 外观 | Catppuccin Mocha、Maple Mono NF CN、终端背景 95% 不透明度 |
 | 搜索 | 优先使用 Sub2API 转发的 Codex/OpenAI 搜索，遇到指定的可恢复故障时回退 Exa |
-| Task Router | 通过 `/skill:task-routing` 显式启用 |
+| Task Router | 通过 `/skill:task-routing` 显式启用；共享规则保存在 Router 仓库，子 Agent 可用 Skills 和受限 codemode，不在 Pi 全局指令中添加 Router 区块 |
 | Pi Sync | 仅手动同步会话和任务，目标为用户自己的私有仓库 |
 
 包顺序、界面替换和 Skills 安装见 [Pi 部署说明](setup_for_pi.md)；凭据路径与搜索路由见 [Pi 配置模板](pi/README.md)。Bootstrap 将 **Pi 和当前终端都设为 Catppuccin Mocha**。字体安装和不透明度由使用者设置，具体见[外观指南](pi/appearance.zh-CN.md)。

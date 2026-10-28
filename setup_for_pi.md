@@ -38,13 +38,16 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | `design-taste-frontend` | [taste-skill](https://github.com/Leonxlnx/taste-skill), only `skills/taste-skill/` |
 | `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), only `skills/create-readme/`, not the whole collection |
 | `humanizer` | [blader/humanizer](https://github.com/blader/humanizer) |
+| `anti-defensive-writing` | [Kiterlin/anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing), install only the root `SKILL.md` and license, not both duplicate Skill trees |
 | `meeting-summary-html` | [meeting-summary-html](https://github.com/gfgghgftgffg/meeting-summary-html), including preparation scripts |
 | `shuorenhua` | [MrGeDiao/shuorenhua](https://github.com/MrGeDiao/shuorenhua) |
 | `task-routing` | Generate through the installer in section 5 |
 | `grilling` | [source](https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md), actual Skill at `skills/productivity/grilling/` |
 | `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
 
-Set `disable-model-invocation: true` in `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies. Keep them available for explicit invocation; do not add automatic interview instructions.
+
+Leave `disable-model-invocation` absent or `false` in `design-taste-frontend`, `humanizer` and `shuorenhua` so they remain discoverable for applicable tasks. Do not install `humanizer-zh` as an additional default.
 
 For `create-readme`, preserve its short description and leave `disable-model-invocation` absent or `false`. Pi loads its full instructions on demand. Use it for README structure, then `humanizer` or `shuorenhua` for prose. Keep current introduction, usage and required deployment/maintenance instructions; link detailed configuration rather than duplicating it. Keep history and troubleshooting narratives out of README.
 
@@ -90,6 +93,8 @@ Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% o
 
 Read the current [Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter guide](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Keep a stable checkout and working copy of [routing.toml](pi/routing.toml), preserving its model choices.
 
+Use `<router-checkout>/AGENTS.md` as the single shared rule file read by all Router parents and roles. On first setup, initialize it from the rendered [Pi global instruction template](pi/AGENTS.md) with verified local Conda/Python paths. On existing setups, preserve independently edited shared rules and merge only requested changes; do not reset the file on reruns. It is a separate editable copy, not a continuing mirror of global instructions. Generated roles reference its absolute path, so moving the checkout requires reinstalling Router. Do not replace it with another machine's unrendered paths.
+
 From the Router checkout, use the actual absolute configuration path:
 
 ```text
@@ -99,19 +104,20 @@ node cli.mjs install --host pi --config <absolute-routing-config>
 node cli.mjs install --host pi --config <absolute-routing-config> --apply
 ```
 
-Respect `PI_CODING_AGENT_DIR` or pass a matching `--pi-home`. Let the installer generate `agents/tr_*.md`, `skills/task-routing/` and one managed AGENTS block. Preserve its backups and conflict protections.
+Respect `PI_CODING_AGENT_DIR` or pass a matching `--pi-home`. Let the installer generate `agents/tr_*.md` and `skills/task-routing/`. Preserve its backups and conflict protections. Pi Router installation does not modify global `AGENTS.md` or add a managed Router block.
 
-Use the lean executor and `ext:pi-web-access-lean/web_access` search selector. Verify roles/model settings without dispatch. Routing activates only through `/skill:task-routing` or an explicit instruction, not merely by installation.
+Use the lean executor and `ext:pi-web-access-lean/web_access` search selector. All generated Pi roles must have `skills: true`, `allowed_subagents: none`, `prompt_mode: replace` and `inherit_context: false`, plus `ext:builtin:codemode/codemode` in their tool selectors. Skills load on demand; codemode can call only the role's existing permitted tools. Keep mutation limits, denied delegation tools and permission hooks unchanged. Verify the shared-file instruction, role/model settings and tool scope without dispatch. Routing activates only through `/skill:task-routing` or an explicit instruction, not merely by installation.
 
 ## 6. Global instructions
 
-Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and `{{PYTHON_PATH}}`. On existing installations, update the corresponding sections while preserving unrelated instructions and exactly one Router block. Respect `AGENTS.override.md`. Use the optional `127.0.0.1:7897` proxy only if it exists and networking needs it.
+Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and `{{PYTHON_PATH}}`. On existing installations, update the corresponding sections while preserving unrelated instructions. Do not add a Router block; remove an existing `pi-task-router:start/end` block when applying this setup, preserving all surrounding text. Respect `AGENTS.override.md`. Use the optional `127.0.0.1:7897` proxy only if it exists and networking needs it.
 
 ## 7. Verification
 
 - Verify Pi, Node, Git, Bash, the `codex` interpreter and `pypdf`.
 - Check the nine packages and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
-- Verify eight complete Skills, the three explicit-only flags and automatically available `create-readme`. Test meeting preparation on a temporary local text fixture.
+- Verify nine complete Skills, the four explicit-only flags and automatically available `create-readme`, `design-taste-frontend`, `humanizer` and `shuorenhua`. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
+- Verify Router's shared `AGENTS.md` has local paths and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
 - Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
 - Restart Pi; check tidy diffs, starline layout and native queue text. Keep Pi Sync manual and its status panel unchanged.
 - Verify Pi's `catppuccin-mocha` theme and the active terminal profile's Catppuccin Mocha scheme separately. Report both states; applying only the Pi theme does not complete theme setup.

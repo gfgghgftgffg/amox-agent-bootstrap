@@ -40,16 +40,16 @@ test('both setup guides install create-readme without making it explicit-only', 
   }
   const piGuide = read('setup_for_pi.md');
   const skills = piGuide.split('## 3. Skills')[1].split('## 4. Configuration')[0];
-  assert.equal((skills.match(/^\| `/gm) || []).length, 8);
-  assert.match(piGuide, /Verify eight complete Skills/);
-  assert.match(read('setup.md'), /All seven project \/ Skill entries/);
+  assert.equal((skills.match(/^\| `/gm) || []).length, 9);
+  assert.match(piGuide, /Verify nine complete Skills/);
+  assert.match(read('setup.md'), /All eight project \/ Skill entries/);
 });
 
 test('instruction templates end Requirement Alignment with the document rule', () => {
   const rule = 'Unless user request, document should not include historical background, troubleshooting processes, or redundant explanations.';
   for (const file of ['templates/AGENTS.md', 'pi/AGENTS.md']) {
     const text = read(file);
-    const section = text.split('# Requirement Alignment\n')[1].split('\n# Workflow')[0].trim();
+    const section = text.split('# Requirement Alignment\n')[1].split('\n# ')[0].trim();
     assert.equal(section.split('\n').at(-1), '- ' + rule, file);
     assert.equal(text.split(rule).length - 1, 1, file);
   }
