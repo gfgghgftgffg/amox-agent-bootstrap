@@ -45,10 +45,12 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | `autoresearch-create` | Render an explicit-only wrapper; see below |
 | `autoresearch-finalize` | Render an explicit-only wrapper; see below |
 | `autoresearch-hooks` | Render an explicit-only wrapper; see below |
-| `grilling` | [source](https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md), actual Skill at `skills/productivity/grilling/` |
+| `amox-grill-me` | Install the complete [skills/amox-grill-me/](skills/amox-grill-me/) directory from this repository, including `LICENSE` |
 | `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies.
+
+Install `amox-grill-me` instead of the official `grilling` or legacy `grill-me` Skill. On existing installations, back up and remove those replaced Skill copies from active discovery paths; preserve unrelated Skills. Do not install or update the official Skill alongside this replacement.
 
 Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
 

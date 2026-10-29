@@ -35,7 +35,7 @@ that still needs my input.
 | --- | --- |
 | Tools | Built-in codemode enabled with `defaultTools: ["+codemode"]`, alongside the usual tools |
 | Skills | `create-readme` available automatically; `humanizer` for prose editing |
-| Explicit-only Skills | `anti-defensive-writing`, `grilling`, `meeting-summary-html` and `ian-xiaohei-illustrations` |
+| Explicit-only Skills | `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html` and `ian-xiaohei-illustrations` |
 | Interface | pi-tidy for tool folding/diffs; pi-starline loads last for the editor, user-message frames and clickable pill footer |
 | Appearance | Catppuccin Mocha, Maple Mono NF CN and 95% terminal opacity |
 | Search | Sub2API-hosted Codex/OpenAI search first, Exa fallback for configured recoverable errors |

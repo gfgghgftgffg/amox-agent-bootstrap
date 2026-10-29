@@ -34,7 +34,7 @@
 | --- | --- |
 | 工具 | 通过 `defaultTools: ["+codemode"]` 启用内置 codemode，保留常用工具 |
 | Skills | `create-readme` 允许自动调用；`humanizer` 用于文字编辑 |
-| 仅显式调用的 Skills | `anti-defensive-writing`、`grilling`、`meeting-summary-html` 和 `ian-xiaohei-illustrations` |
+| 仅显式调用的 Skills | `anti-defensive-writing`、`amox-grill-me`、`meeting-summary-html` 和 `ian-xiaohei-illustrations` |
 | 界面 | pi-tidy 负责工具折叠和 diff；pi-starline 最后加载，提供输入框、用户消息边框和可点击的胶囊底栏 |
 | 外观 | Catppuccin Mocha、Maple Mono NF CN、终端背景 95% 不透明度 |
 | 搜索 | 优先使用 Sub2API 转发的 Codex/OpenAI 搜索，遇到指定的可恢复故障时回退 Exa |

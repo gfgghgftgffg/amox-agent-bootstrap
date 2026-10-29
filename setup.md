@@ -21,9 +21,11 @@ Install complete Skills with their scripts, references and assets into the effec
 | humanizer | https://github.com/blader/humanizer | Include the complete Skill |
 | anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/`, named `design-taste-frontend` |
-| grilling | https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md | Install the actual Skill at `skills/productivity/grilling/` |
+| amox-grill-me | [skills/amox-grill-me/](skills/amox-grill-me/) in this repository | Install the complete directory, including `LICENSE`, as `amox-grill-me` |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `grilling` and `meeting-summary-html`, including reused copies.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me` and `meeting-summary-html`, including reused copies.
+
+Install `amox-grill-me` instead of the official `grilling` or legacy `grill-me` Skill. On existing installations, back up and remove those replaced Skill copies from active discovery paths; preserve unrelated Skills. Do not install or update the official Skill alongside this replacement.
 
 Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
 
