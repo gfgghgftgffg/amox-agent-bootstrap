@@ -23,7 +23,6 @@
   "defaultTools": ["+codemode"],
   "tidy": {
     "frameMessages": true,
-    "frameUserMessages": false,
     "messageBorderColors": {
       "user": "syntaxKeyword"
     }

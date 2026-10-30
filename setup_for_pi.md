@@ -23,8 +23,8 @@ Install the following packages with `pi install npm:<name>`, without `--local` o
 | `npm:@monotykamary/pi-retry` | Retry and continuation |
 | `npm:pi-sync-suite` | Manual session/mission sync |
 | `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
-| `npm:pi-tidy` | Tool folding and diff presentation |
-| `npm:pi-starline` | Editor, user messages and pill footer |
+| `npm:pi-tidy` | User messages, tool folding and diff presentation |
+| `npm:pi-starline` | Editor and pill footer |
 
 This setup replaces `@heyhuynhgiabuu/pi-pretty`, `pi-open-tui` and `@narumitw/pi-statusline`. Back up settings, remove those confirmed old packages with `pi remove <actual-source>`, and preserve their preference files. Leave unrelated extensions unchanged.
 
@@ -93,9 +93,9 @@ Apply [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json) and [suba
 
 Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/themes/catppuccin-mocha.json) to the same relative paths under `<agent-dir>` before selecting the theme.
 
-- Tidy: message frames on, `frameUserMessages: false`; other features use upstream defaults.
+- Tidy: message frames on; user messages use the default rounded frame. Remove the obsolete `frameUserMessages` setting; other features use upstream defaults.
 - Theme: keep `toolSuccessBg: "base"` for red/green diff backgrounds.
-- Starline: Nerd Font icons, Mocha pastel pills, `editorPaddingY: 0`, `editorMetadataFormat: ""`.
+- Starline: Nerd Font icons, Mocha pastel pills, `editorPaddingY: 0`. Remove obsolete `editorMetadataFormat`, `colorSources.userMessages`, `colors.userMessageBorder` and `colors.userMessageText` settings. User-message frame borders use Tidy's `messageBorderColors.user`; body text follows the Pi theme.
 - Keep `colors.thinking` absent for automatic thinking-level colors; remove an existing fixed override.
 - Directory: `pathDisplay: { "mode": "full", "depth": 0 }`.
 - Queue pill off, leaving Pi's native pending-message text visible.

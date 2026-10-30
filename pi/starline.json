@@ -31,7 +31,6 @@
     "caps": "round",
     "bubbleAnimation": true
   },
-  "editorMetadataFormat": "",
   "editorPaddingY": 0,
   "pathDisplay": {
     "mode": "full",
@@ -42,8 +41,7 @@
   },
   "colorSources": {
     "starship": "theme",
-    "editor": "theme",
-    "userMessages": "theme"
+    "editor": "theme"
   },
   "colors": {
     "model": "bg:$pink fg:$base",
@@ -61,8 +59,6 @@
     "subagents": "bg:$green fg:$base",
     "extensionStatus": "bg:$teal fg:$base",
     "editorAccent": "$mauve",
-    "editorBorder": "#45475a",
-    "userMessageBorder": "#45475a",
-    "userMessageText": "#cdd6f4"
+    "editorBorder": "#45475a"
   }
 }

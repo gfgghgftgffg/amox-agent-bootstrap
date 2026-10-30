@@ -26,7 +26,8 @@ test('codemode is additive and does not hide direct tools', () => {
   assert.equal(settings.theme, 'catppuccin-mocha');
   assert.equal(settings.hideThinkingBlock, true);
   assert.equal(settings.tidy.frameMessages, true);
-  assert.equal(settings.tidy.frameUserMessages, false);
+  assert.equal(Object.hasOwn(settings.tidy, 'frameUserMessages'), false);
+  assert.equal(settings.tidy.messageBorderColors.user, 'syntaxKeyword');
   assert.equal(fs.existsSync(path.join(root, 'pi/open-tui.json')), false);
   assert.equal(fs.existsSync(path.join(root, 'pi/pi-pretty.json')), false);
 });
@@ -73,8 +74,8 @@ test('deployment guides retain the requested configuration', () => {
   ]) assert.ok(codex.includes(value), value);
   const pi = read('setup_for_pi.md');
   for (const value of [
-    'toolSuccessBg: "base"', 'frameUserMessages: false', 'editorPaddingY: 0',
-    'editorMetadataFormat: ""', 'syncLocalPackagePaths: false',
+    'toolSuccessBg: "base"', 'default rounded frame', 'editorPaddingY: 0',
+    'syncLocalPackagePaths: false',
     'node cli.mjs install --host pi --config <absolute-routing-config> --apply',
   ]) assert.ok(pi.includes(value), value);
 });
@@ -102,7 +103,10 @@ test('starline uses the current compact layout and automatic thinking colors', (
     'git', 'context', 'cost', 'sessionDuration', 'time', 'extensionStatus',
   ]);
   assert.equal(c.pill.segments.includes('queue'), false);
-  assert.equal(c.editorMetadataFormat, '');
+  assert.equal(Object.hasOwn(c, 'editorMetadataFormat'), false);
+  assert.equal(Object.hasOwn(c.colorSources, 'userMessages'), false);
+  assert.equal(Object.hasOwn(c.colors, 'userMessageBorder'), false);
+  assert.equal(Object.hasOwn(c.colors, 'userMessageText'), false);
   assert.equal(c.editorPaddingY, 0);
   assert.deepEqual(c.pathDisplay, { mode: 'full', depth: 0 });
   assert.equal(c.colors.thinking, undefined);
