@@ -22,6 +22,7 @@
   "theme": "catppuccin-mocha",
   "defaultTools": ["+codemode"],
   "tidy": {
+    "finalReplyStyle": "off",
     "frameMessages": true,
     "messageBorderColors": {
       "user": "syntaxKeyword"

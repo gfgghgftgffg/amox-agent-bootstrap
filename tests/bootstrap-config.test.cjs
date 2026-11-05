@@ -25,6 +25,7 @@ test('codemode is additive and does not hide direct tools', () => {
   ]);
   assert.equal(settings.theme, 'catppuccin-mocha');
   assert.equal(settings.hideThinkingBlock, true);
+  assert.equal(settings.tidy.finalReplyStyle, 'off');
   assert.equal(settings.tidy.frameMessages, true);
   assert.equal(Object.hasOwn(settings.tidy, 'frameUserMessages'), false);
   assert.equal(settings.tidy.messageBorderColors.user, 'syntaxKeyword');
