@@ -11,7 +11,7 @@ Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md).
 
 ## 2. Packages
 
-Install the following packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json), placing starline last after preserved unrelated packages.
+Install the following packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json) and preserve unrelated packages.
 
 | Package | Purpose |
 | --- | --- |
@@ -21,14 +21,14 @@ Install the following packages with `pi install npm:<name>`, without `--local` o
 | `npm:@gfgghgftgffg/rpiv-todo-lean` | `todo` |
 | `npm:@gfgghgftgffg/pi-subagents-lean` | `subagent` and native workflows |
 | `npm:@monotykamary/pi-retry` | Retry and continuation |
-| `npm:pi-sync-suite` | Manual session/mission sync |
-| `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
 | `npm:pi-tidy` | User messages, tool folding and diff presentation |
 | `npm:pi-starline` | Editor and pill footer |
+| `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
+| `npm:@gfgghgftgffg/amox-pi-sync` | Raw agent-data sync with manual sessions/missions scope |
 
 This setup replaces `@heyhuynhgiabuu/pi-pretty`, `pi-open-tui` and `@narumitw/pi-statusline`. Back up settings, remove those confirmed old packages with `pi remove <actual-source>`, and preserve their preference files. Leave unrelated extensions unchanged.
 
-Read the [amox package instructions](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). For existing `@ssk_dev` or local facades, obtain approval before source migration and remove only the replaced registrations. Keep one tool per name; do not separately load upstream engines. Normal npm installation needs no amox checkout. Update packages later with `pi update --extensions`.
+Read the [amox package instructions](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). For existing `@ssk_dev` or local facades, obtain approval before source migration and remove only the replaced registrations. Keep one tool per name; do not separately load upstream engines. For sync, replace confirmed `pi-sync-suite` or local `amox-pi-sync` registrations with `npm:@gfgghgftgffg/amox-pi-sync`; keep the old files and backups, and never load both sync extensions. Normal npm installation needs no amox checkout. Update packages later with `pi update --extensions`.
 
 ## 3. Skills
 
@@ -86,8 +86,8 @@ Apply [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json) and [suba
 
 - Keep the specified provider, model and thinking preferences; report unavailable models without substitution.
 - Enable codemode with `defaultTools: ["+codemode"]`, retaining existing tools and the default `codemode.mode: "on"`.
-- Set `hideThinkingBlock: true` and `theme: "catppuccin-mocha"`.
-- Apply the full subagent template and report project-level overrides.
+- Set `hideThinkingBlock: false` and `theme: "catppuccin-mocha"`.
+- Apply the lean subagent template (`fallbackSubagent: "none"`, `strictAgentFiles: true`, `workflowsEnabled: true`); leave other options at package defaults and report project-level overrides.
 
 ### Interface
 
@@ -99,6 +99,7 @@ Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/t
 - Keep `colors.thinking` absent for automatic thinking-level colors; remove an existing fixed override.
 - Directory: `pathDisplay: { "mode": "full", "depth": 0 }`.
 - Queue pill off, leaving Pi's native pending-message text visible.
+- Keep the `pi-sync` status on the right with `/sync-settings` as the legacy command fallback; amox-pi-sync's pill bridge opens its status bubble directly.
 
 Apply **Catppuccin Mocha to both Pi and the current terminal** using the [appearance guide](pi/appearance.md) ([中文](pi/appearance.zh-CN.md)). Deploy the Pi theme, detect the actual terminal, back up its configuration, and import/select the official Mocha scheme for the active profile. Preserve unrelated settings. Registering a scheme without selecting it is not complete. If the terminal cannot be configured from this host, report terminal theme as pending, not complete.
 
@@ -108,7 +109,7 @@ Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% o
 
 - Deploy [sub2api.json](pi/sub2api.json), preserving existing credentials. If absent, leave `YOUR_API_KEY` and tell the user the local file and `sub2api.token` field to edit privately.
 - Deploy [web-search.json](pi/web-search.json) and its credential helper using the [search routing instructions](pi/README.md#search-routing): Sub2API/OpenAI first, Exa fallback. Render the helper path and relay endpoint; preserve unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
-- Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Keep manual mode, sessions/missions-only scope and `syncLocalPackagePaths: false`. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
+- Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Deploy `amox-pi-sync.json` with `mode: "manual"` and `paths: ["sessions", "missions"]`; do not carry over the old suite's chat, environment or package-sync settings. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
 - Keep retry defaults and inspect `/retry status`.
 
 ## 5. Task Router

@@ -31,6 +31,10 @@
     "caps": "round",
     "bubbleAnimation": true
   },
+  "extensionStatuses": {
+    "placements": { "pi-sync": "right" },
+    "commands": { "pi-sync": "/sync-settings" }
+  },
   "editorPaddingY": 0,
   "pathDisplay": {
     "mode": "full",

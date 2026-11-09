@@ -16,7 +16,7 @@ Deploy through [setup_for_pi.md](../setup_for_pi.md). `<agent-dir>` is `PI_CODIN
 | [pi-btw.json](pi-btw.json) | `<agent-dir>/pi-btw.json` |
 | [autoresearch-skill.md](autoresearch-skill.md) | Render three `<agent-dir>/skills/autoresearch-*/SKILL.md` wrappers; see [setup](../setup_for_pi.md#autoresearch-skills) |
 | [subagents.json](subagents.json) | `<agent-dir>/subagents.json` |
-| [pi-sync-suite.json](pi-sync-suite.json) | `<agent-dir>/pi-sync-suite.json`; supply a private SSH remote and absolute checkout path |
+| [amox-pi-sync.json](amox-pi-sync.json) | `<agent-dir>/amox-pi-sync.json`; supply a private SSH remote and absolute checkout path |
 | [routing.toml](routing.toml) | Stable configuration path for the Router installer |
 
 ## Interface

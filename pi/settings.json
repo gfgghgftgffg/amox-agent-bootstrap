@@ -6,13 +6,13 @@
     "npm:@gfgghgftgffg/rpiv-todo-lean",
     "npm:@gfgghgftgffg/pi-subagents-lean",
     "npm:@monotykamary/pi-retry",
-    "npm:pi-sync-suite",
+    "npm:pi-tidy",
+    "npm:pi-starline",
     {
       "source": "npm:pi-autoresearch",
       "skills": []
     },
-    "npm:pi-tidy",
-    "npm:pi-starline"
+    "npm:@gfgghgftgffg/amox-pi-sync"
   ],
   "defaultProvider": "sub2api",
   "defaultModel": "gpt-6.1-sol",
@@ -28,5 +28,5 @@
       "user": "syntaxKeyword"
     }
   },
-  "hideThinkingBlock": true
+  "hideThinkingBlock": false
 }

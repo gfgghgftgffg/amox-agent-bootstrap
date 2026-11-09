@@ -18,19 +18,42 @@ test('codemode is additive and does not hide direct tools', () => {
     'npm:@gfgghgftgffg/rpiv-todo-lean',
     'npm:@gfgghgftgffg/pi-subagents-lean',
     'npm:@monotykamary/pi-retry',
-    'npm:pi-sync-suite',
-    { source: 'npm:pi-autoresearch', skills: [] },
     'npm:pi-tidy',
     'npm:pi-starline',
+    { source: 'npm:pi-autoresearch', skills: [] },
+    'npm:@gfgghgftgffg/amox-pi-sync',
   ]);
   assert.equal(settings.theme, 'catppuccin-mocha');
-  assert.equal(settings.hideThinkingBlock, true);
+  assert.equal(settings.hideThinkingBlock, false);
   assert.equal(settings.tidy.finalReplyStyle, 'off');
   assert.equal(settings.tidy.frameMessages, true);
   assert.equal(Object.hasOwn(settings.tidy, 'frameUserMessages'), false);
   assert.equal(settings.tidy.messageBorderColors.user, 'syntaxKeyword');
   assert.equal(fs.existsSync(path.join(root, 'pi/open-tui.json')), false);
   assert.equal(fs.existsSync(path.join(root, 'pi/pi-pretty.json')), false);
+});
+
+test('sync and subagents use the current lean configuration', () => {
+  assert.deepEqual(JSON.parse(read('pi/subagents.json')), {
+    fallbackSubagent: 'none', strictAgentFiles: true, workflowsEnabled: true,
+  });
+  const sync = JSON.parse(read('pi/amox-pi-sync.json'));
+  assert.deepEqual(sync, {
+    version: 1,
+    repoUrl: 'git@github.com:YOUR_GITHUB_USERNAME/YOUR_PRIVATE_SESSIONS_REPO.git',
+    repoDir: '{{SYNC_REPO_DIR}}',
+    mode: 'manual', paths: ['sessions', 'missions'],
+    pullIntervalMinutes: 1440, watchIntervalMs: 10000, pushDebounceMs: 2500,
+    retention: { keepBackups: 20, maxAgeDays: 180 },
+  });
+  assert.equal(fs.existsSync(path.join(root, 'pi/pi-sync-suite.json')), false);
+  for (const file of ['pi/pi-sync-setup.md', 'pi/pi-sync-setup.zh-CN.md']) {
+    const guide = read(file);
+    for (const value of ['npm:@gfgghgftgffg/amox-pi-sync', 'amox-pi-sync.json',
+      'amox-pi-sync-repo', 'amox-pi-sync-backups', '/sync-status']) {
+      assert.ok(guide.includes(value), file + ': ' + value);
+    }
+  }
 });
 
 test('both setup guides install create-readme without making it explicit-only', () => {
@@ -76,7 +99,7 @@ test('deployment guides retain the requested configuration', () => {
   const pi = read('setup_for_pi.md');
   for (const value of [
     'toolSuccessBg: "base"', 'default rounded frame', 'editorPaddingY: 0',
-    'syncLocalPackagePaths: false',
+    'mode: "manual"', 'paths: ["sessions", "missions"]',
     'node cli.mjs install --host pi --config <absolute-routing-config> --apply',
   ]) assert.ok(pi.includes(value), value);
 });
@@ -108,6 +131,10 @@ test('starline uses the current compact layout and automatic thinking colors', (
   assert.equal(Object.hasOwn(c.colorSources, 'userMessages'), false);
   assert.equal(Object.hasOwn(c.colors, 'userMessageBorder'), false);
   assert.equal(Object.hasOwn(c.colors, 'userMessageText'), false);
+  assert.deepEqual(c.extensionStatuses, {
+    placements: { 'pi-sync': 'right' },
+    commands: { 'pi-sync': '/sync-settings' },
+  });
   assert.equal(c.editorPaddingY, 0);
   assert.deepEqual(c.pathDisplay, { mode: 'full', depth: 0 });
   assert.equal(c.colors.thinking, undefined);
@@ -173,6 +200,6 @@ test('appearance requires both Pi and terminal themes while leaving fonts user-m
     assert.doesNotMatch(read(file), /Terminal appearance is manual|Font and terminal settings are manual|does not.*modify terminal profiles|must not.*edit terminal profiles|不修改终端配置|字体与终端设置由使用者自行完成/, file);
   }
   assert.match(guide, /Keep `colors.thinking` absent/);
-  assert.match(guide, /placing starline last/);
-  assert.doesNotMatch(guide, /open-tui last|hideThinkingBlock: false|pi-pretty\.json/);
+  assert.match(guide, /Keep the order in/);
+  assert.doesNotMatch(guide, /placing starline last|open-tui last|hideThinkingBlock: true|pi-pretty\.json/);
 });
