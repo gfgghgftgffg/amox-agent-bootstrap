@@ -13,7 +13,7 @@ Deploy [amox-pi-sync.json](amox-pi-sync.json) to `<agent-dir>/amox-pi-sync.json`
 | `repoUrl` | Your private repository's SSH URL; replace both `YOUR_*` placeholders |
 | `repoDir` | Replace `{{SYNC_REPO_DIR}}` with a dedicated absolute checkout path, normally `<agent-dir>/amox-pi-sync-repo` |
 | `mode` | `manual`; no startup network access |
-| `paths` | `["sessions", "missions"]`, relative to the agent directory |
+| `paths` | `["sessions"]`, relative to the agent directory |
 | `retention` | Keep the newest 20 backups for up to 180 days; cleanup requires manual preview/confirmation |
 
 Back up existing configuration. Preserve a valid amox remote, checkout and runtime fields; each computer uses the same remote but its own local path. Missing repository details leave sync pending.

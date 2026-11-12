@@ -4,8 +4,7 @@
   "repoDir": "{{SYNC_REPO_DIR}}",
   "mode": "manual",
   "paths": [
-    "sessions",
-    "missions"
+    "sessions"
   ],
   "pullIntervalMinutes": 1440,
   "watchIntervalMs": 10000,

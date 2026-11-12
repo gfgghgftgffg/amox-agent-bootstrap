@@ -13,7 +13,7 @@
 | `repoUrl` | 私有仓库 SSH 地址，替换两个 `YOUR_*` 占位符 |
 | `repoDir` | 将 `{{SYNC_REPO_DIR}}` 替换为专用副本的绝对路径，通常为 `<agent-dir>/amox-pi-sync-repo` |
 | `mode` | `manual`，启动时不访问网络 |
-| `paths` | `["sessions", "missions"]`，相对于 agent 数据目录 |
+| `paths` | `["sessions"]`，相对于 agent 数据目录 |
 | `retention` | 保留最新 20 份、最长 180 天；清理需手动预览并确认 |
 
 先备份已有配置，保留有效的 amox 远端、本地副本和运行时字段。各电脑使用相同远端、各自的本地路径。仓库信息缺失时标记为待配置。

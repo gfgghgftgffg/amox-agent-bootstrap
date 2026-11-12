@@ -39,7 +39,8 @@
 | 外观 | Catppuccin Mocha、Maple Mono NF CN、终端背景 95% 不透明度 |
 | 搜索 | 优先使用 Sub2API 转发的 Codex/OpenAI 搜索，遇到指定的可恢复故障时回退 Exa |
 | Task Router | 通过 `/skill:task-routing` 显式启用；共享规则保存在 Router 仓库，子 Agent 可用 Skills 和受限 codemode，不在 Pi 全局指令中添加 Router 区块 |
-| Pi Sync | amox-pi-sync，仅手动同步原始会话和任务，目标为用户自己的私有 SSH 仓库 |
+| 目标 | pi-goal-x-lean，持久目标与 lean 子 Agent／workflow 联动，仅按要求启动 |
+| Pi Sync | amox-pi-sync，仅手动同步原始会话，目标为用户自己的私有 SSH 仓库 |
 | Autoresearch | pi-autoresearch，配套三个仅显式调用的 Skill 包装文件；按要求启动实验循环 |
 
 包顺序、界面替换和 Skills 安装见 [Pi 部署说明](setup_for_pi.md)；凭据路径与搜索路由见 [Pi 配置模板](pi/README.md)。Bootstrap 将 **Pi 和当前终端都设为 Catppuccin Mocha**。字体安装和不透明度由使用者设置，具体见[外观指南](pi/appearance.zh-CN.md)。

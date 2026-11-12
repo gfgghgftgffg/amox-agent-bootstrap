@@ -4,7 +4,7 @@ Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md).
 
 ## 1. Runtime and Python
 
-- Reuse compatible Pi, Node.js, Git and Bash. Install Pi using its [official instructions](https://github.com/earendil-works/pi) if absent. Current packages require Node >=22.19; tidy's bash/write previews require Pi >=1.3. Check current package requirements.
+- Reuse compatible Pi, Node.js, Git and Bash. Install Pi using its [official instructions](https://github.com/earendil-works/pi) if absent. Current packages require Node >=22.19 and Pi >=1.4.0 <2.0.0; tidy's bash/write previews require Pi >=1.3. Check current package requirements.
 - Reuse Conda, or install official Miniforge in a user-owned directory.
 - Reuse the `codex` environment, or create it with Python 3.12. Use its interpreter for all Python scripts and dependencies, not system Python, base or `pip --user`.
 - Install `pypdf` if absent and verify its import.
@@ -20,15 +20,18 @@ Install the following packages with `pi install npm:<name>`, without `--local` o
 | `npm:@gfgghgftgffg/pi-web-access-lean` | `web_access` |
 | `npm:@gfgghgftgffg/rpiv-todo-lean` | `todo` |
 | `npm:@gfgghgftgffg/pi-subagents-lean` | `subagent` and native workflows |
+| `npm:@gfgghgftgffg/pi-goal-x-lean` | Persistent goals with parent-session ownership and subagent/workflow waiting |
 | `npm:@monotykamary/pi-retry` | Retry and continuation |
 | `npm:pi-tidy` | User messages, tool folding and diff presentation |
 | `npm:pi-starline` | Editor and pill footer |
 | `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
-| `npm:@gfgghgftgffg/amox-pi-sync` | Raw agent-data sync with manual sessions/missions scope |
+| `npm:@gfgghgftgffg/amox-pi-sync` | Raw agent-data sync with manual sessions-only scope |
 
 This setup replaces `@heyhuynhgiabuu/pi-pretty`, `pi-open-tui` and `@narumitw/pi-statusline`. Back up settings, remove those confirmed old packages with `pi remove <actual-source>`, and preserve their preference files. Leave unrelated extensions unchanged.
 
 Read the [amox package instructions](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). For existing `@ssk_dev` or local facades, obtain approval before source migration and remove only the replaced registrations. Keep one tool per name; do not separately load upstream engines. For sync, replace confirmed `pi-sync-suite` or local `amox-pi-sync` registrations with `npm:@gfgghgftgffg/amox-pi-sync`; keep the old files and backups, and never load both sync extensions. Normal npm installation needs no amox checkout. Update packages later with `pi update --extensions`.
+
+Install `pi-goal-x-lean` after the current `pi-subagents-lean` and do not separately load upstream `pi-goal-x`. Keep one source per extension. Use `/goal <objective>` only when requested; bootstrap must not create goals or start autonomous runs. The parent owns goals; tracked subagent/workflow results must be delivered before automatic continuation or completion. Goal milestones and `todo` remain independent. No extra goal configuration file is required.
 
 ## 3. Skills
 
@@ -109,7 +112,7 @@ Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% o
 
 - Deploy [sub2api.json](pi/sub2api.json), preserving existing credentials. If absent, leave `YOUR_API_KEY` and tell the user the local file and `sub2api.token` field to edit privately.
 - Deploy [web-search.json](pi/web-search.json) and its credential helper using the [search routing instructions](pi/README.md#search-routing): Sub2API/OpenAI first, Exa fallback. Render the helper path and relay endpoint; preserve unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
-- Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Deploy `amox-pi-sync.json` with `mode: "manual"` and `paths: ["sessions", "missions"]`; do not carry over the old suite's chat, environment or package-sync settings. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
+- Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Deploy `amox-pi-sync.json` with `mode: "manual"` and `paths: ["sessions"]`; do not carry over the old suite's chat, environment or package-sync settings. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
 - Keep retry defaults and inspect `/retry status`.
 
 ## 5. Task Router

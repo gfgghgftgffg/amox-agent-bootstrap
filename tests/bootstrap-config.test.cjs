@@ -17,6 +17,7 @@ test('codemode is additive and does not hide direct tools', () => {
     'npm:@gfgghgftgffg/pi-web-access-lean',
     'npm:@gfgghgftgffg/rpiv-todo-lean',
     'npm:@gfgghgftgffg/pi-subagents-lean',
+    'npm:@gfgghgftgffg/pi-goal-x-lean',
     'npm:@monotykamary/pi-retry',
     'npm:pi-tidy',
     'npm:pi-starline',
@@ -42,7 +43,7 @@ test('sync and subagents use the current lean configuration', () => {
     version: 1,
     repoUrl: 'git@github.com:YOUR_GITHUB_USERNAME/YOUR_PRIVATE_SESSIONS_REPO.git',
     repoDir: '{{SYNC_REPO_DIR}}',
-    mode: 'manual', paths: ['sessions', 'missions'],
+    mode: 'manual', paths: ['sessions'],
     pullIntervalMinutes: 1440, watchIntervalMs: 10000, pushDebounceMs: 2500,
     retention: { keepBackups: 20, maxAgeDays: 180 },
   });
@@ -99,7 +100,7 @@ test('deployment guides retain the requested configuration', () => {
   const pi = read('setup_for_pi.md');
   for (const value of [
     'toolSuccessBg: "base"', 'default rounded frame', 'editorPaddingY: 0',
-    'mode: "manual"', 'paths: ["sessions", "missions"]',
+    'mode: "manual"', 'paths: ["sessions"]',
     'node cli.mjs install --host pi --config <absolute-routing-config> --apply',
   ]) assert.ok(pi.includes(value), value);
 });

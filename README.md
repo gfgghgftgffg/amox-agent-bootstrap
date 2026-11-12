@@ -40,7 +40,8 @@ that still needs my input.
 | Appearance | Catppuccin Mocha, Maple Mono NF CN and 95% terminal opacity |
 | Search | Sub2API-hosted Codex/OpenAI search first, Exa fallback for configured recoverable errors |
 | Task Router | Explicit `/skill:task-routing`; shared rules in the Router checkout, Skills and scoped codemode enabled for children; no global Pi Router block |
-| Pi Sync | amox-pi-sync; manual raw session/mission sync to your own private SSH repository |
+| Goals | pi-goal-x-lean; persistent goals coordinated with lean subagents and workflows, started only on request |
+| Pi Sync | amox-pi-sync; manual raw session sync to your own private SSH repository |
 | Autoresearch | pi-autoresearch with three explicit-only Skill wrappers; experiment loops start only on request |
 
 See [Pi setup](setup_for_pi.md) for package order, UI migration and Skill installation, and [Pi configuration](pi/README.md) for credential paths and search routing. Bootstrap applies **Catppuccin Mocha to both Pi and the active terminal profile**. Font installation and opacity remain user-managed; see the [appearance guide](pi/appearance.md).
