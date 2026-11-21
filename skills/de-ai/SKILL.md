@@ -4,7 +4,7 @@ description: "Rewrite a document so it reads less like machine translation or ge
 disable-model-invocation: true
 license: MIT
 metadata:
-  version: "4.1.0"
+  version: "1.0"
 ---
 
 # De-AI Pipeline
