@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.work/
+*.docx
+*.pdf
+!projects/*.json
+.DS_Store
