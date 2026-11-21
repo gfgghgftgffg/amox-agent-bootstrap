@@ -87,15 +87,84 @@ To change the order, override `chain_templates` — each hop is `[lang, [tier1..
 }
 ```
 
-## Terminology
+## Configuration
+
+Two things are configurable per project: the rule probabilities and the term table. Both are plain JSON, and neither needs editing the source.
+
+### Rule probabilities
+
+Copy `projects/rewrite.example.json`, edit, and pass it with `--config`:
+
+```bash
+python scripts/pipeline.py --input in.docx --out out.docx \
+  --config projects/my-project/rewrite.json
+```
+
+```json
+{
+  "seed": 42,
+  "en": {
+    "connector_swap": 1.0,
+    "gerund_tail": 0.85,
+    "modal_passive": 0.7,
+    "split_long": 0.8,
+    "starter_dedup": 0.9
+  },
+  "zh": {
+    "frame_delete": 0.9,
+    "connector_swap": 0.8,
+    "tail_swap": 0.8,
+    "verbify": 0.7,
+    "passive_rewrite": 0.7,
+    "highfreq_trim": 0.6,
+    "split_long": 0.8,
+    "redundant_trim": 0.9,
+    "starter_dedup": 0.9
+  },
+  "zh_highfreq_words": ["进一步", "显著", "充分", "全面", "极大", "深入", "有效", "关键", "核心"],
+  "forbidden": [],
+  "selection": { "min_sim": { "en": 0.99, "zh": 0.75 }, "min_divergence": 0.10 }
+}
+```
+
+Each value is the probability that one hit of that rule is applied, drawn per occurrence from a seeded generator. What the keys mean:
+
+| Key | Effect |
+|---|---|
+| `en.connector_swap` | swap filler connectives within their class instead of deleting them |
+| `en.gerund_tail` | rewrite `, ensuring` / `, allowing` riders into `to ensure` / `and allows` |
+| `en.modal_passive` | downgrade the nine fixed `will be V-ed` / `must be V-ed` patterns |
+| `en.split_long` | split long sentences at a real subject |
+| `en.starter_dedup` | break runs of identical `The` / `This` / `When` openings |
+| `zh.frame_delete` | delete stock frames (`随着…的发展`, `综上所述`) |
+| `zh.connector_swap` / `zh.tail_swap` | rotate connectives (`因此`, `从而`, `使得`) within their class |
+| `zh.verbify` | turn light verbs into real ones (`进行了分析` → `分析了`) |
+| `zh.passive_rewrite` | rewrite `被…所` / `得到了` / `受到了` |
+| `zh.highfreq_trim` | thin words in `zh_highfreq_words` past `max_per_word` occurrences |
+| `zh.split_long`, `zh.redundant_trim`, `zh.starter_dedup` | long-sentence split, filler removal, repeated openings |
+
+`0` disables a rule; below `0.3` it rarely fires. `seed` fixes the randomness so a run reproduces. `forbidden` lists words that invalidate any candidate containing them. `selection` sets the similarity floor and the minimum 3-gram divergence a candidate needs to count as a real rewrite.
+
+Term restoration and citation repair ignore these probabilities; they always run.
+
+### Term table
 
 Protection needs no configuration: camel-case names, all-caps acronyms, `ns:Action` identifiers, subscript keys, version numbers and repeated product names are extracted from the document, and any candidate that loses one is discarded.
 
-Replacement needs an explicit table, because it is a global regex and a wrong table damages the document:
+Replacement is opt-in, because it is a global regex and a wrong table damages the document. A table is a list of `[regex, replacement]` pairs:
+
+```json
+[
+  ["\\bkms:\\s*Decrypt\\b", "kms:Decrypt"],
+  ["\\breplay memory\\b", "replay cache"]
+]
+```
 
 ```bash
 python scripts/pipeline.py --input in.docx --out out.docx --terms projects/terms.example.json
 ```
+
+Templates: `projects/terms.example.json` and a validated Kerberos / AWS table at `projects/terms.kerberos-aws.json`. With no `--terms`, nothing is replaced and the run says so.
 
 ## Artifacts
 
