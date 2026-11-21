@@ -1,40 +1,32 @@
 ---
 name: de-ai
-description: "Rewrite a document so it reads less like machine translation or generated text. Handles .docx, .md and .txt; Chinese or English sources, English or Chinese output. Use when asked to lower AI-detection scores, remove machine-translation tone, or rewrite a document that reads as if it were generated. Rewriting is done by cross-family machine translation plus deterministic regex, never by an LLM writing prose."
+description: "Rewrite a document so it reads less like machine translation or generated text. Handles .docx, .md and .txt, Chinese or English, output in either language. Use when asked to lower AI-detection scores, remove machine-translation tone, or rewrite text that reads as generated. Rewriting runs through machine translation and regex rules; no model writes the prose."
 disable-model-invocation: true
 license: MIT
 metadata:
-  version: "4.0.0"
+  version: "4.1.0"
 ---
 
 # De-AI Pipeline
 
-## What you must not do
+Rewrites a document by pushing it through machine translation across language families, which breaks the original word order, then through regex rules that shave the leftovers: trailing `, ensuring` clauses, modal passives, stock connectives, uniform sentence length. Every change comes from these scripts. Text you write yourself carries a language-model sampling fingerprint, which is the thing this pipeline exists to remove, so the division of labour is: the scripts produce the prose, you run them, read the artifacts and report.
 
-**Never rewrite, polish or paraphrase the prose yourself.** Not one word.
+## Environment
 
-Every change must come from the scripts in this skill: translation chains reorder the text, regex rules shave sentence tails and lengths. Text you generate yourself carries a language-model sampling fingerprint, which is exactly what this pipeline exists to avoid.
-
-You do four things only: run the script, read the artifacts, decide the next step from the status table, report to the user.
-
-## Your steps
-
-### 0. Environment
-
-Use the current environment's `python`. Dependencies are in `scripts/requirements.txt`; install what is missing instead of substituting an implementation.
+Use the current environment's `python`. Dependencies are in `scripts/requirements.txt`; install what is missing rather than substituting an implementation.
 
 ```bash
 PY=python
 S="<skill-dir>/scripts/pipeline.py"
 ```
 
+## Steps
+
 ### 1. Confirm the input
 
-Accepts `.docx`, `.md`, `.markdown`, `.txt`. If the user pasted text into the chat, write it to `.md` or `.txt` first.
+Accepts `.docx`, `.md`, `.markdown`, `.txt`. If the user pasted text into the chat, write it to `.md` or `.txt` first. Legacy `.doc` needs a re-save as `.docx`.
 
-Legacy `.doc` is not supported; ask for a `.docx` re-save.
-
-Ask exactly one question: **Chinese output or English output**. A Chinese source defaults to Chinese output, an English source to English.
+Ask one question: Chinese output or English output. A Chinese source defaults to Chinese, an English source to English.
 
 ### 2. Dry run
 
@@ -42,13 +34,7 @@ Ask exactly one question: **Chinese output or English output**. A Chinese source
 "$PY" "$S" --input "<input>" --out "<output>" --src-lang auto --dst-lang same --dry-run
 ```
 
-This probes engine availability, then writes `<output>.work/plan.json`. Check three things:
-
-- the number of target blocks is plausible
-- the skip list does not contain body prose
-- the language guess is right (`auto` uses a CJK ratio; force `--src-lang` for mixed documents)
-
-Do not continue if fewer than two chains survive; see the engine section.
+This probes engine availability and writes `<output>.work/plan.json`. Check the target count, look for body prose in the skip list, and confirm the language guess; `auto` decides from a CJK ratio, so force `--src-lang` on mixed documents. If fewer than two chains survive the probe, fix that before continuing.
 
 ### 3. Real run
 
@@ -56,211 +42,143 @@ Do not continue if fewer than two chains survive; see the engine section.
 "$PY" "$S" --input "<input>" --out "<output>" --src-lang auto --dst-lang same --level standard
 ```
 
-`--level` is `light` (1 chain), `standard` (3 chains, default) or `deep` (4 chains). Start with `standard`; do not open with `deep`.
+`--level` sets the chain count: `light` 1, `standard` 3, `deep` 4. Start with `standard`.
 
 ### 4. Read the artifacts
 
-Read `<output>.work/report.md` first, then `<output>.work/result.json` for detail.
+`<output>.work/report.md` first, then `<output>.work/result.json` for detail.
 
-| Status | Meaning | What you do |
+| Status | Meaning | Action |
 |---|---|---|
-| `replaced` | Normal replacement | Nothing |
+| `replaced` | Normal replacement | None |
 | `replaced-low-sim` | Replaced, but far from the source; possible drift | Show `orig` and `final` side by side |
-| `replaced-min-change` | No chain actually moved this block | Rerun with `deep`; if it persists, say the block cannot be improved mechanically |
-| `replaced-worse(+Δ)` | Written back, but the ranking score went up because every candidate was worse | Give the user both versions and let them choose |
-| `all-candidates-failed-validation` | Every candidate lost numbers, citations or terms, or the translation was truncated | Inspect `candidates[].validation`: `length anomaly` means truncated by the endpoint, `term drift` means terminology drift, `numbers missing` means a dropped figure |
+| `replaced-min-change` | No chain moved this block | Rerun with `deep`; if it persists, say the block cannot be improved mechanically |
+| `replaced-worse(+Δ)` | Written back, but the ranking score rose because every candidate was worse | Give both versions and let the user choose |
+| `all-candidates-failed-validation` | Candidates lost numbers, citations or terms, or the translation was truncated | Read `candidates[].validation`: `length anomaly` means truncation, `term drift` means terminology moved, `numbers missing` means a figure was dropped |
 | `all-chains-failed` | Every chain errored | Read `detail`; usually network or rate limiting |
 
-### 5. At most one rerun
+### 5. One rerun at most
 
-Run the pipeline again at most once, only for `replaced-min-change`, `replaced-worse`, `all-candidates-failed-validation` and `all-chains-failed` blocks, with `--level deep` or a different `--seed`. Stop after the second round whatever the result.
+Rerun once, only for `replaced-min-change`, `replaced-worse`, `all-candidates-failed-validation` and `all-chains-failed` blocks, with `--level deep` or a new `--seed`. Stop after the second round whatever happens.
 
-`<output>.work/units/` caches translations. Rerunning with the same arguments only fills in failed or unfinished chains.
+`<output>.work/units/` caches translations, so a rerun with the same arguments only fills in failed or unfinished chains.
 
 ### 6. Report
 
-Four things, nothing more:
+Give four things: how many blocks were processed, replaced, skipped and failed; a per-block table with status, chain, before and after scores, and 3-gram overlap; the blocks that need a human and why; and the note that `new_score` ranks candidates within a block rather than measuring detection.
 
-1. Blocks processed, replaced, skipped, failed
-2. A per-block table: status, chain, before `base+penalty`, after `base+penalty`, 3-gram overlap
-3. Blocks that need a human and why
-4. One caveat: `new_score` is a candidate ranking score, not a detector probability
+That score is not a detector reading, and no pass over a document proves anything about how a detector will rate it. The only evidence is the report the user gets after submitting. Say that once, plainly, and do not repeat it through the conversation.
 
-## What you must not claim
-
-- Do not promise a detection score. This pipeline contains no detector.
-- Do not say a document "passed AI detection". The only evidence is the report the user gets after submitting.
-- Do not turn a drop in `new_score` into a percentage drop in AI score.
-
-## Parameters
+## Flags
 
 | Flag | Meaning |
 |---|---|
 | `--input` / `--docx` | Input file: `.docx`, `.md`, `.markdown`, `.txt` |
 | `--out` / `--out-docx` | Output file; the extension decides the format |
-| `--src-lang auto\|en\|zh` | Default `auto`, decides per block from a CJK ratio |
+| `--src-lang auto\|en\|zh` | Default `auto`, decided per block from a CJK ratio |
 | `--dst-lang same\|en\|zh` | `same` keeps the source language |
-| `--level light\|standard\|deep` | Run 1, 3 or 4 chains |
-| `--terms <json>` | Project term table, `[[regex, replacement], ...]` |
-| `--config <json>` | Probabilities, seed, chain templates; see `projects/rewrite.example.json` |
-| `--seed N` | Fix the randomness to reproduce a run |
+| `--level light\|standard\|deep` | 1, 3 or 4 chains |
+| `--terms <json>` | Term table, `[[regex, replacement], ...]` |
+| `--config <json>` | Probabilities, seed and chain templates; start from `projects/rewrite.example.json` |
+| `--seed N` | Fix the draw to reproduce a run |
 | `--skip-preflight` | Skip engine probing |
 | `--out-pdf <pdf>` | `.docx` input only; LibreOffice first, Word as a Windows fallback |
 
 ## Chains
 
-Four fixed chain shapes. **Each hop has two engine tiers**: tier1 is the set validated by the original experiment, tier2 is a general fallback pool.
+Four fixed shapes. Each hop offers a tier1 engine list, the set the original experiment validated, and a tier2 fallback list.
 
-| Chain | Hop 1 | Hop 2 | Hop 3 (final) |
+| Chain | Hop 1 | Hop 2 | Hop 3, final |
 |---|---|---|---|
-| 1 | DE · `iciba` | FR · `qqTranSmart` | source lang · `youdao` |
-| 2 | JA · `qqTranSmart` | DE · `iciba` | source lang · `youdao` |
-| 3 | RU · `iciba` | DE · `qqTranSmart` | source lang · `iciba` |
-| 4 | DE · `reverso` | bridge lang · `qqTranSmart` | source lang · `iciba` |
+| 1 | DE · `iciba` | FR · `qqTranSmart` | source language · `youdao` |
+| 2 | JA · `qqTranSmart` | DE · `iciba` | source language · `youdao` |
+| 3 | RU · `iciba` | DE · `qqTranSmart` | source language · `iciba` |
+| 4 | DE · `reverso` | bridge language · `qqTranSmart` | source language · `iciba` |
 
-The tier1 assignment follows the measured result: mid hops use `iciba`, `qqTranSmart` or `reverso` to break the source word order, and **the final hop uses only `youdao` or `iciba`** — `reverso` as the last hop leaves European academic phrasing, so it appears only in the tier2 final-hop pool.
+Mid hops use `iciba`, `qqTranSmart` or `reverso` to break the source word order. The final hop uses only `youdao` or `iciba`; reverso as a last hop leaves European academic phrasing, so it appears only in the tier2 final-hop pool.
 
-tier2 pool: `baidu`, `bing`, `google`, `youdao`, `iciba`, `reverso`, `tencent`, `sogou`, `alibaba`, `caiyun`, `yandex`, `deepl`, `papago`.
+The tier2 pool: `baidu`, `bing`, `google`, `youdao`, `iciba`, `reverso`, `tencent`, `sogou`, `alibaba`, `caiyun`, `yandex`, `deepl`, `papago`.
 
-Each hop prints the tier it landed on:
+Each hop prints the engine and tier it landed on:
 
 ```
 chain2 zh->ja      uses qqTranSmart  [tier1]
 chain3 de->en      uses baidu        [tier2]  <- downgraded
 ```
 
-**Any `[tier2]` means the validated engine was unreachable and quality may drop.** Say so when reporting.
+A `[tier2]` means the validated engine was unreachable and the output may be worse. Mention that when reporting.
 
-The bridge language is the first language that is neither source nor target: EN→EN bridges through Chinese, ZH→ZH through English, ZH→EN through Japanese.
+The bridge language is the first one that is neither source nor target: English to English bridges through Chinese, Chinese to Chinese through English, Chinese to English through Japanese.
 
-To change priorities, set `chain_templates` — each hop is `[lang, [tier1...], [tier2...]]`; the two-element form treats every engine as tier1:
+Override `chain_templates` to reorder or substitute engines. Each hop is `[language, [tier1...], [tier2...]]`; the two-element form treats every engine as tier1, and `null` means the document's own target language.
 
-```json
-{
-  "chain_templates": [
-    [["de", ["iciba"], ["baidu", "bing"]],
-     ["fr", ["qqTranSmart"], ["baidu"]],
-     [null, ["youdao"], ["iciba", "reverso"]]]
-  ]
-}
-```
-
-## Supported formats
+## Formats
 
 | Format | Read | Write | Skipped |
 |---|---|---|---|
-| `.docx` | python-docx | paragraph styles preserved, runs merged | heading styles, captions, references, monospace paragraphs, short labels |
-| `.md` / `.markdown` | plain text, blank-line blocks | written back as-is | headings, code fences, tables, block quotes, link definitions, indented code |
-| `.txt` | plain text, blank-line blocks | written back as-is | only very short blocks |
+| `.docx` | python-docx | paragraph styles kept, runs merged | heading styles, captions, references, monospace paragraphs, short labels |
+| `.md` `.markdown` | plain text, blocks split on blank lines | written back as-is | headings, code fences, tables, block quotes, link definitions, indented code |
+| `.txt` | plain text, blocks split on blank lines | written back as-is | very short blocks |
 
-Markdown fences are tracked per line, so anything inside a fence — tables included — is left alone. The output extension may differ from the input.
+Markdown fences are tracked per line, so anything inside one, tables included, is untouched. The output extension may differ from the input.
 
-## Probability config
+## Tuning
 
-Every rule fires per hit according to `config_default.json`; a fixed seed makes runs reproducible. Override per project in `projects/<project>/rewrite.json`:
+Every rule fires per hit at a probability set in `config_default.json`; a per-project file passed through `--config` overrides it. `0` disables a rule, and below `0.3` it rarely fires. `seed` fixes the draw so a run reproduces. `forbidden` lists words that invalidate any candidate containing them. `selection.min_divergence` sets how far a candidate must move, as 3-gram overlap with the source, to count as a real rewrite.
 
-```json
-{
-  "seed": 42,
-  "en": { "connector_swap": 1.0, "gerund_tail": 0.85, "modal_passive": 0.7, "split_long": 0.8, "starter_dedup": 0.9 },
-  "zh": { "frame_delete": 0.9, "connector_swap": 0.8, "tail_swap": 0.8, "verbify": 0.7,
-          "passive_rewrite": 0.7, "highfreq_trim": 0.6, "split_long": 0.8,
-          "redundant_trim": 0.9, "starter_dedup": 0.9 },
-  "zh_highfreq_words": ["进一步", "显著", "充分", "全面", "极大", "深入", "有效", "关键", "核心"],
-  "forbidden": ["回放缓存"],
-  "selection": { "min_sim": { "en": 0.99, "zh": 0.75 }, "min_divergence": 0.10 }
-}
-```
+Term restoration and citation repair ignore these probabilities and always run in full.
 
-- `0` disables a rule; below `0.3` it rarely fires.
-- Term restoration and citation repair are never randomised; they always run in full.
-- Ordinals stay in one series: `First/Second/Last`, `Firstly/Secondly/Finally` or `To begin with/Next/Finally` — never `First` followed by `Secondly`. The Chinese equivalents behave the same way.
-- Filler connectives are not deleted; one is swapped for another from the same class, at most `max_per_word` times per word.
-- A word in `forbidden` invalidates any candidate containing it; use it to block known mistranslations.
-- `min_divergence` is the floor for "this candidate actually changed something" (3-gram overlap with the source). Candidates below it rank last; if all of them are, the status becomes `replaced-min-change`.
+Why the thresholds sit where they do is in `references/chains.md`.
 
-## Terminology
+The rule groups, in the order they execute: English runs punctuation, terms, connective swaps, `is responsible for`, `, -ing` tails, modal passives, long-sentence splits, repeated openings, then citation repair. Chinese runs punctuation, terms, stock-frame deletion, ordinal series, connective swaps, trailing connectives, light verbs, passives, high-frequency trimming, long-sentence splits, repeated openings, redundant words, then citation repair.
 
-Two layers, neither requiring a filled-in table.
+## Terms
 
-**Automatic protection (always on).** Camel-case names (`GetObject`), all-caps acronyms (`TLS`, `KMS`), `ns:Action` (`kms:Decrypt`), subscript keys (`K_c,tgs`), version numbers (`1.3`) and multi-word product names repeated at least twice (`AWS Transfer Family`) are extracted from the whole document. A candidate that loses any of them is discarded. The check runs only when source and target language match, since identifiers are legitimately translated across languages.
+Identifiers are protected without configuration. The script extracts camel-case names, all-caps acronyms, `ns:Action` identifiers, subscript keys, version numbers and repeated product names, and discards any candidate that loses one. This check runs only when source and target language match, since identifiers are legitimately translated across languages.
 
-**Term replacement (opt-in).** Nothing is replaced by default, because replacement is a global regex and a wrong table damages the document:
+Replacement is opt-in, because it is a global regex and a wrong table damages the document:
 
 ```json
 [["\\bkms:\\s*Decrypt\\b", "kms:Decrypt"], ["\\breplay memory\\b", "replay cache"]]
 ```
 
-Templates: `projects/terms.example.json`, plus a validated Kerberos/AWS table at `projects/terms.kerberos-aws.json`.
+Templates live in `projects/terms.example.json`, with a validated Kerberos and AWS table at `projects/terms.kerberos-aws.json`. Without `--terms`, nothing is replaced and the run says so.
 
-## Validation (a candidate failing any check is discarded)
+## Checks
 
-The number set, the citation set and uppercase identifiers (`KMS`, `kms:Decrypt`, `K_C`) must survive; with an English target, every term-table replacement must keep its original count; nothing from `forbidden` may appear; length ratio must stay within 0.70–1.45 words for English and 0.75–1.40 characters for Chinese.
-
-The length ratio is the guard against silent truncation: free translation endpoints drop the tail of long paragraphs while numbers and citations survive, so length is the only signal left.
+A candidate is discarded before ranking if it loses a number, a citation or a protected identifier, breaks a term count, contains a forbidden word, or changes length outside a band: 0.70–1.45 words for English, 0.75–1.40 characters for Chinese, or 0.30–1.05 English words per Chinese character across languages. The length band exists because free endpoints sometimes drop the tail of a long paragraph while leaving numbers and citations intact.
 
 ## Artifacts
 
 ```
-<out>                rewritten document, metadata scrubbed
-<out>.work/units/    raw translation and error per block per chain
-<out>.work/result.json   every candidate, score, validation problem, final text
+<out>                    rewritten document, metadata scrubbed
+<out>.work/units/        raw translation and error per block per chain
+<out>.work/result.json   every candidate, its scores, validation problems, final text
 <out>.work/report.md     per-block table, unrewritten reasons, skip list
 ```
 
-## Stop conditions
+## Stopping
 
-### Code level (bounded, cannot hang)
+The block list is finite, each hop gets three attempts, the chain count is fixed by `--level`, and there are no `while` loops. PDF export times out at 600 seconds for LibreOffice and 300 for Word.
 
-| Condition | Behaviour |
-|---|---|
-| Block list exhausted | Normal exit, writes `result.json` and `report.md` |
-| 3 failed attempts per hop | Chain abandoned, error recorded, next chain continues |
-| Chain cap | 1 / 3 / 4 per `level`; the script never adds chains |
-| Engine probing | One request per (engine, source, target) combination |
-| PDF export | 600 s timeout for LibreOffice, 300 s for Word |
-| `while` loops in the code | None |
+Every block ends in one of six states. Four are written back (`replaced`, `replaced-low-sim`, `replaced-min-change`, `replaced-worse`); two keep the original text (`all-candidates-failed-validation`, `all-chains-failed`). All six appear in the report. Nothing is skipped silently.
 
-### Block level (every block has one terminal state)
+Exit codes: `0` all blocks replaced, `1` nothing to rewrite, `2` some blocks kept or PDF export failed, `3` no usable chain.
 
-Written back: `replaced`, `replaced-low-sim`, `replaced-min-change`, `replaced-worse`.
-Kept as-is: `all-candidates-failed-validation`, `all-chains-failed`.
+A human can sign off when the run exits `0`, no block failed, every `replaced-min-change` and `replaced-worse` block has been read, and the document has been read once end to end.
 
-Both outcomes appear in the report; nothing is skipped silently.
+## Limits worth knowing
 
-### Agent level (the important one)
+A `.docx` write merges runs inside a paragraph, so mid-paragraph bold, italics and superscript citation numbers are lost; check formatting after export. Markdown and plain text are unaffected.
 
-**At most two rounds.** First round `standard`; second round `deep` or a new `--seed`, restricted to the failing blocks. Stop and report after the second round regardless of outcome.
+Chinese character stacking, over-long attributives and parallelism density are measured but never rewritten, since a regex cannot find the correct boundary. The numbers sit in `features` in `result.json`.
 
-### Exit codes
+Free endpoints rate-limit. Run long documents in batches; rerunning with the same arguments resumes.
 
-| Code | Meaning |
-|---|---|
-| 0 | Every target block replaced |
-| 1 | No rewritable block (check `--min-words` or the input format) |
-| 2 | Some blocks kept their original text, or PDF export failed |
-| 3 | No usable chain; configure `chain_templates` |
+A full-document rewrite also touches blocks that were fine, and can leave them worse. The status column says which.
 
-### When a human can sign off
+English documents need `torch`, `transformers` and a cached `gpt2`, about 3GB. Behind the Great Firewall, prefetch once with `HF_ENDPOINT=https://hf-mirror.com`.
 
-1. Exit code 0.
-2. No `all-chains-failed`; no `all-candidates-failed-validation` unless accepted.
-3. Every `replaced-min-change` and `replaced-worse` block reviewed.
-4. The whole document read once — rewriting touches every block, including ones that were fine.
+`--out-pdf` shells out to LibreOffice, falling back to Word COM on Windows. Nothing else needs an external program.
 
-## Known limits
-
-- A `.docx` write merges runs inside a paragraph, so mid-paragraph bold, italics and superscript citation numbers are lost. Review formatting after export. `.md` and `.txt` are unaffected.
-- Chinese `的` stacking, over-long attributives and parallelism density are measured but never rewritten automatically; the numbers sit in `features` in `result.json`.
-- Free endpoints rate-limit. Run long documents in batches; rerunning with the same arguments resumes.
-- The English score is a heuristic with no calibrated weights; calibration would need paired human annotations.
-- A full-document rewrite also changes blocks that were fine before, and can make them worse. Read the result.
-- Legacy `.doc` is unsupported; re-save as `.docx`.
-
-## Portability
-
-`--out-pdf` shells out to LibreOffice (Windows, macOS, Linux), falling back to Word COM on Windows. Nothing else needs an external program.
-
-English documents need `torch` and `transformers` plus a cached `gpt2` (about 3GB). Behind the Great Firewall, pre-fetch once with `HF_ENDPOINT=https://hf-mirror.com`.
-
-Document text is sent to the third-party translation endpoints listed above. Do not run this on confidential material.
+Document text goes to the third-party endpoints listed above. Do not run this on confidential material.
