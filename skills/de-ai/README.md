@@ -1,79 +1,81 @@
 # de-ai
 
-改写 `.docx` / `.md` / `.txt` 原文，降低机翻腔与 AI 痕迹。中文稿可以出中文，也可以出英文。
+Rewrite a document so it reads less like machine translation or generated text. Works on `.docx`, `.md` and `.txt`; Chinese or English sources, English or Chinese output.
 
-改写方式：**跨语系机器翻译链打散词序 + 确定性正则削句尾句长**。正文不由大模型生成。
+The rewrite is **cross-family machine translation to break the word order, then deterministic regex to shave sentence tails and length**. No LLM writes the prose.
 
-## 做什么
+## How it works
 
 ```
-原文 --[iciba]--> 德语 --[qq]--> 法语 --[youdao]--> 原语种
-原文 --[qq]-->    日语 --[iciba]--> 德语 --[youdao]--> 原语种
-原文 --[iciba]--> 俄语 --[qq]--> 德语 --[iciba]-->  原语种
-原文 --[reverso]--> 德语 --[qq]--> 桥接语种 --[iciba]--> 原语种
+source --[iciba]-->   German  --[qq]--> French  --[youdao]--> source language
+source --[qq]-->      Japanese --[iciba]--> German --[youdao]--> source language
+source --[iciba]-->   Russian --[qq]--> German  --[iciba]-->  source language
+source --[reverso]--> German  --[qq]--> bridge  --[iciba]-->  source language
 ```
 
-同一段跑四条链，各产出一个候选，清洗后按分数选优。清洗是纯正则：
+Each block runs every chain, producing one candidate per chain. Candidates are cleaned, validated, then ranked. Cleaning is pure regex:
 
-- 英文：`, -ing` 尾巴清零、情态被动降级、套话连接词按同类池随机取用、长句按主语断开、连续同构句首替换
-- 中文：框架句删除（"随着…的发展"、"综上所述"）、虚化动词实义化（"进行了分析"→"分析了"）、被动改写、高频修饰词降频、伴随尾巴（"，从而"/"，使得"）随机取用、长句断开
+- English: drop `, -ing` riders, reduce modal passives, swap filler connectives within a class, split long sentences at a real subject, break runs of identical sentence openings
+- Chinese: delete stock frames (`随着…的发展`, `综上所述`), turn light verbs into real ones (`进行了分析` → `分析了`), rewrite passives, thin high-frequency modifiers, swap trailing connectives (`，从而`, `，使得`), split long sentences
 
-每条规则的触发概率都能在配置文件里调，种子固定可复现。
+Every rule has a probability you can tune; the seed makes runs reproducible.
 
-## 安装
+## Install
 
 ```bash
 pip install -r scripts/requirements.txt
 ```
 
-英文稿需要 `torch` + `transformers` 并下载 GPT-2（约 3GB）。国内网络先设镜像预拉一次：
+English documents additionally need `torch` and `transformers` plus a cached GPT-2 (about 3GB). Where the Hugging Face Hub is unreachable, pre-fetch once:
 
 ```bash
 HF_ENDPOINT=https://hf-mirror.com python -c "from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('gpt2')"
 ```
 
-拉完缓存在本地，之后离线可用。
+After that the model loads offline.
 
-## 用法
+## Usage
 
-作为 agent skill 使用：把本目录放进 `~/.pi/agent/skills/`（或 `~/.claude/skills/`），然后说「帮我把这份 docx 的 AI 味降一下」。
+As an agent skill: drop this directory into `~/.pi/agent/skills/` (or a compatible skills directory) together with the prompt template, then invoke it explicitly — it is excluded from automatic model selection on purpose.
 
-直接跑也行：
+Or run it directly:
 
 ```bash
-# 中文稿出中文
+# Chinese in, Chinese out
 python scripts/pipeline.py --input in.md --out out.md --src-lang zh --dst-lang zh
 
-# 英文稿出英文（Word 文档）
+# English in, English out (Word)
 python scripts/pipeline.py --input in.docx --out out.docx --src-lang en --dst-lang en
 
-# 中文稿出英文
+# Chinese in, English out
 python scripts/pipeline.py --input in.txt --out out.txt --src-lang zh --dst-lang en
 ```
 
-先空跑看计划：
+Dry run first to see the plan:
 
 ```bash
-python scripts/pipeline.py --input in.docx --out out.docx --src-lang zh --dst-lang zh --dry-run
+python scripts/pipeline.py --input in.docx --out out.docx --src-lang auto --dst-lang same --dry-run
 ```
 
-## 引擎可用性
+Supported extensions: `.docx`, `.md`, `.markdown`, `.txt`. Legacy `.doc` must be re-saved as `.docx`.
 
-翻译走 [`translators`](https://github.com/UlionTse/translators) 封装的免费接口。**每跳先用原方案的厂商（tier1），不可用才降到通用池（tier2）。**
+## Engine availability
 
-| 网络 | 通常可用 |
+Translation goes through the free endpoints wrapped by [`translators`](https://github.com/UlionTse/translators). **Each hop tries tier1 first — the set validated by the original experiment — and falls back to a general pool only when tier1 is unreachable.**
+
+| Network | Usually reachable |
 |---|---|
-| 中国大陆 | `iciba`、`qqTranSmart`、`youdao`、`baidu` |
-| 境外 | `reverso`、`bing`、`google`、`yandex` |
+| Mainland China | `iciba`, `qqTranSmart`, `youdao`, `baidu` |
+| Elsewhere | `reverso`, `bing`, `google`, `yandex` |
 
-运行时会逐跳打印实际选中的引擎和级别，出现 `[tier2]` 说明原方案厂商没连上：
+Every hop prints the engine and tier it landed on; `[tier2]` means the validated engine was unreachable:
 
 ```
-链2 zh->ja     用 qqTranSmart  [tier1]
-链3 de->en     用 baidu        [tier2]  ← 降级
+chain2 zh->ja      uses qqTranSmart  [tier1]
+chain3 de->en      uses baidu        [tier2]  <- downgraded
 ```
 
-要改优先级：
+To change the order, override `chain_templates` — each hop is `[lang, [tier1...], [tier2...]]`:
 
 ```json
 {
@@ -85,41 +87,39 @@ python scripts/pipeline.py --input in.docx --out out.docx --src-lang zh --dst-la
 }
 ```
 
-## 术语
+## Terminology
 
-自动保护不需要配置：运行时会从全文抽出驼峰名、全大写缩写、`ns:Action`、下标键、版本号、重复出现的产品名，候选里丢了就作废。
+Protection needs no configuration: camel-case names, all-caps acronyms, `ns:Action` identifiers, subscript keys, version numbers and repeated product names are extracted from the document, and any candidate that loses one is discarded.
 
-术语替换需要显式给词表（全局正则，词表不对会改坏正文）：
+Replacement needs an explicit table, because it is a global regex and a wrong table damages the document:
 
 ```bash
 python scripts/pipeline.py --input in.docx --out out.docx --terms projects/terms.example.json
 ```
 
-## 产物
+## Artifacts
 
 ```
-out.docx                  改写后的文档（元数据已清）
-out.docx.work/report.md   逐段对照表、未替换原因、跳过清单
-out.docx.work/result.json 全部候选、分数、校验问题、最终文本
-out.docx.work/units/      每段每条链的原始翻译，重跑时复用
+out.docx                     rewritten document, metadata scrubbed
+out.docx.work/report.md      per-block table, unrewritten reasons, skip list
+out.docx.work/result.json    every candidate, scores, validation problems, final text
+out.docx.work/units/         raw translation per block per chain, reused on rerun
 ```
 
-## 校验
+## Validation
 
-任一不过就作废该候选：数字集合、引用编号、大写标识符、术语出现次数、禁用译法、长度比。
+A candidate is discarded if any check fails: number set, citation set, uppercase identifiers, term counts, forbidden words, length ratio.
 
-长度比（英文 0.70~1.45 词，中文 0.75~1.40 汉字）是防吞段用的——免费翻译接口会悄悄截断长句，数字和引用都还在，只有长度对不上。
+The length ratio (0.70–1.45 words for English, 0.75–1.40 characters for Chinese) guards against silent truncation — free endpoints drop the tail of long paragraphs while numbers and citations survive, so length is the only signal left.
 
-## 注意
+## Caveats
 
-- 排序分不是检测器概率，只在候选之间和改前改后之间可比。本工具不承诺任何检测分数。
-- 写回会合并段内 run，段落中间的加粗、斜体、上标引用编号会丢，导出后要人工核格式。
-- 整篇改写会把本来没问题的段落一起改掉，改完请通读。
-- 正文会发给上述第三方翻译网站，敏感内容不要用。
-- 支持 `.docx`、`.md`、`.markdown`、`.txt`；旧版 `.doc` 需先另存为 `.docx`。
-- PDF 导出需要 LibreOffice（跨平台）或 Windows 上的 Word，其余功能不依赖外部程序。
-- `.docx` 写回会合并段内 run，段中的加粗、斜体、上标引用编号会丢。
+- The ranking score is not a detector probability. It is comparable only between candidates of the same block and between a block's before and after. This tool promises no detection score.
+- A `.docx` write merges runs inside a paragraph: mid-paragraph bold, italics and superscript citation numbers are lost. Check formatting after export.
+- A full-document rewrite also touches blocks that were fine, and can make them worse. Read the output.
+- Document text is sent to the third-party translation endpoints above. Do not use it on confidential material.
+- PDF export needs LibreOffice (cross-platform) or Microsoft Word on Windows. Everything else needs no external program.
 
-## 许可
+## License
 
 MIT

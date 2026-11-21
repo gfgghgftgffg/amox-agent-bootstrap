@@ -1,140 +1,139 @@
 ---
 name: de-ai
-description: "改写 .docx 原文，降低机翻腔与 AI 痕迹。中文稿可出中文或出英文。用户说「降 AI 率」「去 AI 味」「这段太像机翻」「改写这份 docx」时使用。改写由跨语系机器翻译链加确定性正则完成，不由大模型生成正文。"
+description: "Rewrite a document so it reads less like machine translation or generated text. Handles .docx, .md and .txt; Chinese or English sources, English or Chinese output. Use when asked to lower AI-detection scores, remove machine-translation tone, or rewrite a document that reads as if it were generated. Rewriting is done by cross-family machine translation plus deterministic regex, never by an LLM writing prose."
 disable-model-invocation: true
 license: MIT
 metadata:
-  version: "3.0.0"
+  version: "4.0.0"
 ---
 
 # De-AI Pipeline
 
-## 你不做什么
+## What you must not do
 
-**不许自己改写、润色、重写正文。** 一个字都不行。
+**Never rewrite, polish or paraphrase the prose yourself.** Not one word.
 
-最终文本必须由本 skill 的脚本产出：翻译链负责换词序，正则负责削句尾与句长。由你直接生成会带语言模型的采样指纹，正好是这套流程要避开的东西。
+Every change must come from the scripts in this skill: translation chains reorder the text, regex rules shave sentence tails and lengths. Text you generate yourself carries a language-model sampling fingerprint, which is exactly what this pipeline exists to avoid.
 
-你只做四件事：跑脚本、读产物、按判据决定下一步、向用户汇报。
+You do four things only: run the script, read the artifacts, decide the next step from the status table, report to the user.
 
-## 你的动作
+## Your steps
 
-### 0. 环境
+### 0. Environment
 
-解释器用当前环境的 `python`。依赖见 `scripts/requirements.txt`，缺就装，不要擅自换实现。
+Use the current environment's `python`. Dependencies are in `scripts/requirements.txt`; install what is missing instead of substituting an implementation.
 
 ```bash
 PY=python
-S="<skill目录>/scripts/pipeline.py"
+S="<skill-dir>/scripts/pipeline.py"
 ```
 
-### 1. 确认输入
+### 1. Confirm the input
 
-支持 `.docx`、`.md`、`.markdown`、`.txt`。用户只给了聊天里的文字，先落成 `.md` 或 `.txt` 再往下走。
+Accepts `.docx`, `.md`, `.markdown`, `.txt`. If the user pasted text into the chat, write it to `.md` or `.txt` first.
 
-`.doc`（旧版二进制）不支持，让用户另存为 `.docx`。
+Legacy `.doc` is not supported; ask for a `.docx` re-save.
 
-问清一件事：**交中文还是交英文**。中文稿默认交中文，英文稿默认交英文。
+Ask exactly one question: **Chinese output or English output**. A Chinese source defaults to Chinese output, an English source to English.
 
-### 2. 空跑
+### 2. Dry run
 
 ```bash
-"$PY" "$S" --input "<输入>" --out "<输出>" --src-lang auto --dst-lang same --dry-run
+"$PY" "$S" --input "<input>" --out "<output>" --src-lang auto --dst-lang same --dry-run
 ```
 
-这一步会先探测引擎可用性，再写 `<输出>.work/plan.json`。确认三件事：
+This probes engine availability, then writes `<output>.work/plan.json`. Check three things:
 
-- 目标段数是否合理
-- 跳过清单里有没有被误跳的正文
-- 语种判断对不对（`auto` 按 CJK 占比，混合稿要手工指定）
+- the number of target blocks is plausible
+- the skip list does not contain body prose
+- the language guess is right (`auto` uses a CJK ratio; force `--src-lang` for mixed documents)
 
-可用链少于 2 条时不要继续，先按第 6 节换链。
+Do not continue if fewer than two chains survive; see the engine section.
 
-### 3. 正式跑
+### 3. Real run
 
 ```bash
-"$PY" "$S" --input "<输入>" --out "<输出>" --src-lang auto --dst-lang same --level standard
+"$PY" "$S" --input "<input>" --out "<output>" --src-lang auto --dst-lang same --level standard
 ```
 
-`--level` 选 `light`（1 条）/ `standard`（3 条，默认）/ `deep`（4 条）。先跑 `standard`，别一上来用 `deep`。
+`--level` is `light` (1 chain), `standard` (3 chains, default) or `deep` (4 chains). Start with `standard`; do not open with `deep`.
 
-### 4. 读产物
+### 4. Read the artifacts
 
-`<输出>.work/report.md` 先看，`<输出>.work/result.json` 查细节。
+Read `<output>.work/report.md` first, then `<output>.work/result.json` for detail.
 
-| 状态 | 含义 | 你的动作 |
+| Status | Meaning | What you do |
 |---|---|---|
-| `replaced` | 正常替换 | 不用管 |
-| `replaced-low-sim` | 替换了但跟原文差太多 | 逐句对照 `orig` 和 `final`，讲给用户听 |
-| `replaced-min-change` | 这段的链都没真正改写 | 换 `deep` 重跑；还不行就说"这段机械改写改不动" |
-| `replaced-worse(+Δ)` | 写出去了，但排序分比原文更高（其它候选更差） | 把原文和改后一起给用户，让他决定留哪句 |
-| `all-candidates-failed-validation` | 候选都丢了数字/引用/术语，或翻译被截断 | 看 `candidates[].validation`：`length anomaly` 是接口吞段，`term drift` 是术语走形，`numbers missing` 是数字丢 |
-| `all-chains-failed` | 所有链都报错 | 看 `detail` 里的引擎错误，多半是网络或限流 |
+| `replaced` | Normal replacement | Nothing |
+| `replaced-low-sim` | Replaced, but far from the source; possible drift | Show `orig` and `final` side by side |
+| `replaced-min-change` | No chain actually moved this block | Rerun with `deep`; if it persists, say the block cannot be improved mechanically |
+| `replaced-worse(+Δ)` | Written back, but the ranking score went up because every candidate was worse | Give the user both versions and let them choose |
+| `all-candidates-failed-validation` | Every candidate lost numbers, citations or terms, or the translation was truncated | Inspect `candidates[].validation`: `length anomaly` means truncated by the endpoint, `term drift` means terminology drift, `numbers missing` means a dropped figure |
+| `all-chains-failed` | Every chain errored | Read `detail`; usually network or rate limiting |
 
-### 5. 最多重跑一次
+### 5. At most one rerun
 
-整个流程最多自动再跑一轮，只针对 `replaced-min-change`、`all-candidates-failed-validation`、`all-chains-failed` 的段落，用 `--level deep` 或换 `--seed`。第二轮结束无论结果如何都停下汇报。
+Run the pipeline again at most once, only for `replaced-min-change`, `replaced-worse`, `all-candidates-failed-validation` and `all-chains-failed` blocks, with `--level deep` or a different `--seed`. Stop after the second round whatever the result.
 
-`<输出>.work/units/` 是翻译缓存，同参数重跑只补失败或未完成的链，不重翻已做完的。
+`<output>.work/units/` caches translations. Rerunning with the same arguments only fills in failed or unfinished chains.
 
-### 6. 汇报
+### 6. Report
 
-四样东西，不要更多：
+Four things, nothing more:
 
-1. 处理段数、替换数、跳过数、失败数
-2. 逐段对照表（状态、链、改前「句式分+扣分」、改后同口径、3-gram 重合）
-3. 需要人看的段落清单及原因
-4. 一句限定：`new_score` 是候选排序分，不是任何检测器的概率
+1. Blocks processed, replaced, skipped, failed
+2. A per-block table: status, chain, before `base+penalty`, after `base+penalty`, 3-gram overlap
+3. Blocks that need a human and why
+4. One caveat: `new_score` is a candidate ranking score, not a detector probability
 
-## 不许说的话
+## What you must not claim
 
-- 不许承诺"AI 率降到多少"。这套流程没有检测器。
-- 不许说"已通过 AI 检测"。唯一证据是用户提交后拿到的真实报告。
-- 不许把 `new_score` 下降的百分比说成 AI 率下降的百分比。
+- Do not promise a detection score. This pipeline contains no detector.
+- Do not say a document "passed AI detection". The only evidence is the report the user gets after submitting.
+- Do not turn a drop in `new_score` into a percentage drop in AI score.
 
-## 参数
+## Parameters
 
-| 参数 | 说明 |
+| Flag | Meaning |
 |---|---|
-| `--input` / `--docx` | 输入文件：`.docx` / `.md` / `.markdown` / `.txt` |
-| `--out` / `--out-docx` | 输出文件，扩展名决定格式，可与输入不同 |
-| `--src-lang auto\|en\|zh` | 默认 `auto`，按段落 CJK 占比判断 |
-| `--dst-lang same\|en\|zh` | `same` 表示交原语种 |
-| `--level light\|standard\|deep` | 跑 1/3/4 条链 |
-| `--terms <json>` | 项目术语表，`[[正则, 替换], ...]` |
-| `--config <json>` | 概率、种子、链模板，模板见 `projects/rewrite.example.json` |
-| `--seed N` | 固定随机，复现同一次结果 |
-| `--skip-preflight` | 跳过引擎探测，直接跑 |
-| `--out-pdf <pdf>` | 仅 `.docx` 输入可用；优先 LibreOffice（跨平台），Windows 上退回 Word |
+| `--input` / `--docx` | Input file: `.docx`, `.md`, `.markdown`, `.txt` |
+| `--out` / `--out-docx` | Output file; the extension decides the format |
+| `--src-lang auto\|en\|zh` | Default `auto`, decides per block from a CJK ratio |
+| `--dst-lang same\|en\|zh` | `same` keeps the source language |
+| `--level light\|standard\|deep` | Run 1, 3 or 4 chains |
+| `--terms <json>` | Project term table, `[[regex, replacement], ...]` |
+| `--config <json>` | Probabilities, seed, chain templates; see `projects/rewrite.example.json` |
+| `--seed N` | Fix the randomness to reproduce a run |
+| `--skip-preflight` | Skip engine probing |
+| `--out-pdf <pdf>` | `.docx` input only; LibreOffice first, Word as a Windows fallback |
 
-## 链
+## Chains
 
-四条链的形状固定，**每一跳分两级引擎**：先用 tier1（原方案实测过的厂商），全不可用才降到 tier2。
+Four fixed chain shapes. **Each hop has two engine tiers**: tier1 is the set validated by the original experiment, tier2 is a general fallback pool.
 
-| 链 | 第 1 跳 | 第 2 跳 | 第 3 跳（末跳） |
+| Chain | Hop 1 | Hop 2 | Hop 3 (final) |
 |---|---|---|---|
-| 1 | DE · `iciba` | FR · `qqTranSmart` | 原语种 · `youdao` |
-| 2 | JA · `qqTranSmart` | DE · `iciba` | 原语种 · `youdao` |
-| 3 | RU · `iciba` | DE · `qqTranSmart` | 原语种 · `iciba` |
-| 4 | DE · `reverso` | 桥接语种 · `qqTranSmart` | 原语种 · `iciba` |
+| 1 | DE · `iciba` | FR · `qqTranSmart` | source lang · `youdao` |
+| 2 | JA · `qqTranSmart` | DE · `iciba` | source lang · `youdao` |
+| 3 | RU · `iciba` | DE · `qqTranSmart` | source lang · `iciba` |
+| 4 | DE · `reverso` | bridge lang · `qqTranSmart` | source lang · `iciba` |
 
-tier1 的分配来自实测结论：中转跳用 `iciba` / `qqTranSmart` / `reverso` 打散语序，**末跳只用 `youdao` / `iciba`**——`reverso` 作末跳会残留欧式学术短语，所以它只出现在 tier2 的末跳候选里。
+The tier1 assignment follows the measured result: mid hops use `iciba`, `qqTranSmart` or `reverso` to break the source word order, and **the final hop uses only `youdao` or `iciba`** — `reverso` as the last hop leaves European academic phrasing, so it appears only in the tier2 final-hop pool.
 
-tier2 是通用降级池：`baidu`、`bing`、`google`、`youdao`、`iciba`、`reverso`、`tencent`、`sogou`、`alibaba`、`caiyun`、`yandex`、`deepl`、`papago`。
+tier2 pool: `baidu`, `bing`, `google`, `youdao`, `iciba`, `reverso`, `tencent`, `sogou`, `alibaba`, `caiyun`, `yandex`, `deepl`, `papago`.
 
-运行时会打印每跳用了哪一级：
+Each hop prints the tier it landed on:
 
 ```
-链2 zh->ja     用 qqTranSmart  [tier1]
-链2 ja->de     用 iciba        [tier1]
-链3 de->en     用 baidu        [tier2]  ← 降级
+chain2 zh->ja      uses qqTranSmart  [tier1]
+chain3 de->en      uses baidu        [tier2]  <- downgraded
 ```
 
-**出现 `[tier2]` 就是原方案厂商不可用，输出质量可能下降**，汇报时要跟用户说明。
+**Any `[tier2]` means the validated engine was unreachable and quality may drop.** Say so when reporting.
 
-桥接语种取第一个不同于首尾的语言：英出英用中文，中出中用英文，中出英用日语。
+The bridge language is the first language that is neither source nor target: EN→EN bridges through Chinese, ZH→ZH through English, ZH→EN through Japanese.
 
-要改优先级，在配置里给 `chain_templates`，格式是「每跳 = [语种, [tier1...], [tier2...]]」，两元素写法等于把引擎全当 tier1：
+To change priorities, set `chain_templates` — each hop is `[lang, [tier1...], [tier2...]]`; the two-element form treats every engine as tier1:
 
 ```json
 {
@@ -146,9 +145,19 @@ tier2 是通用降级池：`baidu`、`bing`、`google`、`youdao`、`iciba`、`r
 }
 ```
 
-## 概率配置
+## Supported formats
 
-所有规则按 `config_default.json` 的概率逐处触发，固定种子可复现。项目覆盖文件放 `projects/<项目>/rewrite.json`：
+| Format | Read | Write | Skipped |
+|---|---|---|---|
+| `.docx` | python-docx | paragraph styles preserved, runs merged | heading styles, captions, references, monospace paragraphs, short labels |
+| `.md` / `.markdown` | plain text, blank-line blocks | written back as-is | headings, code fences, tables, block quotes, link definitions, indented code |
+| `.txt` | plain text, blank-line blocks | written back as-is | only very short blocks |
+
+Markdown fences are tracked per line, so anything inside a fence — tables included — is left alone. The output extension may differ from the input.
+
+## Probability config
+
+Every rule fires per hit according to `config_default.json`; a fixed seed makes runs reproducible. Override per project in `projects/<project>/rewrite.json`:
 
 ```json
 {
@@ -163,101 +172,95 @@ tier2 是通用降级池：`baidu`、`bing`、`google`、`youdao`、`iciba`、`r
 }
 ```
 
-- 0 等于关闭，低于 0.3 基本只命中极个别位置。
-- 术语还原与引用补回不参与随机，永远全量执行。
-- 序号成套：`First/Second/Last`、`Firstly/Secondly/Finally`、`To begin with/Next/Finally` 整篇只选一套，不会出现 `First` 接 `Secondly`；中文同理。
-- 套话连接词不删，按同类池随机取用，同词全篇最多替换 `max_per_word` 次。
-- `forbidden` 里的词出现在候选文本就作废该候选，用于挡已知错译。
-- `min_divergence` 是"这条候选真的改动了"的下限（与原文的 3-gram 重合）。低于它的候选排到后面，全部低于时状态记 `replaced-min-change`。
+- `0` disables a rule; below `0.3` it rarely fires.
+- Term restoration and citation repair are never randomised; they always run in full.
+- Ordinals stay in one series: `First/Second/Last`, `Firstly/Secondly/Finally` or `To begin with/Next/Finally` — never `First` followed by `Secondly`. The Chinese equivalents behave the same way.
+- Filler connectives are not deleted; one is swapped for another from the same class, at most `max_per_word` times per word.
+- A word in `forbidden` invalidates any candidate containing it; use it to block known mistranslations.
+- `min_divergence` is the floor for "this candidate actually changed something" (3-gram overlap with the source). Candidates below it rank last; if all of them are, the status becomes `replaced-min-change`.
 
-## 术语
+## Terminology
 
-分两层，都不需要用户填表。
+Two layers, neither requiring a filled-in table.
 
-**第一层，自动保护（默认开启）。** 从全文自动抽出不能改动的标识符：驼峰名（`GetObject`）、全大写缩写（`TLS`、`KMS`）、`ns:Action`（`kms:Decrypt`）、下标键（`K_c,tgs`）、版本号（`1.3`），以及重复出现两次以上的多词产品名（`AWS Transfer Family`）。候选里只要少了一个，该候选作废。源语与目标语相同时（英出英、中出中）才做这项检查，跨语种翻译时标识符本来就会被译掉。
+**Automatic protection (always on).** Camel-case names (`GetObject`), all-caps acronyms (`TLS`, `KMS`), `ns:Action` (`kms:Decrypt`), subscript keys (`K_c,tgs`), version numbers (`1.3`) and multi-word product names repeated at least twice (`AWS Transfer Family`) are extracted from the whole document. A candidate that loses any of them is discarded. The check runs only when source and target language match, since identifiers are legitimately translated across languages.
 
-**第二层，术语替换（需显式给词表）。** 默认不替换任何术语，因为替换是全局正则，词表不对会改坏正文：
+**Term replacement (opt-in).** Nothing is replaced by default, because replacement is a global regex and a wrong table damages the document:
 
 ```json
 [["\\bkms:\\s*Decrypt\\b", "kms:Decrypt"], ["\\breplay memory\\b", "replay cache"]]
 ```
 
-模板 `projects/terms.example.json`，已验证的 Kerberos / AWS 词表 `projects/terms.kerberos-aws.json`。
+Templates: `projects/terms.example.json`, plus a validated Kerberos/AWS table at `projects/terms.kerberos-aws.json`.
 
-术语替换是全局正则，词表不对会直接改坏正文，所以默认空表。中文稿常见需要补的错译（如 `回放缓存 → 重放缓存`）和不可接受译法（写进 `forbidden`）都由项目词表负责。
+## Validation (a candidate failing any check is discarded)
 
-## 支持的格式
+The number set, the citation set and uppercase identifiers (`KMS`, `kms:Decrypt`, `K_C`) must survive; with an English target, every term-table replacement must keep its original count; nothing from `forbidden` may appear; length ratio must stay within 0.70–1.45 words for English and 0.75–1.40 characters for Chinese.
 
-| 格式 | 读 | 写 | 跳过什么 |
-|---|---|---|---|
-| `.docx` | python-docx | 保留段落样式，合并段内 run | 标题样式、图注表注、参考文献、等宽字体段落、短标签 |
-| `.md` / `.markdown` | 纯文本，空行分块 | 原样写回 | 标题、代码围栏、表格、引用块、链接定义、缩进代码 |
-| `.txt` | 纯文本，空行分块 | 原样写回 | 只跳过过短的块 |
+The length ratio is the guard against silent truncation: free translation endpoints drop the tail of long paragraphs while numbers and citations survive, so length is the only signal left.
 
-Markdown 的代码围栏用行级状态机判断，围栏内的内容（含表格）不会被改。输出文件扩展名可以和输入不同，比如 `.md` 进 `.docx` 出不支持——文本类之间可以互换。
-
-## 校验（不通过就作废该候选）
-
-数字集合、引用编号集合、大写标识符（`KMS`、`kms:Decrypt`、`K_C`）必须全部保留；目标语为英文时术语表每项出现次数必须相等；`forbidden` 里的词不得出现；长度比英文 0.70~1.45 词、中文 0.75~1.40 汉字。
-
-长度比是防吞段的：免费翻译接口会悄悄截断长句，数字和引用都还在，只有长度对不上。
-
-## 产物
+## Artifacts
 
 ```
-<out-docx>             改写后的文档（元数据已清）
-<out-docx>.work/units/ 每段每条链的原始翻译与错误
-<out-docx>.work/result.json   全部候选、分数、校验问题、最终文本
-<out-docx>.work/report.md     逐段对照表、未替换原因、跳过清单
+<out>                rewritten document, metadata scrubbed
+<out>.work/units/    raw translation and error per block per chain
+<out>.work/result.json   every candidate, score, validation problem, final text
+<out>.work/report.md     per-block table, unrewritten reasons, skip list
 ```
 
-## 已知限制
+## Stop conditions
 
-- `.docx` 写回会合并段内 run，段落中间的加粗、斜体、上标引用编号会丢，导出后要人工核格式。`.md` / `.txt` 没有这个问题。
-- PDF 导出需要 LibreOffice（Windows / macOS / Linux 都有）或 Windows 上的 Microsoft Word；两者都没有时会在报告里给出警告，文档本身已经写好。
-- 中文「的」字堆叠、最长定语句、排比密度只统计不自动改，数字在 `result.json` 的 `features` 里。
-- 免费接口会限流。长稿子分段跑，超时后同参数重跑即可续。
-- 旧版 `.doc` 不支持，需要先另存为 `.docx`。
-- 英文分是启发式，没有校准权重（校准需要成对的人工标注样本）。
-- 打分按「每条链一个候选」算，段落只有一两句时句式率的统计不稳，分数波动大；短段落的分数只当作相对参考。
-- 整篇改写会把本来没问题的段落也改掉，可能改差。改完要人读一遍。
+### Code level (bounded, cannot hang)
 
-## 停止条件
-
-### 代码层（到点必停，不会挂住）
-
-| 条件 | 行为 |
+| Condition | Behaviour |
 |---|---|
-| 段落列表遍历完 | 正常结束，写 `result.json` 与 `report.md` |
-| 每跳翻译失败 3 次 | 放弃该链，记错误，继续下一条 |
-| 链数上限 | `light` 1 条 / `standard` 3 条 / `deep` 4 条，不会自己加链 |
-| 引擎探测 | 每个（引擎, 源语, 目标语）组合只探一次 |
-| Word 导 PDF | 300 秒超时 |
-| 代码里 `while` | 0 个，没有重试大循环 |
+| Block list exhausted | Normal exit, writes `result.json` and `report.md` |
+| 3 failed attempts per hop | Chain abandoned, error recorded, next chain continues |
+| Chain cap | 1 / 3 / 4 per `level`; the script never adds chains |
+| Engine probing | One request per (engine, source, target) combination |
+| PDF export | 600 s timeout for LibreOffice, 300 s for Word |
+| `while` loops in the code | None |
 
-### 段落层（每段必有一个终局）
+### Block level (every block has one terminal state)
 
-写回的：`replaced`、`replaced-low-sim`、`replaced-min-change`。
-保留原文的：`all-candidates-failed-validation`、`all-chains-failed`。
+Written back: `replaced`, `replaced-low-sim`, `replaced-min-change`, `replaced-worse`.
+Kept as-is: `all-candidates-failed-validation`, `all-chains-failed`.
 
-两种情况都会写进报告，不会静默跳过。
+Both outcomes appear in the report; nothing is skipped silently.
 
-### Agent 层（这条最重要）
+### Agent level (the important one)
 
-**最多两轮。** 第一轮 `standard`；第二轮只对上面三类失败段落用 `--level deep` 或换 `--seed`。第二轮结束无论结果如何都停下汇报，不许再试。
+**At most two rounds.** First round `standard`; second round `deep` or a new `--seed`, restricted to the failing blocks. Stop and report after the second round regardless of outcome.
 
-### 退出码
+### Exit codes
 
-| 码 | 含义 |
+| Code | Meaning |
 |---|---|
-| 0 | 所有目标段都已替换 |
-| 1 | 没有可改写的段落（检查 `--min-words`） |
-| 2 | 有段落被保留原文，需要看报告 |
-| 3 | 没有可用链，需要配 `chain_templates` |
+| 0 | Every target block replaced |
+| 1 | No rewritable block (check `--min-words` or the input format) |
+| 2 | Some blocks kept their original text, or PDF export failed |
+| 3 | No usable chain; configure `chain_templates` |
 
-### 人可以收工的条件
+### When a human can sign off
 
-1. 退出码 0。
-2. 没有 `all-chains-failed`；没有 `all-candidates-failed-validation`，或已确认可接受。
-3. `replaced-min-change` 的段落已看过，或 deep 重跑后仍无改善、确认人工处理。
-4. 全文通读一遍——改写会动整篇，包括本来没问题的段落。
+1. Exit code 0.
+2. No `all-chains-failed`; no `all-candidates-failed-validation` unless accepted.
+3. Every `replaced-min-change` and `replaced-worse` block reviewed.
+4. The whole document read once — rewriting touches every block, including ones that were fine.
+
+## Known limits
+
+- A `.docx` write merges runs inside a paragraph, so mid-paragraph bold, italics and superscript citation numbers are lost. Review formatting after export. `.md` and `.txt` are unaffected.
+- Chinese `的` stacking, over-long attributives and parallelism density are measured but never rewritten automatically; the numbers sit in `features` in `result.json`.
+- Free endpoints rate-limit. Run long documents in batches; rerunning with the same arguments resumes.
+- The English score is a heuristic with no calibrated weights; calibration would need paired human annotations.
+- A full-document rewrite also changes blocks that were fine before, and can make them worse. Read the result.
+- Legacy `.doc` is unsupported; re-save as `.docx`.
+
+## Portability
+
+`--out-pdf` shells out to LibreOffice (Windows, macOS, Linux), falling back to Word COM on Windows. Nothing else needs an external program.
+
+English documents need `torch` and `transformers` plus a cached `gpt2` (about 3GB). Behind the Great Firewall, pre-fetch once with `HF_ENDPOINT=https://hf-mirror.com`.
+
+Document text is sent to the third-party translation endpoints listed above. Do not run this on confidential material.

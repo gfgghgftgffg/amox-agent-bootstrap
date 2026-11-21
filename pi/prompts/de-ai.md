@@ -1,16 +1,16 @@
 ---
-description: "改写 docx 原文降低机翻腔与 AI 痕迹；中文稿可出中文或出英文。"
-argument-hint: "<文件.docx> [交中文|交英文] [--level light|standard|deep]"
+description: "Rewrite a .docx/.md/.txt so it reads less like machine translation or generated text, without letting a model write the prose."
+argument-hint: "<file> [Chinese|English output] [--level light|standard|deep]"
 ---
-先完整读取 `de-ai` skill 的 `SKILL.md`，然后严格按其中的「你的动作」执行。入口是该 skill 目录下的 `scripts/pipeline.py`。
+Read the `de-ai` skill's `SKILL.md` in full first, then follow its "Your steps" section exactly. The entry point is `scripts/pipeline.py` inside that skill directory.
 
-三条硬约束：
+Three hard constraints:
 
-1. 不许自己改写、润色、重写正文。所有正文变动只能由脚本产出。
-2. 每个目标段要么正常替换，要么在报告里标明原因。不许用脚本产出之外的文本填补失败段落。
-3. 不许承诺任何检测器分数下降。`new_score` 只是候选排序分。
+1. Never rewrite, polish or paraphrase the prose yourself. Every change must come from the scripts.
+2. Every target block either gets replaced or is reported with a reason. Never patch a failed block with text the script did not produce.
+3. Never promise a detection score. `new_score` is a candidate ranking score only.
 
-用户本次输入：
+The user's input:
 $ARGUMENTS
 
-若没有给出文件路径，先依据当前对话确定对象；仍不明确时只问要处理哪个 `.docx`，不要自动修改无关文档。
+If no file path is given, determine the target from the conversation. If it is still unclear, ask which file to process and do not touch unrelated documents.

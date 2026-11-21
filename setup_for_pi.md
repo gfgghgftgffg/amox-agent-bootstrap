@@ -50,7 +50,7 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | `autoresearch-hooks` | Render an explicit-only wrapper; see below |
 | `amox-grill-me` | Install the complete [skills/amox-grill-me/](skills/amox-grill-me/) directory from this repository, including `LICENSE` |
 | `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
-| `de-ai` | Install the complete [skills/de-ai/](skills/de-ai/) directory from this repository, including `scripts/`, `references/`, `projects/`, `README.md` and `LICENSE`; deploy [pi/prompts/de-ai.md](pi/prompts/de-ai.md) to `<agent-dir>/prompts/de-ai.md`. Accepts `.docx`, `.md` and `.txt` |
+| `de-ai` | Install the complete [skills/de-ai/](skills/de-ai/) directory from this repository, including `scripts/`, `references/`, `projects/`, `README.md`, `README.zh-CN.md` and `LICENSE`; deploy [pi/prompts/de-ai.md](pi/prompts/de-ai.md) to `<agent-dir>/prompts/de-ai.md`. Accepts `.docx`, `.md` and `.txt` |
 
 Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html`, `ian-xiaohei-illustrations` and `de-ai`, including reused copies.
 

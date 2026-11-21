@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""文档读写：.docx / .md / .markdown / .txt 统一成「块 + 写回」接口。
+"""Document I/O: .docx / .md / .markdown / .txt behind one block-and-write interface.
 
-跨平台，不依赖 Microsoft Word：PDF 导出优先用 LibreOffice（Windows / macOS / Linux 都有），
-Windows 上才退回 Word COM。纯文本与 Markdown 直接读写文件，不需要任何外部程序。
+Cross-platform and independent of Microsoft Word: PDF export prefers LibreOffice (present on
+Windows, macOS and Linux) and only falls back to Word COM on Windows. Plain text and Markdown
+are read and written directly, with no external program involved.
 """
 
 import os
@@ -35,7 +36,7 @@ MD_SKIP_PREFIXES = (
 
 
 def text_units(text: str) -> int:
-    """中英通用长度：汉字数与英文词数相加。"""
+    """Language-neutral length: CJK characters plus English word tokens."""
     return len(re.findall(r"[\u4e00-\u9fff]", text)) + len(re.findall(r"[A-Za-z][A-Za-z'-]*", text))
 
 
@@ -43,7 +44,7 @@ FENCE_RE = re.compile(r"^\s*(```|~~~)")
 
 
 def _fenced_lines(lines: List[str]) -> List[bool]:
-    """标记每一行是否处在代码围栏内（含围栏行本身）。"""
+    """Flag every line that sits inside a code fence, including the fence lines themselves."""
     flags, inside = [], False
     for line in lines:
         if FENCE_RE.match(line):
@@ -71,7 +72,7 @@ def _md_reason(block: str, fenced: bool) -> Optional[str]:
 
 
 class DocxDocument:
-    """基于 python-docx；能保留段落样式，但会合并段内 run。"""
+    """Backed by python-docx. Paragraph styles survive; runs inside a paragraph are merged."""
 
     kind = "docx"
 
@@ -128,7 +129,7 @@ class DocxDocument:
 
 
 class PlainDocument:
-    """纯文本与 Markdown：以空行分块，块内文本整块替换。"""
+    """Plain text and Markdown: blocks split on blank lines, replaced as a whole."""
 
     def __init__(self, path: str):
         self.path = path
@@ -177,7 +178,7 @@ class PlainDocument:
         start, end = self.blocks[idx]
         new_lines = text.split("\n")
         self.lines[start:end] = new_lines
-        # 块的行数变了，重算后续块的偏移
+        # The block length changed, so recompute the offsets that follow.
         self.blocks = []
         self._split_blocks()
 
@@ -190,9 +191,9 @@ def load_document(path: str):
     suffix = Path(path).suffix.lower()
     if suffix not in SUPPORTED_SUFFIXES:
         raise ValueError(
-            f"不支持的格式 {suffix or '(无扩展名)'}；支持 "
-            + "、".join(sorted(SUPPORTED_SUFFIXES))
-            + "。旧版 .doc 请先另存为 .docx。")
+            f"Unsupported format {suffix or '(no extension)'}; supported: "
+            + ", ".join(sorted(SUPPORTED_SUFFIXES))
+            + ". Re-save legacy .doc as .docx first.")
     if suffix == ".docx":
         return DocxDocument(path)
     return PlainDocument(path)
@@ -245,9 +246,9 @@ def _export_pdf_word(docx_path: str, pdf_path: str) -> None:
 
 
 def export_pdf(src_path: str, pdf_path: str) -> str:
-    """docx -> pdf。优先 LibreOffice，其次 Windows + Word。返回实际使用的引擎。"""
+    """docx -> pdf. LibreOffice first, Word on Windows second. Returns the engine used."""
     if not src_path.lower().endswith(".docx"):
-        raise RuntimeError("只有 .docx 能导出 PDF；文本和 Markdown 请直接改完就用，或用 pandoc 另转。")
+        raise RuntimeError("Only .docx can be exported to PDF; use the rewritten text or Markdown as-is, or convert it with pandoc.")
 
     soffice = _find_soffice()
     if soffice:
@@ -257,7 +258,7 @@ def export_pdf(src_path: str, pdf_path: str) -> str:
                        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
         produced = Path(outdir) / (Path(src_path).stem + ".pdf")
         if not produced.exists():
-            raise RuntimeError(f"LibreOffice 没有产出 PDF：{outdir}")
+            raise RuntimeError(f"LibreOffice produced no PDF in {outdir}")
         shutil.move(str(produced), pdf_path)
         shutil.rmtree(outdir, ignore_errors=True)
         engine = "libreoffice"
@@ -266,8 +267,8 @@ def export_pdf(src_path: str, pdf_path: str) -> str:
         engine = "word"
     else:
         raise RuntimeError(
-            "找不到 PDF 转换器。装 LibreOffice（跨平台）后重试；"
-            "Windows 上也可以用已安装的 Microsoft Word。")
+            "No PDF converter found. Install LibreOffice (cross-platform) and retry; "
+            "an installed Microsoft Word also works on Windows.")
 
     try:
         from pypdf import PdfReader, PdfWriter
@@ -283,5 +284,5 @@ def export_pdf(src_path: str, pdf_path: str) -> str:
             writer.write(fh)
         os.replace(tmp, pdf_path)
     except Exception as exc:
-        raise RuntimeError(f"PDF 已生成但元数据清理失败：{exc}") from exc
+        raise RuntimeError(f"PDF written but metadata scrubbing failed: {exc}") from exc
     return engine

@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-"""跨语系多引擎竞标链。
+"""Cross-family translation chains.
 
-一条链 = 若干跳，每跳写「语种 + tier1 引擎 + tier2 引擎」。运行前逐跳探测：
-先用 tier1（原方案实测的厂商），全部不可用才降到 tier2（其他引擎）。
+A chain is a list of hops. Each hop declares a language plus a tier1 and a tier2 engine list.
+Before a run, every hop is probed: tier1 (the engines validated by the original experiment) is
+tried first, tier2 (the general pool) only when tier1 is unreachable.
 
-tier1 的分配来自实测结论：中转跳用 iciba / qqTranSmart / reverso 打散语序，
-末跳只用 youdao / iciba。reverso 作末跳会残留欧式学术短语，所以它只出现在
-tier2 的末跳候选里，降级使用时日志会标注。
+tier1 assignment follows the measured result: mid hops use iciba / qqTranSmart / reverso to break
+the source word order, and the final hop uses only youdao / iciba. Reverso as a last hop leaves
+European academic phrasing, so it only appears in the tier2 final-hop pool; a downgrade is logged.
 
-语种写法：具体语种（"de"）、null（= 文档目标语种）、"BRIDGE"（桥接语种，
-第一个既不是源语也不是目标语的语言）。
+Language field: a concrete code ("de"), None (= document target language), or "BRIDGE"
+(the first language that is neither source nor target).
 """
 
 import re
@@ -23,7 +24,7 @@ SHORT = {
     "deepl": "deepl", "papago": "papago", "modernMt": "modernMt",
 }
 
-# 每跳： (语种, tier1 引擎, tier2 引擎)
+# Each hop: (language, tier1 engines, tier2 engines)
 DEFAULT_CHAINS: List[List[Tuple[Optional[str], Tuple[str, ...], Tuple[str, ...]]]] = [
     [("de", ("iciba",), ("baidu", "youdao", "bing")),
      ("fr", ("qqTranSmart",), ("baidu", "youdao", "bing")),
@@ -44,6 +45,7 @@ DEFAULT_CHAINS: List[List[Tuple[Optional[str], Tuple[str, ...], Tuple[str, ...]]
 
 BRIDGE_ORDER = ["zh", "en", "ja", "fr", "de", "ru"]
 
+# Probe sentences: short, unambiguous, one per language.
 PROBE = {"en": "The service validates the ticket before it is issued.",
          "zh": "该系统在签发之前会先校验票据的有效性。"}
 
@@ -59,7 +61,7 @@ def _expand_lang(lang: Optional[str], src: str, dst: str) -> str:
 
 
 def _parse_cfg(chains_cfg: Optional[Sequence]) -> List[List[Tuple[Optional[str], Tuple[str, ...], Tuple[str, ...]]]]:
-    """接受 [[["de", ["iciba"], ["baidu"]], ...], ...]；两元素写法 [[["de", ["iciba"]], ...]] 视为全 tier1。"""
+    """Accept [[["de", ["iciba"], ["baidu"]], ...], ...]; a two-element hop means all tier1."""
     if not chains_cfg:
         return DEFAULT_CHAINS
     parsed = []
@@ -77,7 +79,7 @@ def _parse_cfg(chains_cfg: Optional[Sequence]) -> List[List[Tuple[Optional[str],
 
 
 def _probe(eng: str, from_lang: str, to_lang: str) -> Optional[str]:
-    """返回 None 表示可用，否则是错误信息。"""
+    """Return None when usable, otherwise the error message."""
     try:
         import translators as ts
     except ImportError:
@@ -93,7 +95,7 @@ def _probe(eng: str, from_lang: str, to_lang: str) -> Optional[str]:
 def build_chains(src: str, dst: str,
                  chains_cfg: Optional[Sequence] = None,
                  probe: bool = True) -> Tuple[List[Chain], List[str], List[str]]:
-    """逐跳挑引擎，返回 (可用链, 日志行, 降级说明)。"""
+    """Pick an engine per hop. Returns (usable chains, log lines, downgrade notes)."""
     templates = _parse_cfg(chains_cfg)
     log: List[str] = []
     degradations: List[str] = []
@@ -122,15 +124,15 @@ def build_chains(src: str, dst: str,
                     break
             if picked is None:
                 pool = ", ".join(tier1 + tier2)
-                log.append(f"  链{idx + 1} 断在 {from_lang}->{to_lang}：候选 {pool} 都不可用"
-                           + (f"（{last_err[:60]}）" if last_err else ""))
+                log.append(f"  chain{idx + 1} broken at {from_lang}->{to_lang}: none of {pool} usable"
+                           + (f" ({last_err[:60]})" if last_err else ""))
                 ok = False
                 break
             resolved.append((picked, to_lang))
-            mark = "" if tier == "tier1" else "  ← 降级"
-            log.append(f"  链{idx + 1} {from_lang}->{to_lang:<6} 用 {picked:<12} [{tier}]{mark}")
+            mark = "" if tier == "tier1" else "  <- downgraded"
+            log.append(f"  chain{idx + 1} {from_lang}->{to_lang:<6} uses {picked:<12} [{tier}]{mark}")
             if tier == "tier2":
-                degradations.append(f"链{idx + 1} {from_lang}->{to_lang} 降级到 {picked}")
+                degradations.append(f"chain{idx + 1} {from_lang}->{to_lang} downgraded to {picked}")
         if ok and resolved:
             name = "->".join(f"{lang.upper()}_{SHORT.get(eng, eng)}" for eng, lang in resolved)
             chains.append((name, tuple(resolved)))
@@ -139,7 +141,7 @@ def build_chains(src: str, dst: str,
 
 def translate_chain(text: str, src: str, hops: Tuple[Tuple[str, str], ...],
                     retries: int = 3) -> Tuple[Optional[str], Optional[str]]:
-    """返回 (结果, 错误)。任一跳失败即放弃该链，不返回半成品。"""
+    """Return (result, error). Any failed hop abandons the chain; no partial output is returned."""
     try:
         import translators as ts
     except ImportError:

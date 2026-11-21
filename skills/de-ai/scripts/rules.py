@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""确定性改写规则。每条规则按概率逐处命中，随机源固定种子。
+"""Deterministic rewrite rules. Each rule fires per hit according to a probability, driven by a
+seeded random source so runs reproduce.
 
-英文规则来自 de_ai_pipeline 的 postprocess_nmt_english，改为概率触发并加入连接词随机取用。
-中文规则对应英文的同一批问题：程式化框架、虚化动词、被动、套话连接词、长句、
-同构句首、冗余词。「的字堆叠」和「排比密度」只统计不自动改。
+The English rules started from de_ai_pipeline postprocess_nmt_english, made probabilistic and
+extended with connective swapping. The Chinese rules target the same class of problems: stock
+frames, light verbs, passives, filler connectives, long sentences, repeated sentence openings,
+redundant words. Character stacking and parallelism density are measured only.
 """
 
 import random
@@ -11,15 +13,16 @@ import re
 from typing import Dict, List, Sequence, Tuple
 
 # ==============================================================================
-# 术语表（项目专用，用 --terms 覆盖）
+# Term table (project specific, override with --terms)
 # ==============================================================================
-# 默认不替换任何术语。术语表按项目给，模板见 projects/terms.example.json，
-# 已验证过的 Kerberos / AWS 词表见 projects/terms.kerberos-aws.json。
-# 空表是刻意的：术语替换是全局正则，词表不对会直接改坏别的文档。
+# Nothing is replaced by default. Supply a table per project: a template lives in
+# projects/terms.example.json and a validated Kerberos / AWS table in
+# projects/terms.kerberos-aws.json. The empty default is deliberate: replacement is a global
+# regex, so a wrong table damages an unrelated document.
 DEFAULT_TERM_FIXES: List[Tuple[str, str]] = []
 
 # ==============================================================================
-# 随机上下文
+# Random context
 # ==============================================================================
 class RuleContext:
     def __init__(self, cfg: Dict, seed: int = 0):
@@ -44,7 +47,7 @@ class RuleContext:
         self.hits[rule] = self.hits.get(rule, 0) + 1
 
     def take_slot(self, word: str) -> bool:
-        """同一个词全篇最多替换 max_per_word 次。"""
+        """Allow at most max_per_word replacements of one word per document."""
         n = self.counts.get(word, 0)
         if n >= self.max_per_word:
             return False
@@ -53,7 +56,7 @@ class RuleContext:
 
 
 # ==============================================================================
-# 英文
+# English
 # ==============================================================================
 ORDINAL_SERIES: List[List[str]] = [
     ["First", "Second", "Last"],
@@ -87,10 +90,12 @@ GERUND_TAILS = [
     (r",\s*(?:thereby\s+)?minimizing\b", " and minimizes"),
     (r",\s*(?:thereby\s+)?preventing\b", " and prevents"),
     (r",\s*(?:thereby\s+)?making\b", " and makes"),
-    # ", including -> such as" 已移除：无实测支撑，且在语序被重排后会把从句改坏
+    # ", including -> such as" was removed: no measured support, and it breaks clauses once
+    # translation has rearranged the sentence.
 ]
 
-# 「and ensuring」这类并列分词改成并列谓语，避免断句后留下 -ing 残句
+# Coordinated participles such as "and ensuring" become coordinated predicates, so a
+# later sentence split never leaves an -ing fragment behind.
 AND_GERUND = [
     (r"\band\s+avoiding\b", "and avoids"),
     (r"\band\s+ensuring\b", "and ensures"),
@@ -132,7 +137,8 @@ FINITE_VERBS = (
     r"keeps|keep|applies|apply|enables|enable|defines|define|covers|cover|checks|check|"
     r"rejects|reject|sends|send|creates|create|runs|run)\b"
 )
-# 断句只在右半有明确主语时才做，否则会切掉共享主语
+# Split only when the right side has an explicit subject; otherwise the shared subject
+# would be cut off.
 _SUBJECT_START = re.compile(r"^(the|this|that|these|those|it|they|we|you|i|each|such|both|all|most|some|any|a|an|its|their|our|his|her)\b", re.I)
 
 EN_FLAGGED_STARTERS = {"the", "this", "these", "when", "before", "if", "after"}
@@ -272,7 +278,7 @@ def en_starter_dedup(text: str, ctx: RuleContext) -> str:
 
 
 # ==============================================================================
-# 中文
+# Chinese
 # ==============================================================================
 ZH_FRAME_PATTERNS = [
     r"^随着.{2,15}?(?:的)?(?:不断)?(?:发展|推进|深入|普及|进步)[，,]",
@@ -300,7 +306,8 @@ ZH_ORDINAL_SERIES = [
 ]
 _ZH_ORDINAL_RE = re.compile(r"^(首先|其次|再次|最后|第一|第二|第三|起初|随后)[，,]")
 
-# 伴随结构与虚化尾巴：按类随机取用，不删除，保持因果或并列关系
+# Trailing connectives are swapped within a class, never deleted, so the causal or
+# coordinating relation survives.
 ZH_TAIL_CLASSES = {
     "causal": ["从而", "进而", "因而", "由此", "于是"],
     "causative": ["使得", "致使", "令", "让"],
@@ -312,7 +319,7 @@ _ZH_TAIL_RE = re.compile(
 
 
 def zh_tail_swap(text: str, ctx: RuleContext) -> str:
-    """英文 `, -ing` 的对应物：「，从而」「，使得」「，并且」轮流换成同类词。"""
+    """The Chinese counterpart of `, -ing`: 从而 / 使得 / 并且 rotate within their class."""
     if ctx.prob("zh", "tail_swap") <= 0:
         return text
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""De-AI Pipeline：跨语系多引擎竞标 + 确定性正则改写。
+"""De-AI Pipeline: cross-family multi-engine tournament plus deterministic regex rewriting.
 
-流程：筛段落 → 探测引擎可用性 → 逐段跑链 → 每条候选清洗 → 保真校验 → 打分 → 选优 → 写回 → 导出。
-所有中间结果落盘到 --work，同参数重跑复用已完成的翻译。
+Flow: collect blocks -> probe engines -> run chains -> clean every candidate -> validate ->
+score -> pick -> write back -> export. Every intermediate result lands in --work, so a rerun
+with the same arguments reuses finished translations.
 """
 
 import argparse
@@ -40,19 +41,19 @@ def cache_key(*parts: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description="De-AI Pipeline")
     ap.add_argument("--docx", "--input", dest="docx", required=True,
-                    help="输入文件：.docx / .md / .markdown / .txt")
+                    help="Input file: .docx / .md / .markdown / .txt")
     ap.add_argument("--out", "--out-docx", dest="out", required=True,
-                    help="输出文件，扩展名决定格式")
-    ap.add_argument("--out-pdf", default="", help="仅 .docx 支持，用 LibreOffice 或 Word 转换")
+                    help="Output file; the extension decides the format")
+    ap.add_argument("--out-pdf", default="", help=".docx only; converted with LibreOffice or Word")
     ap.add_argument("--src-lang", default="auto", choices=["auto", "en", "zh"])
     ap.add_argument("--dst-lang", default="same", choices=["same", "en", "zh"])
     ap.add_argument("--level", default="standard", choices=list(LEVEL_CHAINS))
     ap.add_argument("--min-words", type=int, default=30)
     ap.add_argument("--config", default=str(Path(__file__).parent / "config_default.json"))
     ap.add_argument("--terms", default="", help="JSON: [[pattern, replacement], ...]")
-    ap.add_argument("--work", default="", help="工作目录，默认 <out-docx>.work")
+    ap.add_argument("--work", default="", help="Work directory, defaults to <out>.work")
     ap.add_argument("--seed", type=int, default=None)
-    ap.add_argument("--skip-preflight", action="store_true", help="跳过引擎可用性探测")
+    ap.add_argument("--skip-preflight", action="store_true", help="Skip engine probing")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -73,20 +74,21 @@ def main() -> int:
     try:
         document = docio.load_document(args.docx)
     except ValueError as exc:
-        print(f"错误：{exc}")
+        print(f"ERROR: {exc}")
         return 1
     if args.out_pdf and document.kind != "docx":
-        print("错误：--out-pdf 只支持 .docx 输入。")
+        print("ERROR: --out-pdf supports .docx input only.")
         return 1
-    print(f"输入格式：{document.kind}")
+    print(f"Input format: {document.kind}")
 
     targets, skipped = document.units(min_words=args.min_words)
     print(f"Targets: {len(targets)} | skipped: {len(skipped)}")
     if not targets:
-        print("没有可改写的段落。检查 --min-words，或看跳过原因。")
+        print("No rewritable block. Check --min-words, or read the skip reasons.")
         return 1
     if not terms:
-        print("[INFO] 未指定 --terms，本次不做术语替换（自动抽取的标识符仍会受保护）。")
+        print("[INFO] No --terms given, so no term replacement this run "
+              "(auto-extracted identifiers are still protected).")
 
     if args.src_lang == "auto":
         langs = {chainmod.detect_lang(t["text"]) for t in targets}
@@ -97,22 +99,22 @@ def main() -> int:
     min_sim = float(min_sim_cfg.get(dst, 0.99)) if isinstance(min_sim_cfg, dict) else float(min_sim_cfg)
     cross = src != dst
 
-    print(f"挑链（{src} -> {dst}，逐跳挑第一个可用引擎）")
+    print(f"Selecting chains ({src} -> {dst}), first usable engine per hop")
     all_chains, chain_log, degradations = chainmod.build_chains(
         src, dst, cfg.get("chain_templates"), probe=not args.skip_preflight)
     for line in chain_log:
         print(line)
     all_chains = all_chains[: LEVEL_CHAINS[args.level]]
-    print(f"  可用链 {len(all_chains)} 条")
+    print(f"  {len(all_chains)} usable chain(s)")
     if degradations:
-        print(f"  [WARN] {len(degradations)} 跳降到 tier2（非原方案引擎），质量可能下降：")
+        print(f"  [WARN] {len(degradations)} hop(s) downgraded to tier2, quality may drop:")
         for d in degradations:
             print(f"    {d}")
 
     if not all_chains:
-        print("\n没有可用链。国内网络通常只有 iciba / qqTranSmart / youdao 可用，")
-        print("境外网络通常只有 reverso / bing / google 可用。")
-        print("在 config 的 chain_templates 里换成你能用到的引擎序列，例如：")
+        print("\nNo usable chain. Inside mainland China usually only iciba / qqTranSmart / youdao work;")
+        print("elsewhere usually only reverso / bing / google do.")
+        print("Replace chain_templates with engines you can reach, for example:")
         print('  [[["reverso","de"],["bing","fr"],["reverso",null]],')
         print('   [["bing","ja"],["reverso","de"],["reverso",null]]]')
         return 3
@@ -130,7 +132,7 @@ def main() -> int:
 
     protected = scoremod.extract_terms([t["text"] for t in targets]) if src == dst else []
     if protected:
-        print(f"自动术语保护 {len(protected)} 条：{', '.join(protected[:8])}"
+        print(f"Auto-protected terms ({len(protected)}): {', '.join(protected[:8])}"
               + (" …" if len(protected) > 8 else ""))
 
     scorer = scoremod.build_scorer(dst)
@@ -236,9 +238,9 @@ def main() -> int:
     if args.out_pdf:
         try:
             engine = docio.export_pdf(args.out, args.out_pdf)
-            print(f"PDF 由 {engine} 转换，元数据已清")
+            print(f"PDF converted by {engine}; metadata scrubbed")
         except Exception as exc:
-            print(f"[WARN] PDF 导出失败：{exc}")
+            print(f"[WARN] PDF export failed: {exc}")
             return 2
 
     report = {
@@ -259,20 +261,22 @@ def main() -> int:
 
 def write_report(path: Path, report: Dict, dst: str) -> None:
     lines = [
-        "# De-AI 报告",
+        "# De-AI report",
         "",
-        f"- 方向：{report['src']} → {report['dst']}（{report['level']}）",
-        f"- 种子：{report['seed']}　耗时：{report['elapsed_sec']}s",
-        f"- 链：{', '.join(report['chains'])}",
-        f"- 处理段数：{len(report['units'])}　失败：{len(report['failed'])}　跳过：{len(report['skipped'])}",
+        f"- Direction: {report['src']} -> {report['dst']} ({report['level']})",
+        f"- Seed: {report['seed']}  elapsed: {report['elapsed_sec']}s",
+        f"- Chains: {', '.join(report['chains'])}",
+        f"- Blocks: {len(report['units'])}  failed: {len(report['failed'])}  skipped: {len(report['skipped'])}",
         "",
-        "## 逐段结果",
+        "## Per-block result",
         "",
-        ("跨语种（{} -> {}）：改前分、3-gram 重合、相似度都不可比，已置空。".format(report["src"], report["dst"])
+        ("Cross-language ({} -> {}): the before score, 3-gram overlap and similarity are not "
+         "comparable and are left blank.".format(report["src"], report["dst"])
          if report["src"] != report["dst"]
-         else "改前 = 句式分 + 扣分，改后同口径；两栏都可超过 1，不是百分比。"),
+         else "Before = sentence score + penalty, after uses the same split; both columns can "
+              "exceed 1 and neither is a percentage."),
         "",
-        "| 段 | 状态 | 链 | 改前 | 改后 | 3-gram 重合 | 相似度 |",
+        "| Block | Status | Chain | Before | After | 3-gram overlap | Similarity |",
         "|---|---|---|---|---|---|---|",
     ]
     for u in report["units"]:
@@ -283,19 +287,21 @@ def write_report(path: Path, report: Dict, dst: str) -> None:
             f"| {u['chosen_divergence'] if u['chosen_divergence'] is not None else '—'} "
             f"| {round(u['chosen_sim'], 4) if u['chosen_sim'] is not None else '—'} |")
     if report["failed"]:
-        lines += ["", "## 未替换的段落", ""]
+        lines += ["", "## Blocks kept as-is", ""]
         for f in report["failed"]:
             lines.append(f"- `{f['unit']}` {f['reason']}")
     if report["skipped"]:
-        lines += ["", "## 跳过的段落", "", "| 段 | 原因 | 开头 |", "|---|---|---|"]
+        lines += ["", "## Skipped blocks", "", "| Block | Reason | Opening |", "|---|---|---|"]
         for s in report["skipped"]:
             lines.append(f"| {s['idx']} | {s['reason']} | {s['text'][:40]} |")
     if dst == "zh":
-        lines += ["", "## 中文指标（仅统计，不自动改）", "",
-                  "「的」字密度、最长定语句、排比密度在 `result.json` 的 `features` 里，三项都需要人工处理。"]
-    lines += ["", "## 说明", "",
-              "改后分是候选排序分，不是检测器概率。3-gram 重合率越低表示与原句词序差别越大。",
-              "只有通过数字、引用、标识符、术语、长度比校验的候选才会被选中。"]
+        lines += ["", "## Chinese metrics (measured only, never rewritten)", "",
+                  "Character density, longest attributive clause and parallelism density live in `features` "
+                  "inside `result.json`; all three need a human."]
+    lines += ["", "## Notes", "",
+              "The after score ranks candidates; it is not a detector probability. A lower 3-gram overlap "
+              "means the word order moved further from the source.",
+              "Only candidates that pass the number, citation, identifier, term and length checks can be chosen."]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

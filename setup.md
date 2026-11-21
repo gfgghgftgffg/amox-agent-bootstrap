@@ -22,7 +22,7 @@ Install complete Skills with their scripts, references and assets into the effec
 | anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/`, named `design-taste-frontend` |
 | amox-grill-me | [skills/amox-grill-me/](skills/amox-grill-me/) in this repository | Install the complete directory, including `LICENSE`, as `amox-grill-me` |
-| de-ai | [skills/de-ai/](skills/de-ai/) in this repository | Install the complete directory with `scripts/`, `references/`, `projects/` and `LICENSE`; run its scripts with the `codex` interpreter. Accepts `.docx`, `.md` and `.txt` |
+| de-ai | [skills/de-ai/](skills/de-ai/) in this repository | Install the complete directory with `scripts/`, `references/`, `projects/`, `README.md` and `LICENSE`; run its scripts with the `codex` interpreter. Accepts `.docx`, `.md` and `.txt` |
 
 Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html` and `de-ai`, including reused copies.
 

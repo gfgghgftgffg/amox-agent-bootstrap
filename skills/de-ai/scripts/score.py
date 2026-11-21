@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-"""候选打分与保真校验。
+"""Candidate scoring and fidelity validation.
 
-英文：GPT-2 的句间困惑度起伏 + 句式统计，加权求和。没有校准权重可用（那需要成对的
-人工标注样本），所以这是启发式分，只用于候选排序和改前改后比较。
-中文：同样没有校准样本，用可手算的句式统计做启发式分。
-保真：英文用 GPT-2 末层隐层余弦；中文用长度比。
+English: GPT-2 sentence-level perplexity variance plus sentence statistics, summed with
+weights. No calibrated weights exist (that would need paired human annotations), so this is a
+heuristic used only to rank candidates and to compare a block before and after.
+Chinese: no calibration sample either, so countable sentence statistics are used instead.
+Fidelity: cosine of the GPT-2 last hidden state for English, length ratio for Chinese.
 """
 
 import re
@@ -14,7 +15,8 @@ import numpy as np
 
 LENGTH_RATIO = {"en": (0.70, 1.45), "zh": (0.75, 1.40)}
 
-# 启发式公式的理论最大值，用来把 base 归一到 0~1，避免候选全部顶到上限
+# Theoretical maximum of each heuristic. Normalising base into 0~1 keeps candidates
+# distinguishable instead of letting them all saturate at the cap.
 EN_BASE_MAX = 1.575
 ZH_BASE_MAX = 1.55
 
@@ -25,7 +27,7 @@ def _is_cjk_text(text: str) -> bool:
 
 
 def trigram_jaccard(s1: str, s2: str) -> float:
-    """英文按词三元组，中文按字三元组（中文没有空格分词）。"""
+    """Word trigrams for English, character trigrams for Chinese (no whitespace tokenising)."""
     if _is_cjk_text(s1) or _is_cjk_text(s2):
         t1 = re.findall(r"[\u4e00-\u9fff]|[A-Za-z]+|\d+", s1.lower())
         t2 = re.findall(r"[\u4e00-\u9fff]|[A-Za-z]+|\d+", s2.lower())
@@ -52,9 +54,10 @@ def _size(text: str, lang: str) -> int:
 def validate(orig_text: str, cand: str, terms: Sequence[Tuple[str, str]] = (),
              dst_lang: str = "en", forbidden: Sequence[str] = (),
              protected: Sequence[str] = (), cross_lang: bool = False) -> List[str]:
-    """确定性保真校验。返回问题列表，空列表表示通过。
+    """Deterministic fidelity checks. Returns a problem list; empty means it passed.
 
-    术语检查只在目标语种为英文时生效：英文术语译成中文属于正常翻译，不是漂移。
+    The term check runs only for an English target: rendering an English term in Chinese is a
+    normal translation, not drift.
     """
     problems = []
     a, b = _spec(orig_text), _spec(cand)
@@ -83,7 +86,7 @@ def validate(orig_text: str, cand: str, terms: Sequence[Tuple[str, str]] = (),
     if re.search(r"QZ\d{3}ZQ", cand):
         problems.append("placeholder residue")
     if cross_lang:
-        # 中文汉字数与英文词数大致是 1 : 0.55~0.8，用这个区间抓截断
+        # Roughly 0.55-0.8 English words per Chinese character; this band catches truncation.
         zh_chars = len(re.findall(r"[一-鿿]", orig_text))
         en_words = _size(cand, "en")
         if zh_chars >= 20:
@@ -105,16 +108,17 @@ IDENT_PATTERNS = [
     r"\b[A-Z]{2,}\b",                               # TLS, KMS, AD
     r"\b[a-zA-Z]+:[a-zA-Z]+\b",                      # kms:Decrypt
     r"\b[A-Za-z]_[A-Za-z0-9,]+\b",                   # K_c,tgs
-    r"\bv?\d+\.\d+(?:\.\d+)*\b",  # 版本号
+    r"\bv?\d+\.\d+(?:\.\d+)*\b",  # version numbers
 ]
 _STOP_CAPS = {"A", "I", "OK", "AI", "HTML", "URL", "PDF", "DOCX", "API", "ID"}
 
 
 def extract_terms(texts: Sequence[str], min_repeat: int = 2) -> List[str]:
-    """从文档里自动抽出不能改动的标识符，不需要模型也不需要用户填表。
+    """Extract identifiers that must survive verbatim. No model and no user input required.
 
-    - 驼峰标识符、全大写缩写、`ns:Action`、`K_c,x`、版本号：出现过就算。
-    - 「多个首字母大写的词组」：至少重复 min_repeat 次才算产品名，避免把句首词当术语。
+    - Camel case, all-caps acronyms, `ns:Action`, `K_c,x` and version numbers count at first sight.
+    - Capitalised multi-word names need at least min_repeat occurrences, so a sentence-initial
+      word is not mistaken for a product name.
     """
     found: Dict[str, int] = {}
     for text in texts:
@@ -130,19 +134,19 @@ def extract_terms(texts: Sequence[str], min_repeat: int = 2) -> List[str]:
 
 
 class EnglishScorer:
-    """英文打分器：本地 GPT-2 提供困惑度与隐层，其余是正则统计。"""
+    """English scorer: local GPT-2 supplies perplexity and the hidden state, the rest is regex."""
 
     def __init__(self, model_name: str = "gpt2"):
         from transformers import AutoModelForCausalLM, AutoTokenizer
         import torch
 
         self.torch = torch
-        try:  # 已缓存就离线加载，避免每次跑都去连 Hub
+        try:  # Load offline when cached, so a run never depends on reaching the Hub.
             self.tok = AutoTokenizer.from_pretrained(model_name, local_files_only=True)
             self.mod = AutoModelForCausalLM.from_pretrained(model_name, local_files_only=True)
         except Exception:
-            print(f"[INFO] {model_name} 不在本地缓存，开始下载（约 500MB）。"
-                  "国内网络可先设 HF_ENDPOINT=https://hf-mirror.com")
+            print(f"[INFO] {model_name} is not cached locally; downloading (about 500MB). "
+                  "Where the Hub is unreachable, set HF_ENDPOINT=https://hf-mirror.com first.")
             self.tok = AutoTokenizer.from_pretrained(model_name)
             self.mod = AutoModelForCausalLM.from_pretrained(model_name)
         self.mod.eval()
@@ -224,7 +228,8 @@ class EnglishScorer:
             + 0.35 * f["modal_passive_rate"]
             + 0.25 * f["nmt_conn_rate"]
         )
-        # 除以理论最大值再截断，否则短段落会全部顶到 1.0，候选之间就分不出高低了
+        # Normalise by the theoretical maximum before clipping, otherwise short blocks all
+        # saturate at 1.0 and candidates stop being distinguishable.
         base = float(np.clip(raw / EN_BASE_MAX, 0.0, 1.0))
         ov = trigram_jaccard(text, ref_text) if ref_text else 0.0
         penalty = (0.80 * f["gerund_comma_rate"]
@@ -241,7 +246,7 @@ class EnglishScorer:
 
 
 class ChineseScorer:
-    """中文打分器：纯统计，无模型依赖。"""
+    """Chinese scorer: statistics only, no model dependency."""
 
     CONNECTORS = ("首先", "其次", "再次", "最后", "此外", "因此", "然而", "同时",
                   "综上", "总之", "值得注意", "不难看出", "众所周知", "由此可见")
@@ -290,7 +295,7 @@ class ChineseScorer:
         return base + penalty, f, None
 
     def fidelity(self, orig: str, cand: str) -> float:
-        """中文没有可比对的隐层，用长度比做粗保真指标。"""
+        """No comparable hidden state for Chinese, so length ratio is the coarse fidelity proxy."""
         a, b = len(orig), len(cand)
         if not a:
             return 0.0
