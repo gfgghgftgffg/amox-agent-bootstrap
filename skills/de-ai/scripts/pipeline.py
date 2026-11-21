@@ -68,6 +68,11 @@ def main() -> int:
     min_div = float(sel.get("min_divergence", 0.10))
     forbidden = list(cfg.get("forbidden", []))
 
+    if Path(args.out).resolve() == Path(args.docx).resolve():
+        print("ERROR: --out points at the input file. The original is never overwritten; "
+              "pick a different output path.")
+        return 1
+
     work = Path(args.work or (args.out + ".work"))
     (work / "units").mkdir(parents=True, exist_ok=True)
 

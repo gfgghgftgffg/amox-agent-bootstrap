@@ -49,6 +49,8 @@ python scripts/pipeline.py --input in.docx --out out.docx --src-lang en --dst-la
 python scripts/pipeline.py --input in.txt --out out.txt --src-lang zh --dst-lang en
 ```
 
+输入文件只读，结果写到 `--out`。两个参数给同一个路径会被直接拒绝，所以跑一次不会毁掉原稿。
+
 正式跑之前先空跑，看它会动哪些块：
 
 ```bash

@@ -47,6 +47,8 @@ python scripts/pipeline.py --input in.docx --out out.docx --src-lang en --dst-la
 python scripts/pipeline.py --input in.txt --out out.txt --src-lang zh --dst-lang en
 ```
 
+The input file is opened read-only and the result goes to `--out`. Passing the same path for both is refused, so a run cannot destroy the original.
+
 List what it would touch before touching it:
 
 ```bash

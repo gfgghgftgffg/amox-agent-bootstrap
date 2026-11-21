@@ -28,6 +28,8 @@ Accepts `.docx`, `.md`, `.markdown`, `.txt`. If the user pasted text into the ch
 
 Ask one question: Chinese output or English output. A Chinese source defaults to Chinese, an English source to English.
 
+Pick an output path the user did not name as the input. The script reads the input and writes a new file; it refuses when `--out` resolves to the input path, so the original survives a run.
+
 ### 2. Dry run
 
 ```bash
