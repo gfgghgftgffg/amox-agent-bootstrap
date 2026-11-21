@@ -22,14 +22,17 @@ Install complete Skills with their scripts, references and assets into the effec
 | anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/`, named `design-taste-frontend` |
 | amox-grill-me | [skills/amox-grill-me/](skills/amox-grill-me/) in this repository | Install the complete directory, including `LICENSE`, as `amox-grill-me` |
+| de-ai | [skills/de-ai/](skills/de-ai/) in this repository | Install the complete directory with `scripts/`, `references/`, `projects/` and `LICENSE`; run its scripts with the `codex` interpreter. Accepts `.docx`, `.md` and `.txt` |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me` and `meeting-summary-html`, including reused copies.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html` and `de-ai`, including reused copies.
 
 Install `amox-grill-me` instead of the official `grilling` or legacy `grill-me` Skill. On existing installations, back up and remove those replaced Skill copies from active discovery paths; preserve unrelated Skills. Do not install or update the official Skill alongside this replacement.
 
 Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
 
 Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
+
+For `de-ai`, install `pypdf` plus `skills/de-ai/scripts/requirements.txt` in the `codex` environment. English documents also need `torch`, `transformers` and a cached `gpt2`; PDF export needs LibreOffice; on Windows an installed Microsoft Word also works. Raise it explicitly with the file path, since it is excluded from automatic invocation. Document text is sent to third-party translation endpoints and the default term table is empty.
 
 ### Task Router
 

@@ -1,0 +1,43 @@
+{
+  "seed": 42,
+  "ordinal_series": "auto",
+  "max_per_word": 2,
+  "en": {
+    "connector_swap": 1.0,
+    "gerund_tail": 0.85,
+    "modal_passive": 0.7,
+    "split_long": 0.8,
+    "starter_dedup": 0.9
+  },
+  "zh": {
+    "frame_delete": 0.9,
+    "connector_swap": 0.8,
+    "tail_swap": 0.8,
+    "verbify": 0.7,
+    "passive_rewrite": 0.7,
+    "highfreq_trim": 0.6,
+    "split_long": 0.8,
+    "redundant_trim": 0.9,
+    "starter_dedup": 0.9
+  },
+  "zh_highfreq_words": [
+    "进一步",
+    "显著",
+    "充分",
+    "全面",
+    "极大",
+    "深入",
+    "有效",
+    "关键",
+    "核心"
+  ],
+  "selection": {
+    "min_sim": {
+      "en": 0.99,
+      "zh": 0.75
+    },
+    "require_validation": true,
+    "keep_all_candidates": true,
+    "min_divergence": 0.1
+  }
+}

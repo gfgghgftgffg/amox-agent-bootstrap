@@ -1,0 +1,14 @@
+# De-AI Pipeline 依赖
+# pip install -r requirements.txt
+
+python-docx>=1.1.0
+numpy>=1.26
+translators>=5.9.0
+
+# 英文稿需要（约 3GB：torch + GPT-2 权重）
+torch>=2.2
+transformers>=4.40
+
+# 仅 --out-pdf 需要：pypdf 清理 PDF 元数据。
+# 转换本身用 LibreOffice（跨平台，命令行 soffice），Windows 上没有时退回 Word COM。
+pypdf>=4.0

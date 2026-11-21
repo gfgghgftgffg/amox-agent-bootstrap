@@ -50,14 +50,17 @@ Install complete Skills, including scripts, references and assets, under `<agent
 | `autoresearch-hooks` | Render an explicit-only wrapper; see below |
 | `amox-grill-me` | Install the complete [skills/amox-grill-me/](skills/amox-grill-me/) directory from this repository, including `LICENSE` |
 | `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
+| `de-ai` | Install the complete [skills/de-ai/](skills/de-ai/) directory from this repository, including `scripts/`, `references/`, `projects/`, `README.md` and `LICENSE`; deploy [pi/prompts/de-ai.md](pi/prompts/de-ai.md) to `<agent-dir>/prompts/de-ai.md`. Accepts `.docx`, `.md` and `.txt` |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html` and `ian-xiaohei-illustrations`, including reused copies.
+Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html`, `ian-xiaohei-illustrations` and `de-ai`, including reused copies.
 
 Install `amox-grill-me` instead of the official `grilling` or legacy `grill-me` Skill. On existing installations, back up and remove those replaced Skill copies from active discovery paths; preserve unrelated Skills. Do not install or update the official Skill alongside this replacement.
 
 Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
 
 Media transcription for `meeting-summary-html` requires `DASHSCOPE_API_KEY`; text preparation requires no ASR key.
+
+`de-ai` is invoked as `/de-ai <file.docx>` through the deployed prompt template, or `/skill:de-ai`. Install its Python dependencies with `pip install -r skills/de-ai/scripts/requirements.txt` from the `codex` environment. English documents additionally need `torch`, `transformers` and a locally cached `gpt2` (about 3GB); pre-fetch it once with `HF_ENDPOINT=https://hf-mirror.com` when the Hub is unreachable. PDF export needs LibreOffice (cross-platform); on Windows it falls back to an installed Microsoft Word. Rewriting sends document text to third-party translation endpoints, so never run it on confidential material, and the term table defaults to empty so technical names are not silently rewritten.
 
 ### Autoresearch Skills
 

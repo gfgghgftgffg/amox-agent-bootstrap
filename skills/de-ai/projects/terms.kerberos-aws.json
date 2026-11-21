@@ -1,0 +1,23 @@
+[
+  ["\\bAWS Transfer family\\b", "AWS Transfer Family"],
+  ["\\bTransfer service family\\b", "Transfer Family"],
+  ["\\bTransfer family\\b", "Transfer Family"],
+  ["\\bIAM identity center\\b", "IAM Identity Center"],
+  ["\\bActive Directory domain services\\b", "Active Directory Domain Services"],
+  ["\\bticket granting server\\b", "ticket-granting server"],
+  ["\\bticket granting ticket\\b", "ticket-granting ticket"],
+  ["\\bread cache\\b", "replay cache"],
+  ["\\bplayback cache\\b", "replay cache"],
+  ["\\breplay memory\\b", "replay cache"],
+  ["\\bK_c,\\s*tgs\\b", "K_c,tgs"],
+  ["\\bK_c,\\s*s\\b", "K_c,s"],
+  ["\\bK_C,\\s*TGS\\b", "K_C,TGS"],
+  ["\\bK_C,\\s*S\\b", "K_C,S"],
+  ["\\bkms:\\s*GenerateDataKey\\b", "kms:GenerateDataKey"],
+  ["\\bkms:\\s*Decrypt\\b", "kms:Decrypt"],
+  ["\\bGet\\s*Object\\b", "GetObject"],
+  ["\\bList\\s*Bucket\\b", "ListBucket"],
+  ["\\bHome\\s*Bucket\\b", "HomeBucket"],
+  ["\\bHome\\s*Directory\\b", "HomeDirectory"],
+  ["\\bHome\\s*Folder\\b", "HomeFolder"]
+]
