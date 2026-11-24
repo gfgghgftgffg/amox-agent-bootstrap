@@ -91,6 +91,7 @@ Deploy the [file map](pi/README.md). Merge template-owned values while preservin
 Apply [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json) and [subagents.json](pi/subagents.json):
 
 - Keep the specified provider, model and thinking preferences; report unavailable models without substitution.
+- Keep `pi-btw.json` free of a `model` key so `/btw` follows the session model. A configured `model` is an override, and an unavailable one falls back to the session model with only a warning.
 - Enable codemode with `defaultTools: ["+codemode"]`, retaining existing tools and the default `codemode.mode: "on"`.
 - Set `hideThinkingBlock: false` and `theme: "catppuccin-mocha"`.
 - Apply the lean subagent template (`fallbackSubagent: "none"`, `strictAgentFiles: true`, `workflowsEnabled: true`); leave other options at package defaults and report project-level overrides.
