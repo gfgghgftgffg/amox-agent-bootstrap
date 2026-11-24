@@ -11,8 +11,8 @@ Deploy through [setup_for_pi.md](../setup_for_pi.md). `<agent-dir>` is `PI_CODIN
 | [starline.json](starline.json) | `<agent-dir>/starline.json` |
 | [themes/catppuccin-mocha.json](themes/catppuccin-mocha.json) | `<agent-dir>/themes/catppuccin-mocha.json` |
 | [sub2api.json](sub2api.json) | `<agent-dir>/sub2api.json`; preserve the existing token |
-| [web-search.json](web-search.json) | `<agent-dir>/web-search.json`; render helper path and relay URL |
-| [read-sub2api-search-key.cjs](read-sub2api-search-key.cjs) | Beside the deployed `sub2api.json` |
+| [web-search.json](web-search.json) | `<agent-dir>/web-search.json`; render the relay provider name |
+| [read-sub2api-search-key.cjs](read-sub2api-search-key.cjs) | Beside the deployed `sub2api.json`; only for the [standalone API-key alternative](#standalone-api-key-alternative) |
 | [pi-btw.json](pi-btw.json) | `<agent-dir>/pi-btw.json` |
 | [autoresearch-skill.md](autoresearch-skill.md) | Render three `<agent-dir>/skills/autoresearch-*/SKILL.md` wrappers; see [setup](../setup_for_pi.md#autoresearch-skills) |
 | [subagents.json](subagents.json) | `<agent-dir>/subagents.json` |
@@ -31,16 +31,24 @@ Use the values in `web-search.json`:
 
 | Setting | Value / adaptation |
 | --- | --- |
-| Search order | `openai` → `exa`, with the template's recoverable-error list |
-| Search model | `gpt-6.1-sol`, independent of the conversation model |
-| `openaiApiKey` | Replace `{{SUB2API_SEARCH_KEY_SCRIPT}}` with the deployed helper's absolute path; JSON-escape it |
-| `openaiResponsesUrl` | Derive from the existing relay `baseURL`: append `/v1/responses`, or `/responses` when it already ends in `/v1` |
-| `openaiSearchProviders` | `[]` |
+| Search order | `exa` → `openai` |
+| `searchRouting.fallbackOn` | `empty`, `domain-miss`, `unsupported`, `transient`, `quota`, `network`, `invalid-response` |
+| `openaiSearchProviders` | `["sub2api"]`, the provider key registered from `sub2api.json` |
+| `openaiUseProviderBaseUrl` | `true`; derives `<relay baseURL>/v1/responses` from the resolved provider credentials |
+| Search model | `gpt-6.2-sol`, independent of the conversation model |
 | `openaiUseAlphaSearch` | `false` |
 
-The helper reads the adjacent Sub2API token, supporting literal values and `${ENV_VAR_NAME}`. Preserve command-backed credentials and request a separate approved search source. Do not run the helper directly in a recorded terminal: its stdout is the token.
+Exa is first because it needs no key and returns bounded raw results; the OpenAI/Codex step runs a full Responses turn and bills its tokens. A caller that names a provider bypasses this route entirely, so `provider: "openai"` still reaches the relay on demand.
 
-Preserve unrelated fetch settings. With approval, remove conflicting top-level `provider`/`searchProvider` overrides and Sub2API `serverTools.responses` search injection. Keep other hosted tools. Do not set `searchRouting.useCurrentModel`. Live search tests require separate approval.
+`empty` and `domain-miss` are deliberate: a technically successful but unusable Exa response moves on to the OpenAI step instead of ending the search. Exa is semantic and rarely returns zero results, so in practice hard failures (`quota`, `network`, `invalid-response`, `unsupported`) are the common trigger. Do not add `off-topic`: it needs a Cloudflare Workers AI or typesafe judge model that this setup does not register.
+
+The OpenAI step reuses the relay credential that Pi already resolves for the provider, so `web-search.json` holds no key and no second copy of the relay URL.
+
+### Standalone API-key alternative
+
+If the relay credential cannot be resolved through Pi's provider registry, set `openaiResponsesUrl` to the full Responses endpoint, set `openaiApiKey`, and drop `openaiUseProviderBaseUrl`; an explicit `openaiResponsesUrl` wins over the derived one. The helper reads the adjacent Sub2API token for that mode, supporting literal values and `${ENV_VAR_NAME}`. Preserve command-backed credentials and request a separate approved search source. Do not run the helper directly in a recorded terminal: its stdout is the token.
+
+Preserve unrelated fetch settings. With approval, remove conflicting top-level `provider`/`searchProvider` overrides and Sub2API `serverTools.responses` search injection. Keep other hosted tools. Do not set `searchRouting.useCurrentModel`: it only accepts official OpenAI, ChatGPT Codex and Azure endpoints, so a relay never qualifies. Live search tests require separate approval.
 
 ## Other configuration
 

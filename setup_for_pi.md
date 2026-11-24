@@ -114,7 +114,7 @@ Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% o
 ### Provider, search and sync
 
 - Deploy [sub2api.json](pi/sub2api.json), preserving existing credentials. If absent, leave `YOUR_API_KEY` and tell the user the local file and `sub2api.token` field to edit privately.
-- Deploy [web-search.json](pi/web-search.json) and its credential helper using the [search routing instructions](pi/README.md#search-routing): Sub2API/OpenAI first, Exa fallback. Render the helper path and relay endpoint; preserve unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
+- Deploy [web-search.json](pi/web-search.json) using the [search routing instructions](pi/README.md#search-routing): Exa first, then the relay-backed OpenAI/Codex step. It needs no separate credential because `openaiUseProviderBaseUrl` reuses the provider token Pi already resolves from `sub2api.json`; render the provider key and keep unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
 - Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Deploy `amox-pi-sync.json` with `mode: "manual"` and `paths: ["sessions"]`; do not carry over the old suite's chat, environment or package-sync settings. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
 - Keep retry defaults and inspect `/retry status`.
 

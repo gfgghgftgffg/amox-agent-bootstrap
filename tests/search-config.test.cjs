@@ -20,21 +20,23 @@ function run(t, config, env = {}) {
   });
 }
 
-test('default search route is independent, Responses-backed, and credential-free', () => {
+test('default search route is Exa first with relay-backed OpenAI fallback', () => {
   const c = JSON.parse(fs.readFileSync(path.join(root, 'pi/web-search.json'), 'utf8'));
-  assert.deepEqual(c.searchRouting.providers, ['openai', 'exa']);
-  assert.deepEqual(c.searchRouting.fallbackOn, ['unsupported', 'transient', 'quota', 'network', 'invalid-response']);
+  assert.deepEqual(c.searchRouting.providers, ['exa', 'openai']);
+  assert.deepEqual(c.searchRouting.fallbackOn, ['empty', 'domain-miss', 'unsupported', 'transient', 'quota', 'network', 'invalid-response']);
   assert.equal(c.searchRouting.useCurrentModel, undefined);
-  assert.deepEqual(c.openaiSearchProviders, []);
+  assert.deepEqual(c.openaiSearchProviders, ['sub2api']);
+  assert.equal(c.openaiUseProviderBaseUrl, true);
   assert.equal(c.openaiUseAlphaSearch, false);
-  assert.equal(c.openaiSearchModel, 'gpt-6.1-sol');
+  assert.equal(c.openaiSearchModel, 'gpt-6.2-sol');
   assert.equal(c.workflow, 'none');
   assert.equal(c.provider, undefined);
   assert.equal(c.searchProvider, undefined);
-  assert.equal(c.openaiApiKey, '!node "{{SUB2API_SEARCH_KEY_SCRIPT}}"');
+  // The relay credential is reused through the provider registry; no second copy.
+  assert.equal(c.openaiApiKey, undefined);
+  assert.equal(c.openaiResponsesUrl, undefined);
   const relay = JSON.parse(fs.readFileSync(path.join(root, 'pi/sub2api.json'), 'utf8')).sub2api;
   assert.equal(relay.token, 'YOUR_API_KEY');
-  assert.equal(c.openaiResponsesUrl, relay.baseURL.replace(/\/$/, '').replace(/\/v1$/, '') + '/v1/responses');
   assert.ok(!relay.serverTools?.responses?.some(tool => tool.type === 'web_search'));
 });
 
