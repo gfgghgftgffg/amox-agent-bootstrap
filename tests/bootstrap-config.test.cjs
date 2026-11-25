@@ -23,6 +23,7 @@ test('codemode is additive and does not hide direct tools', () => {
     'npm:pi-starline',
     { source: 'npm:pi-autoresearch', skills: [] },
     'npm:@gfgghgftgffg/amox-pi-sync',
+    'npm:@gfgghgftgffg/amox-high-level',
   ]);
   assert.equal(settings.theme, 'catppuccin-mocha');
   assert.equal(settings.hideThinkingBlock, false);

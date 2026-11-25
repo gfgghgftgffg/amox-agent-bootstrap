@@ -4,10 +4,11 @@ max_concurrent = 30
 max_coding_repairs = 5
 
 # Model IDs and reasoning effort values come from your provider; this project does not hardcode capabilities.
-# Set provider = "provider-id" only when overriding the existing Codex provider.
+# Name the relay provider for each model and candidate.
 [orchestrator]
 model = "gpt-6.2-astra"
 effort = "xhigh"
+provider = "sub2api-gpt-only"
 
 # Each role's model/effort pair is a default candidate; optional when is a selection hint.
 # options is an array of inline tables, one candidate per line; id may be omitted and is generated deterministically from model/effort/provider.
@@ -15,32 +16,36 @@ effort = "xhigh"
 # All candidates share the role contract and sandbox.
 [roles.coding]
 model = "deepseek-flash"
+provider = "sub2api-mixed"
 effort = "max"
 when = "Default implementation with clear boundaries; use a stronger candidate for complex judgment or cross-module coordination"
 options = [
-  { model = "deepseek-flash", effort = "high", when = "Low-risk mechanical changes with clear boundaries" },
-  { model = "gpt-6.2-sol", effort = "xhigh", when = "Extremely complex implementation, or tasks explicitly identified as exceeding the capabilities of default candidates." }
+  { model = "deepseek-flash", provider = "sub2api-mixed", effort = "high", when = "Low-risk mechanical changes with clear boundaries" },
+  { model = "gpt-6.2-sol", provider = "sub2api-gpt-only", effort = "xhigh", when = "Extremely complex implementation, or tasks explicitly identified as exceeding the capabilities of default candidates." }
 ]
 
 [roles.search]
 model = "deepseek-flash"
+provider = "sub2api-mixed"
 effort = "high"
 when = "Precise file, symbol, or text matching and limited local repository navigation; return paths, line numbers, raw text, and short factual descriptions. Including tracing a call chain or data flow for a well-defined question, or targeted checking against official documentation on one topic"
 options = [
-  { model = "gpt-6.2-sol", effort = "medium", when = "Open-ended questions, multi-round online research, multi-source comparison, conflict checking, or evidence coverage that needs judgment; not every task that touches the network." }
+  { model = "gpt-6.2-sol", provider = "sub2api-gpt-only", effort = "medium", when = "Open-ended questions, multi-round online research, multi-source comparison, conflict checking, or evidence coverage that needs judgment; not every task that touches the network." }
 ]
 
 [roles.verify]
 model = "deepseek-flash"
+provider = "sub2api-mixed"
 effort = "high"
 when = "Verify routine behavior changes against the original acceptance criteria, related tests, and regression checks. Independent checks of mechanical changes with explicit, directly checkable criteria; exclude changes affecting behavior, permissions, concurrency, or data integrity"
 options = [
-  { model = "gpt-6.2-sol", effort = "high", when = "High-risk subtle behavior such as permissions, security, concurrency, data consistency, or cross-component integration and test sufficiency" }
+  { model = "gpt-6.2-sol", provider = "sub2api-gpt-only", effort = "high", when = "High-risk subtle behavior such as permissions, security, concurrency, data consistency, or cross-component integration and test sufficiency" }
 ]
 
 [roles.reasoning]
 model = "gpt-6.2-astra"
 effort = "xhigh"
+provider = "sub2api-gpt-only"
 when = "Exceptionally difficult problems or consequential trade-offs requiring the strongest available judgment"
 options = [
 
@@ -48,6 +53,7 @@ options = [
 
 [roles.general]
 model = "deepseek-flash"
+provider = "sub2api-mixed"
 effort = "high"
 when = "Larger non-coding analysis, summaries, and structured outputs"
 options = [

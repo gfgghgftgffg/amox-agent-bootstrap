@@ -13,12 +13,13 @@
       "source": "npm:pi-autoresearch",
       "skills": []
     },
-    "npm:@gfgghgftgffg/amox-pi-sync"
+    "npm:@gfgghgftgffg/amox-pi-sync",
+    "npm:@gfgghgftgffg/amox-high-level"
   ],
-  "defaultProvider": "sub2api",
+  "defaultProvider": "sub2api-gpt-only",
   "defaultModel": "gpt-6.2-sol",
   "defaultThinkingLevel": "medium",
-  "enabledModels": ["sub2api/*"],
+  "enabledModels": ["sub2api-gpt-only/*", "sub2api-mixed/*"],
   "tuiMode": "fullscreen",
   "theme": "catppuccin-mocha",
   "defaultTools": ["+codemode"],

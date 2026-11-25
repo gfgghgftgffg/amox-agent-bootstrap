@@ -38,7 +38,8 @@ that still needs my input.
 | Explicit-only Skills | `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html`, `ian-xiaohei-illustrations` and `de-ai` |
 | Interface | pi-tidy for tool folding/diffs; pi-starline provides the editor and clickable pill footer |
 | Appearance | Catppuccin Mocha, Maple Mono NF CN and 95% terminal opacity |
-| Search | Sub2API-hosted Codex/OpenAI search first, Exa fallback for configured recoverable errors |
+| Search | Exa first, with Sub2API-hosted Codex/OpenAI fallback for configured recoverable errors |
+| Reply summaries | amox-high-level, on demand with `/hl` or `+hl` |
 | Task Router | Explicit `/skill:task-routing`; shared rules in the Router checkout, Skills and scoped codemode enabled for children; no global Pi Router block |
 | Goals | pi-goal-x-lean; persistent goals coordinated with lean subagents and workflows, started only on request |
 | Pi Sync | amox-pi-sync; manual raw session sync to your own private SSH repository |

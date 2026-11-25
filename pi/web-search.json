@@ -1,6 +1,6 @@
 {
   "workflow": "none",
-  "openaiSearchProviders": ["sub2api"],
+  "openaiSearchProviders": ["sub2api-gpt-only"],
   "openaiUseProviderBaseUrl": true,
   "openaiSearchModel": "gpt-6.2-sol",
   "openaiUseAlphaSearch": false,

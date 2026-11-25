@@ -10,7 +10,7 @@ Deploy through [setup_for_pi.md](../setup_for_pi.md). `<agent-dir>` is `PI_CODIN
 | [settings.json](settings.json) | Merge into `<agent-dir>/settings.json` |
 | [starline.json](starline.json) | `<agent-dir>/starline.json` |
 | [themes/catppuccin-mocha.json](themes/catppuccin-mocha.json) | `<agent-dir>/themes/catppuccin-mocha.json` |
-| [sub2api.json](sub2api.json) | `<agent-dir>/sub2api.json`; preserve the existing token |
+| [sub2api.json](sub2api.json) | `<agent-dir>/sub2api.json`; merge by provider name and preserve existing tokens |
 | [web-search.json](web-search.json) | `<agent-dir>/web-search.json`; render the relay provider name |
 | [read-sub2api-search-key.cjs](read-sub2api-search-key.cjs) | Beside the deployed `sub2api.json`; only for the [standalone API-key alternative](#standalone-api-key-alternative) |
 | [pi-btw.json](pi-btw.json) | `<agent-dir>/pi-btw.json` |
@@ -33,7 +33,7 @@ Use the values in `web-search.json`:
 | --- | --- |
 | Search order | `exa` → `openai` |
 | `searchRouting.fallbackOn` | `empty`, `domain-miss`, `unsupported`, `transient`, `quota`, `network`, `invalid-response` |
-| `openaiSearchProviders` | `["sub2api"]`, the provider key registered from `sub2api.json` |
+| `openaiSearchProviders` | `["sub2api-gpt-only"]`, the GPT provider registered from `sub2api.json` |
 | `openaiUseProviderBaseUrl` | `true`; derives `<relay baseURL>/v1/responses` from the resolved provider credentials |
 | Search model | `gpt-6.2-sol`, independent of the conversation model |
 | `openaiUseAlphaSearch` | `false` |
@@ -46,7 +46,7 @@ The OpenAI step reuses the relay credential that Pi already resolves for the pro
 
 ### Standalone API-key alternative
 
-If the relay credential cannot be resolved through Pi's provider registry, set `openaiResponsesUrl` to the full Responses endpoint, set `openaiApiKey`, and drop `openaiUseProviderBaseUrl`; an explicit `openaiResponsesUrl` wins over the derived one. The helper reads the adjacent Sub2API token for that mode, supporting literal values and `${ENV_VAR_NAME}`. Preserve command-backed credentials and request a separate approved search source. Do not run the helper directly in a recorded terminal: its stdout is the token.
+If the relay credential cannot be resolved through Pi's provider registry, set `openaiResponsesUrl` to the full Responses endpoint, set `openaiApiKey`, and drop `openaiUseProviderBaseUrl`; an explicit `openaiResponsesUrl` wins over the derived one. The helper reads the adjacent `sub2api-gpt-only` token and uses legacy `sub2api` when the GPT-only entry is absent. It supports literal values and `${ENV_VAR_NAME}`. Preserve command-backed credentials and request a separate approved search source. Do not run the helper directly in a recorded terminal: its stdout is the token.
 
 Preserve unrelated fetch settings. With approval, remove conflicting top-level `provider`/`searchProvider` overrides and Sub2API `serverTools.responses` search injection. Keep other hosted tools. Do not set `searchRouting.useCurrentModel`: it only accepts official OpenAI, ChatGPT Codex and Azure endpoints, so a relay never qualifies. Live search tests require separate approval.
 

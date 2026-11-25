@@ -8,7 +8,8 @@ const path = require('node:path');
 
 try {
   const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'sub2api.json'), 'utf8'));
-  let token = config.sub2api?.token;
+  const provider = config["sub2api-gpt-only"] ?? config.sub2api;
+  let token = provider?.token;
   if (typeof token !== 'string') throw new Error('missing token');
   const reference = /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$/.exec(token);
   if (reference) token = process.env[reference[1]];
@@ -20,6 +21,6 @@ try {
   }
   process.stdout.write(token);
 } catch {
-  console.error('Search credential unavailable: check adjacent sub2api.json, sub2api.token and any referenced environment variable. Command-backed tokens need a separately configured openaiApiKey.');
+  console.error('Search credential unavailable: check adjacent sub2api.json, the GPT-only provider token and any referenced environment variable. Command-backed tokens need a separately configured openaiApiKey.');
   process.exitCode = 1;
 }

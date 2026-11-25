@@ -37,7 +37,8 @@
 | 仅显式调用的 Skills | `anti-defensive-writing`、`amox-grill-me`、`meeting-summary-html`、`ian-xiaohei-illustrations` 和 `de-ai` |
 | 界面 | pi-tidy 负责工具折叠和 diff；pi-starline 提供输入框和可点击的胶囊底栏 |
 | 外观 | Catppuccin Mocha、Maple Mono NF CN、终端背景 95% 不透明度 |
-| 搜索 | 优先使用 Sub2API 转发的 Codex/OpenAI 搜索，遇到指定的可恢复故障时回退 Exa |
+| 搜索 | 优先使用 Exa，遇到指定的可恢复故障时回退到 Sub2API 转发的 Codex/OpenAI 搜索 |
+| 回复摘要 | amox-high-level，通过 `/hl` 或 `+hl` 按需生成 |
 | Task Router | 通过 `/skill:task-routing` 显式启用；共享规则保存在 Router 仓库，子 Agent 可用 Skills 和受限 codemode，不在 Pi 全局指令中添加 Router 区块 |
 | 目标 | pi-goal-x-lean，持久目标与 lean 子 Agent／workflow 联动，仅按要求启动 |
 | Pi Sync | amox-pi-sync，仅手动同步原始会话，目标为用户自己的私有 SSH 仓库 |

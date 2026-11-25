@@ -4,7 +4,7 @@ Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md).
 
 ## 1. Runtime and Python
 
-- Reuse compatible Pi, Node.js, Git and Bash. Install Pi using its [official instructions](https://github.com/earendil-works/pi) if absent. Current packages require Node >=22.19 and Pi >=1.4.0 <2.0.0; tidy's bash/write previews require Pi >=1.3. Check current package requirements.
+- Reuse compatible Pi, Node.js, Git and Bash. Install Pi using its [official instructions](https://github.com/earendil-works/pi) if absent. Current packages require Node >=22.19 and Pi >=1.6.0 <2.0.0; tidy's bash/write previews require Pi >=1.3. Check current package requirements.
 - Reuse Conda, or install official Miniforge in a user-owned directory.
 - Reuse the `codex` environment, or create it with Python 3.12. Use its interpreter for all Python scripts and dependencies, not system Python, base or `pip --user`.
 - Install `pypdf` if absent and verify its import.
@@ -26,6 +26,7 @@ Install the following packages with `pi install npm:<name>`, without `--local` o
 | `npm:pi-starline` | Editor and pill footer |
 | `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
 | `npm:@gfgghgftgffg/amox-pi-sync` | Raw agent-data sync with manual sessions-only scope |
+| `npm:@gfgghgftgffg/amox-high-level` | On-demand reply summaries via `/hl` or `+hl`, with a clickable `HL` pill |
 
 This setup replaces `@heyhuynhgiabuu/pi-pretty`, `pi-open-tui` and `@narumitw/pi-statusline`. Back up settings, remove those confirmed old packages with `pi remove <actual-source>`, and preserve their preference files. Leave unrelated extensions unchanged.
 
@@ -114,8 +115,8 @@ Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% o
 
 ### Provider, search and sync
 
-- Deploy [sub2api.json](pi/sub2api.json), preserving existing credentials. If absent, leave `YOUR_API_KEY` and tell the user the local file and `sub2api.token` field to edit privately.
-- Deploy [web-search.json](pi/web-search.json) using the [search routing instructions](pi/README.md#search-routing): Exa first, then the relay-backed OpenAI/Codex step. It needs no separate credential because `openaiUseProviderBaseUrl` reuses the provider token Pi already resolves from `sub2api.json`; render the provider key and keep unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
+- Merge [sub2api.json](pi/sub2api.json) by provider name and preserve credentials for existing entries. `sub2api-gpt-only` serves GPT models and `sub2api-mixed` serves the mixed model pool. Leave `YOUR_API_KEY` for any missing token and tell the user which provider entry in the local file to fill privately. On a single-provider installation, keep the existing `sub2api` entry and reuse its credential for a new entry only if it is confirmed to serve that model pool. Report any missing assignments before using the affected default or Router roles.
+- Deploy [web-search.json](pi/web-search.json) using the [search routing instructions](pi/README.md#search-routing): Exa first, then the relay-backed OpenAI/Codex step. It needs no separate credential because `openaiUseProviderBaseUrl` reuses the provider token Pi already resolves from `sub2api.json`; keep the GPT-only provider key and preserve unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
 - Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Deploy `amox-pi-sync.json` with `mode: "manual"` and `paths: ["sessions"]`; do not carry over the old suite's chat, environment or package-sync settings. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
 - Keep retry defaults and inspect `/retry status`.
 
@@ -150,7 +151,7 @@ Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and 
 - Verify the three autoresearch wrappers are explicit-only, point to existing installed upstream Skills and retain original relative-reference resolution. Confirm the package has `skills: []`, no duplicate autoresearch Skills are loaded and no experiment loop was started.
 - Verify Router's shared `AGENTS.md` has portable environment requirements, no personal paths or unresolved placeholders, and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
 - Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
-- Restart Pi; check tidy diffs, starline layout and native queue text.
+- Restart Pi and check tidy diffs, starline layout and native queue text. Confirm `pi --offline --help` shows `--hl-model` to verify summary extension loading without generating a summary.
 - Verify Pi's `catppuccin-mocha` theme and the active terminal profile's Catppuccin Mocha scheme separately. Report both states; applying only the Pi theme does not complete theme setup.
 - Report installed/reused/pending/failed items, effective paths and restart requirements.
 

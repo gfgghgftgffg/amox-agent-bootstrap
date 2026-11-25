@@ -25,7 +25,7 @@ test('default search route is Exa first with relay-backed OpenAI fallback', () =
   assert.deepEqual(c.searchRouting.providers, ['exa', 'openai']);
   assert.deepEqual(c.searchRouting.fallbackOn, ['empty', 'domain-miss', 'unsupported', 'transient', 'quota', 'network', 'invalid-response']);
   assert.equal(c.searchRouting.useCurrentModel, undefined);
-  assert.deepEqual(c.openaiSearchProviders, ['sub2api']);
+  assert.deepEqual(c.openaiSearchProviders, ['sub2api-gpt-only']);
   assert.equal(c.openaiUseProviderBaseUrl, true);
   assert.equal(c.openaiUseAlphaSearch, false);
   assert.equal(c.openaiSearchModel, 'gpt-6.2-sol');
@@ -35,13 +35,22 @@ test('default search route is Exa first with relay-backed OpenAI fallback', () =
   // The relay credential is reused through the provider registry; no second copy.
   assert.equal(c.openaiApiKey, undefined);
   assert.equal(c.openaiResponsesUrl, undefined);
-  const relay = JSON.parse(fs.readFileSync(path.join(root, 'pi/sub2api.json'), 'utf8')).sub2api;
-  assert.equal(relay.token, 'YOUR_API_KEY');
-  assert.ok(!relay.serverTools?.responses?.some(tool => tool.type === 'web_search'));
+  const relays = JSON.parse(fs.readFileSync(path.join(root, 'pi/sub2api.json'), 'utf8'));
+  const settings = JSON.parse(fs.readFileSync(path.join(root, 'pi/settings.json'), 'utf8'));
+  assert.equal(settings.defaultProvider, c.openaiSearchProviders[0]);
+  assert.deepEqual(settings.enabledModels, ['sub2api-gpt-only/*', 'sub2api-mixed/*']);
+  assert.deepEqual(Object.keys(relays), ['sub2api-gpt-only', 'sub2api-mixed']);
+  for (const relay of Object.values(relays)) {
+    assert.equal(relay.token, 'YOUR_API_KEY');
+    assert.ok(!relay.serverTools?.responses?.some(tool => tool.type === 'web_search'));
+  }
 });
 
 test('literal token is read beside the helper, not from cwd', t => {
-  const result = run(t, JSON.stringify({ sub2api: { token: 'fixture-not-a-real-key' } }));
+  const result = run(t, JSON.stringify({
+    'sub2api-gpt-only': { token: 'fixture-not-a-real-key' },
+    sub2api: { token: 'unrelated-legacy-key' },
+  }));
   assert.equal(result.status, 0);
   assert.equal(result.stdout, 'fixture-not-a-real-key');
   assert.equal(result.stderr, '');

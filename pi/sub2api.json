@@ -1,5 +1,10 @@
 {
-  "sub2api": {
+  "sub2api-gpt-only": {
+    "baseURL": "https://sub2api.amox.cc:18443",
+    "token": "YOUR_API_KEY",
+    "api": "openai-codex-responses"
+  },
+  "sub2api-mixed": {
     "baseURL": "https://sub2api.amox.cc:18443",
     "token": "YOUR_API_KEY",
     "api": "openai-codex-responses"
