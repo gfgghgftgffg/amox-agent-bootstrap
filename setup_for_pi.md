@@ -93,6 +93,7 @@ Apply [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json) and [suba
 
 - Keep the specified provider, model and thinking preferences; report unavailable models without substitution.
 - Keep `pi-btw.json` free of a `model` key so `/btw` follows the session model. A configured `model` is an override, and an unavailable one falls back to the session model with only a warning.
+- Merge [pi-high-level.json](pi/pi-high-level.json) for on-demand summaries with `sub2api-mixed/deepseek-flash`, `high` thinking and a 30-second timeout. Report if the summary model is unavailable.
 - Enable codemode with `defaultTools: ["+codemode"]`, retaining existing tools and the default `codemode.mode: "on"`.
 - Set `hideThinkingBlock: false` and `theme: "catppuccin-mocha"`.
 - Apply the lean subagent template (`fallbackSubagent: "none"`, `strictAgentFiles: true`, `workflowsEnabled: true`); leave other options at package defaults and report project-level overrides.

@@ -1,0 +1,11 @@
+{
+  "model": "sub2api-mixed/deepseek-flash",
+  "thinking": "high",
+  "mode": "manual",
+  "timeoutMs": 30000,
+  "auto": {
+    "minChars": 1200,
+    "minLines": 28
+  },
+  "fallbackMenu": true
+}

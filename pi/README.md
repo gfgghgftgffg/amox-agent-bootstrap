@@ -14,6 +14,7 @@ Deploy through [setup_for_pi.md](../setup_for_pi.md). `<agent-dir>` is `PI_CODIN
 | [web-search.json](web-search.json) | `<agent-dir>/web-search.json`; render the relay provider name |
 | [read-sub2api-search-key.cjs](read-sub2api-search-key.cjs) | Beside the deployed `sub2api.json`; only for the [standalone API-key alternative](#standalone-api-key-alternative) |
 | [pi-btw.json](pi-btw.json) | `<agent-dir>/pi-btw.json` |
+| [pi-high-level.json](pi-high-level.json) | Merge into `<agent-dir>/pi-high-level.json` |
 | [autoresearch-skill.md](autoresearch-skill.md) | Render three `<agent-dir>/skills/autoresearch-*/SKILL.md` wrappers; see [setup](../setup_for_pi.md#autoresearch-skills) |
 | [subagents.json](subagents.json) | `<agent-dir>/subagents.json` |
 | [amox-pi-sync.json](amox-pi-sync.json) | `<agent-dir>/amox-pi-sync.json`; supply a private SSH remote and absolute checkout path |
