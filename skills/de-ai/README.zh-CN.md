@@ -1,96 +1,85 @@
 # de-ai
 
-改写文档，让它不再读起来像机翻或生成文本。
+[English](README.md) | 简体中文
 
-![Python](https://img.shields.io/badge/python-3.9%2B-blue)
-![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue?style=flat-square)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)
 
-支持 `.docx`、`.md`、`.txt`，中文或英文都行，输出保持原格式。正文由跨语系机器翻译加正则规则产出，不由语言模型生成。
+[安装依赖](#安装依赖) • [快速开始](#快速开始) • [处理流程](#处理流程) • [翻译链](#翻译链) • [规则与术语配置](#规则与术语配置) • [命令行参数](#命令行参数) • [输出与限制](#输出与限制)
 
-英文主文档：[README.md](README.md)。agent 读取的是 [SKILL.md](SKILL.md)，本文件是中文镜像。
+使用跨语系机器翻译链与确定性正则规则改写中英文 `.docx`、`.md` 或 `.txt` 文档，输出保持指定文档格式。所有改写结果均由翻译接口和固定种子的规则脚本生成，不经过语言模型改写正文。Agent 调用时读取 [SKILL.md](SKILL.md)。
 
-## 功能
+> [!WARNING]
+> 目标段落会通过 [`translators`](https://github.com/UlionTse/translators) 发送到第三方免费翻译接口。请勿用于机密或受限文档。
 
-- 四条翻译链，每条穿过两个中转语种，原文语序留不下来
-- 确定性清理翻译留下的痕迹：`, -ing` 尾巴、情态被动、套话连接词、长度雷同的句子、重复的句首
-- 每块产出多个候选，按"改了多远"排序，同时不丢数字、引用和标识符
-- 引擎自动降级，适配你网络能连上的翻译接口
-- 每个项目的规则概率和术语表都是纯 JSON
-- 读写 Word、Markdown、纯文本；除 PDF 导出外不需要任何外部程序
+## 安装依赖
 
-## 依赖
-
-Python 3.9 或更新。
+需要 Python 3.9 及以上版本：
 
 ```bash
 pip install -r scripts/requirements.txt
 ```
 
-英文稿另需 `torch`、`transformers` 和本地缓存的 GPT-2，合计约 3GB。
+输出为英文时，打分与隐状态相似度校验还需 `torch`、`transformers` 及本地缓存的 `gpt2` 模型（合计约 3 GB）。
 
 > [!TIP]
-> 连不上 Hugging Face 时，先过镜像拉一次。之后缓存在本地，离线可用。
+> 无法直连 Hugging Face Hub 时，可先通过镜像预拉取一次 `gpt2`，后续即可离线加载：
 >
 > ```bash
-> HF_ENDPOINT=https://hf-mirror.com python -c "from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('gpt2')"
+> HF_ENDPOINT=https://hf-mirror.com python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; AutoTokenizer.from_pretrained('gpt2'); AutoModelForCausalLM.from_pretrained('gpt2')"
 > ```
 
 ## 快速开始
 
 ```bash
-# 中文进，中文出
+# 仅探测可用链并输出分块计划，不执行改写
+python scripts/pipeline.py --input in.docx --out out.docx --src-lang auto --dst-lang same --dry-run
+
+# 中文 Markdown 改写为中文
 python scripts/pipeline.py --input in.md --out out.md --src-lang zh --dst-lang zh
 
-# 英文进，英文出
+# 英文 Word 文档改写为英文
 python scripts/pipeline.py --input in.docx --out out.docx --src-lang en --dst-lang en
 
-# 中文进，英文出
+# 中文纯文本翻译并清理为英文
 python scripts/pipeline.py --input in.txt --out out.txt --src-lang zh --dst-lang en
 ```
 
-输入文件只读，结果写到 `--out`。两个参数给同一个路径会被直接拒绝，所以跑一次不会毁掉原稿。
+`pipeline.py` 以只读方式打开 `--input`，若 `--out` 与输入解析为同一路径则直接报错退出，不会覆盖原文件。
 
-正式跑之前先空跑，看它会动哪些块：
+作为仅显式调用的 Agent Skill（[SKILL.md](SKILL.md)）使用时，将本目录放入宿主 Skills 目录（Pi 另需部署仓库中的 `pi/prompts/de-ai.md`），再通过 `/de-ai <file>` 或 `/skill:de-ai` 触发。
 
-```bash
-python scripts/pipeline.py --input in.docx --out out.docx --src-lang auto --dst-lang same --dry-run
+## 处理流程
+
+1. **提取正文块**：按空行切分 `.md`/`.txt` 或逐段扫描 `.docx`，跳过标题、代码块、表格、图表注、参考文献及字词数低于 `--min-words`（默认 `30`）的短块。
+2. **执行跨语系翻译链**：每个正文块依次经过最多 4 条三跳翻译链，经过日语、俄语、德语、法语等两个中转语种重排从句和修饰语顺序，再译回目标语种。
+3. **执行正则后处理**：修正标点、执行可选术语表替换、轮换连接词与序号词组、清理英文 `, -ing` 伴随状语与情态被动或中文套话框架与虚化动词、切分超长句、去重连续同构句首，并还原 `[N]` 引用编号。
+4. **保真校验与排序**：剔除丢失数字、引用、全大写／`ns:Action` 标识符、受保护术语或术语频次的候选，以及触发 `forbidden` 禁用词或长度比例越界（英文 `0.70–1.45` 词、中文 `0.75–1.40` 字、`zh -> en` 跨语种 `0.30–1.05` 英文词/汉字）的候选。先从通过校验的候选中选出达到相似度阈值的结果。同语种改写时，再优先考虑 `3-gram` Jaccard 重叠度至少为 `0.10`（`selection.min_divergence`）的候选。同组内按 `score`（`base + penalty`）从低到高排序。重叠度超过 `0.22` 会增加惩罚项。
+
+特征对比与打分公式见 [references/chains.md](references/chains.md)。
+
+## 翻译链
+
+默认模板在每一跳先探测 `tier1` 引擎列表，连不通时自动降级到 `tier2` 备选池：
+
+```text
+原文 --[iciba]-->       de --[qqTranSmart]--> fr     --[youdao]--> 目标语种
+原文 --[qqTranSmart]--> ja --[iciba]-->       de     --[youdao]--> 目标语种
+原文 --[iciba]-->       ru --[qqTranSmart]--> de     --[iciba]-->  目标语种
+原文 --[reverso]-->     de --[qqTranSmart]--> BRIDGE --[iciba]-->  目标语种
 ```
 
-作为 agent skill 使用时，把本目录放进 skills 路径，再把本仓库 `pi/prompts/de-ai.md` 的 prompt 模板复制到对应位置，然后显式调用。它是刻意排除在自动选择之外的。
+`BRIDGE` 自动取 `zh, en, ja, fr, de, ru` 中第一个既非源语也非目标语的语种。可用接口取决于网络环境（中国大陆常见为 `iciba`、`qqTranSmart`、`youdao`、`baidu`；境外常见为 `reverso`、`bing`、`google`、`yandex`）。
 
-## 工作原理
-
-固定四条跳法，每条穿过两个中转语种，最后回到原语种：
-
-```
-原文 --[iciba]-->   德语 --[qq]-->     法语 --[youdao]--> 原语种
-原文 --[qq]-->      日语 --[iciba]-->  德语 --[youdao]--> 原语种
-原文 --[iciba]-->   俄语 --[qq]-->     德语 --[iciba]-->  原语种
-原文 --[reverso]--> 德语 --[qq]-->     桥接语种 --[iciba]--> 原语种
-```
-
-起作用的是中间那个语种，不是引擎。中英直译回英文，从句顺序和修饰语位置几乎原样保留；过一遍日语或俄语，语序就被打散了。
-
-翻译完之后，每条候选过一遍清理规则，再过一遍校验。丢数字、丢引用、丢受保护标识符、术语次数对不上、出现禁用词，或者长度跑出区间（英文 0.70~1.45 词，中文 0.75~1.40 字，跨语种 0.30~1.05 英文词每汉字）的候选直接作废。长度这一条挡的是翻译接口悄悄吃掉长段落尾巴的情况。
-
-活下来的候选里，跟原文差得最远的那个胜出。
-
-## 选择翻译引擎
-
-翻译走 [`translators`](https://github.com/UlionTse/translators) 包的那些免费接口，能连上哪几个取决于你在哪跑。国内通常是 `iciba`、`qqTranSmart`、`youdao`、`baidu`；境外通常是 `reverso`、`bing`、`google`、`yandex`。
-
-每一跳都配了 tier1（原方案实测过的引擎）和 tier2（备用）。开跑前逐跳探测一次，取第一个能连上的：
-
-```
+```text
 chain2 zh->ja      uses qqTranSmart  [tier1]
 chain3 de->en      uses baidu        [tier2]  <- downgraded
 ```
 
 > [!NOTE]
-> 出现 `[tier2]` 说明原方案引擎不可用，效果可能变差。末跳限定在 `youdao` 和 `iciba`，因为 reverso 放末跳会留下欧式学术腔。
+> `tier1` 将末跳限定在 `youdao` 和 `iciba`，因为 `reverso` 放在末跳会残留欧式学术句式，因此仅作为中间跳或 `tier2` 备选。
 
-要换顺序或换引擎，覆盖配置里的 `chain_templates`。每跳写成 `[语种, [tier1...], [tier2...]]`，`null` 表示文档自己的目标语种：
+如需调整引擎顺序，可在配置文件中覆盖 `chain_templates`（每跳格式为 `[语种, [tier1...], [tier2...]]`，`null` 代表文档目标语种）：
 
 ```json
 {
@@ -102,15 +91,17 @@ chain3 de->en      uses baidu        [tier2]  <- downgraded
 }
 ```
 
-## 调整改写强度
+## 规则与术语配置
 
-每条规则都按概率逐处触发。从 `projects/rewrite.example.json` 复制一份，改完用 `--config` 传进去：
+### 改写规则
+
+复制 [projects/rewrite.example.json](projects/rewrite.example.json) 修改后通过 `--config` 传入：
 
 ```json
 {
   "seed": 42,
-  "max_per_word": 2,
   "ordinal_series": "auto",
+  "max_per_word": 2,
   "en": {
     "connector_swap": 1.0,
     "gerund_tail": 0.85,
@@ -131,23 +122,24 @@ chain3 de->en      uses baidu        [tier2]  <- downgraded
   },
   "zh_highfreq_words": ["进一步", "显著", "充分", "全面", "极大", "深入", "有效", "关键", "核心"],
   "forbidden": [],
-  "selection": { "min_sim": { "en": 0.99, "zh": 0.75 }, "min_divergence": 0.10 }
+  "selection": {
+    "min_sim": { "en": 0.99, "zh": 0.75 },
+    "require_validation": true,
+    "keep_all_candidates": true,
+    "min_divergence": 0.1
+  }
 }
 ```
 
-`0` 等于关掉，低于 `0.3` 基本不命中。`seed` 固定随机源，同样的参数重跑得到同一份稿。`max_per_word` 限制同一个连接词全篇最多替换几次，`ordinal_series` 锁定序号风格，避免 `First` 后面接 `Secondly`。
+- 规则数值（`0.0`–`1.0`）表示逐处命中的触发概率（`0` 关闭规则）；`seed` 固定后处理规则的随机选择。
+- `max_per_word` 限制单个连接词全篇替换上限（同时对 `zh_highfreq_words` 保留前 `max_per_word` 次出现后再按概率删减）；`ordinal_series` 固定序号成套出现（避免 `首先` 后混入异构序号）。
+- `forbidden` 列出禁止新引入的错译词。术语替换与引用还原始终全量执行。
 
-英文那组管 `, -ing` 尾巴、九条固定情态被动、连接词轮换、长句断开、连续同构句首。中文那组管框架句（`随着…的发展`、`综上所述`）、虚化动词（`进行了分析` → `分析了`）、被动、高频修饰词、伴随尾巴（`，从而`、`，使得`）、长句和重复句首。
+### 术语保护与替换
 
-另有两个设置不只是概率。`forbidden` 里的词一旦出现在候选文本就作废该候选，用来挡你见过的错译。`selection.min_divergence` 是"这条候选算真正改写"所需的最小 3-gram 差异。
+同语种改写会自动提取并保护驼峰命名、全大写缩写、`ns:Action`、下标键（如 `K_c,tgs`）、版本号及重复出现的首字母大写专名。
 
-术语还原和引用补回不受这些概率影响，永远全量执行。
-
-## 术语
-
-标识符不需要任何配置就受保护。脚本会抽出驼峰名、全大写缩写、`ns:Action`、下标键、版本号和重复出现的产品名，候选里丢掉一个就作废。这项检查只在源语和目标语相同时跑，因为跨语种翻译时标识符本来就该被译掉。
-
-替换需要显式给表，因为它是全局正则，词表不对会改坏正文。表是 `[正则, 替换]` 的列表：
+正则术语替换默认为空，需通过 `--terms` 显式传入 `[[正则, 替换], ...]`，避免误伤无关正文：
 
 ```json
 [
@@ -160,78 +152,61 @@ chain3 de->en      uses baidu        [tier2]  <- downgraded
 python scripts/pipeline.py --input in.docx --out out.docx --terms projects/terms.example.json
 ```
 
-> [!TIP]
-> 从 `projects/terms.example.json` 起步。`projects/terms.kerberos-aws.json` 是一份已验证的词表，可以看到技术论文的真实词表长什么样。
+可从 [projects/terms.example.json](projects/terms.example.json) 起步，或参考已验证的技术论文词表 [projects/terms.kerberos-aws.json](projects/terms.kerberos-aws.json)。
 
-不给 `--terms` 就什么都不替换，运行时会提示。
-
-## 命令行
+## 命令行参数
 
 | 参数 | 说明 |
-|---|---|
-| `--input`、`--docx` | 输入文件：`.docx`、`.md`、`.markdown`、`.txt` |
-| `--out`、`--out-docx` | 输出文件，扩展名决定格式 |
-| `--src-lang auto\|en\|zh` | 默认 `auto`，逐块按 CJK 占比判断 |
-| `--dst-lang same\|en\|zh` | `same` 表示交原语种 |
-| `--level light\|standard\|deep` | 跑 1、3 或 4 条链，默认 `standard` |
-| `--config <json>` | 概率、种子和链模板 |
-| `--terms <json>` | 术语表 |
-| `--seed N` | 固定随机源以复现同一次结果 |
-| `--dry-run` | 只出计划，不改写 |
-| `--skip-preflight` | 跳过引擎探测 |
-| `--out-pdf <pdf>` | 仅 `.docx` 输入；LibreOffice 优先，Windows 可退回 Word |
+| --- | --- |
+| `--input`、`--docx` | 输入文件路径（`.docx`、`.md`、`.markdown`、`.mdown`、`.txt`） |
+| `--out`、`--out-docx` | 输出文件路径（不得与 `--input` 相同；扩展名决定输出格式） |
+| `--src-lang auto\|en\|zh` | 源语种；默认 `auto` 在全部目标块的汉字/拉丁字母比均 `> 0.3` 时取 `zh`，否则取 `en` |
+| `--dst-lang same\|en\|zh` | 目标语种；默认 `same` 保持源语种 |
+| `--level light\|standard\|deep` | 启用的翻译链数量：`1`、`3`（默认）或 `4` |
+| `--min-words <int>` | 参与改写的最小块长度（汉字数 + 英文词数，默认 `30`） |
+| `--config <json>` | 规则概率、筛选阈值、随机种子与 `chain_templates` 配置文件 |
+| `--terms <json>` | 可选术语替换表 `[[正则, 替换], ...]` |
+| `--work <dir>` | 缓存与报告输出目录（默认 `<out>.work`） |
+| `--seed <int>` | 覆盖配置中的随机种子 |
+| `--dry-run` | 探测引擎并生成 `<work>/plan.json`，不执行翻译改写 |
+| `--skip-preflight` | 跳过运行前的逐跳引擎探测 |
+| `--out-pdf <pdf>` | 仅限 `.docx` 输入；通过 LibreOffice（600 秒超时）或 Windows Word COM（300 秒超时）导出已清理元数据的 PDF |
 
-退出码：`0` 全部替换，`1` 没有可改的块，`2` 有块被保留或 PDF 导出失败，`3` 没有可用链，需要改 `chain_templates`。
+**退出码**：`0` 全部目标块完成替换；`1` 参数错误或无可改写块；`2` 部分块保留原文或 PDF 导出失败；`3` 无可用翻译链。
 
-## 输出
+## 输出与限制
 
-```
-out.docx                    改写后的文档，元数据已清
-out.docx.work/report.md     逐块对照表、未替换原因、跳过清单
-out.docx.work/result.json   全部候选、分数、校验问题、最终文本
-out.docx.work/units/        每块每条链的原始翻译，重跑时复用
-```
-
-每一块最后落在六种状态之一。四种写回（`replaced`、`replaced-low-sim`、`replaced-min-change`、`replaced-worse`），两种保留原文（`all-candidates-failed-validation`、`all-chains-failed`）。六种都会写进报告。
-
-`report.md` 里的分数只用于同一个块内部的候选排序。跨文档不可比，也不是检测器的读数。
-
-## 支持的格式
-
-| 扩展名 | 读 | 写 | 跳过 |
-|---|---|---|---|
-| `.docx` | python-docx | 保留段落样式，合并段内 run | 标题样式、图表注、参考文献、等宽字体段落、短标签 |
-| `.md` `.markdown` | 纯文本，按空行分块 | 原样写回 | 标题、代码围栏、表格、引用块、链接定义、缩进代码 |
-| `.txt` | 纯文本，按空行分块 | 原样写回 | 过短的块 |
-
-Markdown 的代码围栏逐行判断，围栏内的内容（含表格）不动。旧版 `.doc` 不支持，先另存为 `.docx`。
-
-## 目录结构
-
-```
-pipeline.py         入口：收集块、跑链、校验、选优、写回
-docio.py            .docx / .md / .txt 统一读写，含 PDF 导出
-chains.py           链模板、逐跳引擎探测与降级
-rules.py            中英两套改写规则
-score.py            候选打分与校验
-config_default.json 默认概率
-requirements.txt    Python 依赖
-
-references/chains.md    阈值和链为什么这样定
-projects/               示例配置与术语表，复制后改
+```text
+out.docx                    改写后的文档（.docx 已清理核心元数据）
+out.docx.work/report.md     逐块状态对照表、保留原文原因与跳过清单
+out.docx.work/result.json   所有候选译文、特征分项与校验详情
+out.docx.work/units/        按块和链缓存的原始翻译结果，同参数重跑直接复用
 ```
 
-## 注意
+每个目标块最终记为六种状态之一：`replaced`、`replaced-low-sim(<min_sim)`、`replaced-min-change(<min_div)`、`replaced-worse(+Δ)`（写回译文），或 `all-candidates-failed-validation`、`all-chains-failed`（保留原文）。`report.md` 中的 `Before` 和 `After` 仅用于块内候选排序，不代表任何检测器的判定概率。
 
-> [!WARNING]
-> 正文会发给上面列出的第三方翻译接口。机密材料不要用。
+### 格式处理与注意事项
 
-> [!NOTE]
-> `.docx` 写回会合并段内 run，段落中间的加粗、斜体、上标引用编号会丢，导出后要核格式。Markdown 和纯文本没有这个问题。
+| 格式 | 读写方式 | 自动跳过的块 |
+| --- | --- | --- |
+| `.docx` | 基于 `python-docx`；保留段落样式，合并被替换段落内的 run，并清理 `docProps/core.xml` | 标题／目录／图表注／参考文献样式、图表与摘要行、等宽字体段落、长度 `< min-words` 的块 |
+| `.md`、`.markdown`、`.mdown` | 按空行分块，UTF-8（`\n`）写回 | 标题、围栏与缩进代码块（含围栏内表格）、表格、引用块、分隔线、图片、HTML、链接定义及 `< min-words` 的块 |
+| `.txt` | 按空行分块，UTF-8（`\n`）写回 | 长度 `< min-words` 的块 |
 
 > [!CAUTION]
-> 整篇改写会动到本来没问题的块，也可能把它们改差。报告里标为"几乎没动"或"分数升高"的那些块要读一遍。
+> `.docx` 写回会合并段落内的 run，段内局部加粗、斜体和上标格式会丢失。定稿前请核查 `.docx` 排版，并重点通读报告中标记为 `replaced-min-change` 或 `replaced-worse` 的段落。旧版 `.doc` 需先另存为 `.docx`。
 
-块列表是有限的，每跳最多试三次，链数由 `--level` 固定。PDF 导出给 LibreOffice 600 秒、Word 300 秒超时。由 agent 驱动时最多跑两轮；自己驱动也一样，同一块跑第三轮基本不会变。
+### 目录结构
 
-PDF 导出用 LibreOffice，Windows 上也可以用 Microsoft Word。其余功能不依赖任何外部程序。
+```text
+scripts/
+  pipeline.py         命令行入口：分块、缓存、跑链、选优与报告输出
+  docio.py            .docx / Markdown / 纯文本统一读写及 PDF 导出
+  chains.py           翻译链模板、逐跳预探测与重试逻辑
+  rules.py            受随机种子控制的中英文正则后处理规则
+  score.py            GPT-2／统计打分、术语提取与保真校验
+  config_default.json 默认规则概率与筛选阈值
+  requirements.txt    Python 依赖清单
+references/chains.md  特征对照数据、打分公式与翻译链设计依据
+projects/             可复制修改的改写配置与术语表示例
+```

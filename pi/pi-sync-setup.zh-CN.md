@@ -1,33 +1,44 @@
-# Pi Sync 配置
+# Pi Sync 配置指南
 
 [English](pi-sync-setup.md) | 简体中文
 
-每台电脑安装 `npm:@gfgghgftgffg/amox-pi-sync`。使用你自己的**私有仓库和 SSH 读写权限**，不要使用本 bootstrap 仓库。移除被替换的 `pi-sync-suite` 或本地 amox-pi-sync 注册，保留其文件和备份，只加载一个同步扩展。
+在每台电脑上安装 `npm:@gfgghgftgffg/amox-pi-sync`，通过你自己的私有 SSH Git 仓库手动同步 Pi 会话文件。切勿将同步远端指向本 bootstrap 仓库。
 
-## 配置
+若 `settings.json` 中仍注册着 `pi-sync-suite` 或本地路径版 `amox-pi-sync`，移除旧注册项并保留原有数据与备份目录，确保同时只加载一个同步扩展。
 
-将 [amox-pi-sync.json](amox-pi-sync.json) 部署到 `<agent-dir>/amox-pi-sync.json`。`<agent-dir>` 由 `PI_CODING_AGENT_DIR` 指定，默认 `~/.pi/agent`。
+## 配置 `amox-pi-sync.json`
 
-| 字段 | 设置 |
+先备份已有同步配置，再将 [amox-pi-sync.json](amox-pi-sync.json) 部署到 `<agent-dir>/amox-pi-sync.json`（`<agent-dir>` 取 `PI_CODING_AGENT_DIR`，默认 `~/.pi/agent`）：
+
+| 字段 | 取值与规则 |
 | --- | --- |
-| `repoUrl` | 私有仓库 SSH 地址，替换两个 `YOUR_*` 占位符 |
-| `repoDir` | 将 `{{SYNC_REPO_DIR}}` 替换为专用副本的绝对路径，通常为 `<agent-dir>/amox-pi-sync-repo` |
-| `mode` | `manual`，启动时不访问网络 |
-| `paths` | `["sessions"]`，相对于 agent 数据目录 |
-| `retention` | 保留最新 20 份、最长 180 天；清理需手动预览并确认 |
+| `repoUrl` | 个人私有会话仓库的 SSH 地址（替换 `YOUR_GITHUB_USERNAME` 与 `YOUR_PRIVATE_SESSIONS_REPO`） |
+| `repoDir` | 专用本地同步副本路径；将 `{{SYNC_REPO_DIR}}` 替换为本机绝对路径（通常为 `<agent-dir>/amox-pi-sync-repo`） |
+| `mode` | `"manual"`（Pi 启动时不自动联网拉取或推送） |
+| `paths` | `["sessions"]`，相对于 `<agent-dir>` 解析 |
+| `retention` | `<agent-dir>/amox-pi-sync-backups` 中超出 `20` 份或超过 `180` 天的备份会列为清理候选。清理须手动预览并确认 |
 
-先备份已有配置，保留有效的 amox 远端、本地副本和运行时字段。各电脑使用相同远端、各自的本地路径。仓库信息缺失时标记为待配置。
+重跑部署时保留已配置的有效 `repoUrl`、`repoDir` 与运行参数；多台电脑共用同一个远端 `repoUrl`，各自使用本机独立的 `repoDir`。若尚未准备私有仓库，将该项记为待配置，不要虚构仓库地址。
 
-从 `pi-sync-suite.json` 迁移时保留 SSH 远端，使用新的 `amox-pi-sync-repo` 副本，不复用旧 `sync-suite-repo`。新配置不存在时，扩展可读取旧文件而不改写它；保存时写入新文件。amox 配置不使用旧版的 `chat`、`environment`、`policy` 或 `syncLocalPackagePaths` 字段。备份存放在 `<agent-dir>/amox-pi-sync-backups`。
+### 从 `pi-sync-suite` 迁移
 
-## 验证与使用
+迁移时可复用 `pi-sync-suite.json` 中已确认的 SSH `repoUrl`，同时将 `repoDir` 指向新建的 `<agent-dir>/amox-pi-sync-repo`，不要复用旧的 `sync-suite-repo`。在 `amox-pi-sync.json` 尚未生成前，扩展可以只读兼容旧配置文件，保存设置时写入新的 `amox-pi-sync.json`。不要迁移旧版专有的 `chat`、`environment`、`policy` 或 `syncLocalPackagePaths` 字段。
 
-在 GitHub 设置中确认仓库为私有且有写权限。可通过 `ssh -T git@github.com` 和 `git ls-remote <你的SSH仓库地址>` 检查 SSH／读取权限。重载 Pi，查看 `/sync-status` 或点击 Starline 的 `pi-sync` 胶囊。手动模式启动时不连接远端。
+## 验证与日常命令
 
-- `/sync-push`：上传选中的原始 agent 文件。
-- `/sync-pull`：应用远端文件，同路径内容不同时先备份再替换；保留本地独有文件，不得覆盖活跃会话。
-- `/sync-settings`：设置路径和模式、管理备份、查看诊断及手动清理。
+1. 在 GitHub 仓库设置中确认仓库为私有并检查写入权限，再在本机验证 SSH 认证和远端读取权限。
+   ```sh
+   ssh -T git@github.com
+   git ls-remote <你的SSH仓库地址>
+   ```
+2. 重载 Pi，运行 `/sync-status`（或点击 Starline 右侧的 `pi-sync` 胶囊）核对配置状态。手动模式下启动不会访问远端。
 
-传输前检查会话中的敏感内容并备份本地数据，避免多台电脑同时推送。Bootstrap 不执行同步、setup 命令或清理。`/sync-setup` 只保存配置、不传输数据，bootstrap 验证无需调用它。真实凭据、会话、本地副本和备份不进入本仓库。
+常用命令：
 
-[README](../README.zh-CN.md) · [Pi 部署](../setup_for_pi.md)
+- `/sync-push` — 将配置的 `sessions` 文件推送到私有远端仓库。
+- `/sync-pull` — 拉取远端文件；同名且内容不同的本地文件会先备份到 `amox-pi-sync-backups` 再替换，本地独有文件保留不变，当前活跃会话不会被覆盖。
+- `/sync-settings` — 调整同步路径与模式、查看诊断信息、管理备份或执行手动清理。
+
+推送或拉取前先检查会话中是否包含敏感信息并做好本地备份，避免多台设备同时推送。Bootstrap 期间不执行 `/sync-push`、`/sync-pull`、`/sync-setup` 或清理操作（`/sync-setup` 仅用于写入配置，验收无需调用）。切勿将真实凭据、会话记录、本地同步副本或备份提交到本仓库。
+
+相关文档：[README](../README.zh-CN.md) · [Pi 部署说明](../setup_for_pi.md)

@@ -1,159 +1,160 @@
-# Pi setup
+# Pi Setup Guide
 
-Configure Pi on Windows, macOS or Linux using the [pi/ templates](pi/README.md). Respect `PI_CODING_AGENT_DIR` (default `~/.pi/agent`), back up changed files and preserve unrelated settings and credentials. Use unpinned user-level package sources. Do not make paid model calls, launch agents or transfer private data for setup checks.
+Configure Pi on Windows, macOS, or Linux using the [pi/ templates](pi/README.md). Resolve `<agent-dir>` from `PI_CODING_AGENT_DIR` (default `~/.pi/agent`), back up every modified file, and preserve unrelated settings and credentials. Install extensions from unpinned user-level npm sources. Do not make paid model calls, spawn live subagents, run benchmarks, or transfer private sync data during setup checks.
 
-## 1. Runtime and Python
+## 1. Runtime and Python environment
 
-- Reuse compatible Pi, Node.js, Git and Bash. Install Pi using its [official instructions](https://github.com/earendil-works/pi) if absent. Current packages require Node >=22.19 and Pi >=1.6.0 <2.0.0; tidy's bash/write previews require Pi >=1.3. Check current package requirements.
+- Reuse compatible installations of Pi, Node.js, Git, and Bash. If Pi is missing, install it following the [official Pi repository](https://github.com/earendil-works/pi). Current extensions require Node.js `>=22.19` and Pi `>=1.6.0 <2.0.0` (`pi-tidy` bash/write previews require Pi `>=1.3`); verify current upstream requirements before installing.
 - Reuse Conda, or install official Miniforge in a user-owned directory.
-- Reuse the `codex` environment, or create it with Python 3.12. Use its interpreter for all Python scripts and dependencies, not system Python, base or `pip --user`.
-- Install `pypdf` if absent and verify its import.
+- Reuse the `codex` Conda environment, or create it with Python 3.12. Run all Python scripts and package installs with its interpreter rather than system Python, `base`, or `pip --user`.
+- Install `pypdf` in `codex` if missing and confirm `import pypdf` succeeds.
 
 ## 2. Packages
 
-Install the following packages with `pi install npm:<name>`, without `--local` or version pins. Keep the order in [settings.json](pi/settings.json) and preserve unrelated packages.
+Install each package with `pi install npm:<name>` (no `--local`, no version pins). Keep the order in [settings.json](pi/settings.json) and preserve unrelated packages.
 
-| Package | Purpose |
+| Package | Role |
 | --- | --- |
-| `npm:@indexyz/pi-provider-sub2api` | Relay provider and model discovery |
-| `npm:@narumitw/pi-btw` | Side conversation |
-| `npm:@gfgghgftgffg/pi-web-access-lean` | `web_access` |
-| `npm:@gfgghgftgffg/rpiv-todo-lean` | `todo` |
-| `npm:@gfgghgftgffg/pi-subagents-lean` | `subagent` and native workflows |
-| `npm:@gfgghgftgffg/pi-goal-x-lean` | Persistent goals with parent-session ownership and subagent/workflow waiting |
-| `npm:@monotykamary/pi-retry` | Retry and continuation |
-| `npm:pi-tidy` | User messages, tool folding and diff presentation |
-| `npm:pi-starline` | Editor and pill footer |
-| `npm:pi-autoresearch` | Autonomous experiment loop; disable bundled Skill discovery with `skills: []` |
-| `npm:@gfgghgftgffg/amox-pi-sync` | Raw agent-data sync with manual sessions-only scope |
-| `npm:@gfgghgftgffg/amox-high-level` | On-demand reply summaries via `/hl` or `+hl`, with a clickable `HL` pill |
+| `npm:@indexyz/pi-provider-sub2api` | Sub2API relay provider and model discovery |
+| `npm:@narumitw/pi-btw` | Side-pane `/btw` conversation |
+| `npm:@gfgghgftgffg/pi-web-access-lean` | `web_access` search and fetch tool |
+| `npm:@gfgghgftgffg/rpiv-todo-lean` | `todo` task tracker |
+| `npm:@gfgghgftgffg/pi-subagents-lean` | `subagent` delegation and native workflows |
+| `npm:@gfgghgftgffg/pi-goal-x-lean` | Persistent `/goal` execution coordinated with subagents and workflows |
+| `npm:@monotykamary/pi-retry` | Automatic retry and continuation |
+| `npm:pi-tidy` | Framed messages, right-aligned user prompts, tool folding, and diff rendering |
+| `npm:pi-starline` | Editor frame and clickable Nerd Font pill footer |
+| `npm:pi-autoresearch` | Autonomous experiment loop (`skills: []` disables bundled Skill auto-discovery) |
+| `npm:@gfgghgftgffg/amox-pi-sync` | Manual `sessions`-only raw data sync |
+| `npm:@gfgghgftgffg/amox-high-level` | On-demand `/hl` and `+hl` reply summaries with a clickable `HL` pill |
 
-This setup replaces `@heyhuynhgiabuu/pi-pretty`, `pi-open-tui` and `@narumitw/pi-statusline`. Back up settings, remove those confirmed old packages with `pi remove <actual-source>`, and preserve their preference files. Leave unrelated extensions unchanged.
+Migrate legacy extensions safely:
 
-Read the [amox package instructions](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). For existing `@ssk_dev` or local facades, obtain approval before source migration and remove only the replaced registrations. Keep one tool per name; do not separately load upstream engines. For sync, replace confirmed `pi-sync-suite` or local `amox-pi-sync` registrations with `npm:@gfgghgftgffg/amox-pi-sync`; keep the old files and backups, and never load both sync extensions. Normal npm installation needs no amox checkout. Update packages later with `pi update --extensions`.
-
-Install `pi-goal-x-lean` after the current `pi-subagents-lean` and do not separately load upstream `pi-goal-x`. Keep one source per extension. Use `/goal <objective>` only when requested; bootstrap must not create goals or start autonomous runs. The parent owns goals; tracked subagent/workflow results must be delivered before automatic continuation or completion. Goal milestones and `todo` remain independent. No extra goal configuration file is required.
+- Back up `settings.json`, uninstall confirmed legacy UI packages (`@heyhuynhgiabuu/pi-pretty`, `pi-open-tui`, `@narumitw/pi-statusline`) via `pi remove <actual-source>`, and leave their old config files backed up or untouched.
+- Review the [amox lean extension docs](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). Ask for approval before migrating existing `@ssk_dev` or local facade entries, and remove only replaced registrations so each tool name has one active provider without loading separate upstream engines.
+- Replace confirmed `pi-sync-suite` or local `amox-pi-sync` registrations with `npm:@gfgghgftgffg/amox-pi-sync`, keeping existing data and backups; never load two sync extensions at once.
+- Place `pi-goal-x-lean` after `pi-subagents-lean` and do not load upstream `pi-goal-x` alongside it. Only invoke `/goal <objective>` when asked by the user; parent sessions own goals, wait for tracked subagent/workflow deliveries before continuing or completing, and keep goal milestones separate from `todo`.
+- Update installed extensions later with `pi update --extensions`.
 
 ## 3. Skills
 
-Install complete Skills, including scripts, references and assets, under `<agent-dir>/skills/`. Reuse existing copies without duplicates.
+Install complete Skill directories (including `scripts/`, `references/`, `assets/`, and licenses) under `<agent-dir>/skills/`, reusing existing valid copies without duplicates.
 
-| Skill | Source / installation |
+| Skill | Source and scope |
 | --- | --- |
-| `design-taste-frontend` | [taste-skill](https://github.com/Leonxlnx/taste-skill), only `skills/taste-skill/` |
-| `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), only `skills/create-readme/` |
-| `humanizer` | [blader/humanizer](https://github.com/blader/humanizer) |
+| `design-taste-frontend` | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill), install only `skills/taste-skill/` |
+| `create-readme` | [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main/skills/create-readme), install only `skills/create-readme/` |
+| `humanizer` | [blader/humanizer](https://github.com/blader/humanizer), full Skill |
 | `anti-defensive-writing` | [Kiterlin/anti-defensive-writing](https://github.com/Kiterlin/anti-defensive-writing), install only the root `SKILL.md` and license |
-| `meeting-summary-html` | [meeting-summary-html](https://github.com/gfgghgftgffg/meeting-summary-html), including preparation scripts |
-| `task-routing` | Generate through the installer in section 5 |
-| `autoresearch-create` | Render an explicit-only wrapper; see below |
-| `autoresearch-finalize` | Render an explicit-only wrapper; see below |
-| `autoresearch-hooks` | Render an explicit-only wrapper; see below |
-| `amox-grill-me` | Install the complete [skills/amox-grill-me/](skills/amox-grill-me/) directory from this repository, including `LICENSE` |
-| `ian-xiaohei-illustrations` | [source](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets and attribution |
-| `de-ai` | Install the complete [skills/de-ai/](skills/de-ai/) directory from this repository, including `scripts/`, `references/`, `projects/`, `README.md`, `README.zh-CN.md` and `LICENSE`; deploy [pi/prompts/de-ai.md](pi/prompts/de-ai.md) to `<agent-dir>/prompts/de-ai.md`. Accepts `.docx`, `.md` and `.txt` |
+| `meeting-summary-html` | [gfgghgftgffg/meeting-summary-html](https://github.com/gfgghgftgffg/meeting-summary-html), including preparation scripts |
+| `task-routing` | Generated by the Task Router installer in section 5 |
+| `autoresearch-create` | Rendered explicit-only wrapper ([Autoresearch Skills](#autoresearch-skills)) |
+| `autoresearch-finalize` | Rendered explicit-only wrapper ([Autoresearch Skills](#autoresearch-skills)) |
+| `autoresearch-hooks` | Rendered explicit-only wrapper ([Autoresearch Skills](#autoresearch-skills)) |
+| `amox-grill-me` | Copy complete [skills/amox-grill-me/](skills/amox-grill-me/) from this repository, including `LICENSE` |
+| `ian-xiaohei-illustrations` | [helloianneo/ian-xiaohei-illustrations](https://github.com/helloianneo/ian-xiaohei-illustrations), inner `ian-xiaohei-illustrations/` with references, assets, and attribution |
+| `de-ai` | Copy complete [skills/de-ai/](skills/de-ai/) (`scripts/`, `references/`, `projects/`, `README.md`, `README.zh-CN.md`, `SKILL.md`, `LICENSE`) and deploy [pi/prompts/de-ai.md](pi/prompts/de-ai.md) to `<agent-dir>/prompts/de-ai.md` (`.docx`, `.md`, `.txt`) |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html`, `ian-xiaohei-illustrations` and `de-ai`, including reused copies.
+Apply these invocation and dependency rules:
 
-Install `amox-grill-me` instead of the official `grilling` or legacy `grill-me` Skill. On existing installations, back up and remove those replaced Skill copies from active discovery paths; preserve unrelated Skills. Do not install or update the official Skill alongside this replacement.
-
-Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
-
-Media transcription for `meeting-summary-html` requires `DASHSCOPE_API_KEY`; text preparation requires no ASR key.
-
-`de-ai` is invoked as `/de-ai <file.docx>` through the deployed prompt template, or `/skill:de-ai`. Install its Python dependencies with `pip install -r skills/de-ai/scripts/requirements.txt` from the `codex` environment. English documents additionally need `torch`, `transformers` and a locally cached `gpt2` (about 3GB); pre-fetch it once with `HF_ENDPOINT=https://hf-mirror.com` when the Hub is unreachable. PDF export needs LibreOffice (cross-platform); on Windows it falls back to an installed Microsoft Word. Rewriting sends document text to third-party translation endpoints, so never run it on confidential material, and the term table defaults to empty so technical names are not silently rewritten.
+- Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html`, `ian-xiaohei-illustrations`, and `de-ai`, including reused copies.
+- Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
+- Install `amox-grill-me` instead of upstream `grilling` or legacy `grill-me`. On existing setups, back up and remove those replaced Skill copies from active discovery paths while keeping unrelated Skills intact. Do not install or update the upstream Skill alongside `amox-grill-me`.
+- `meeting-summary-html` requires `DASHSCOPE_API_KEY` only for audio/video transcription; text preparation needs no key.
+- Run `pip install -r skills/de-ai/scripts/requirements.txt` in the `codex` environment for `de-ai` (invoked via `/de-ai <file>` or `/skill:de-ai`). English documents also need `torch`, `transformers`, and local `gpt2` weights (~3 GB; prefetch with `HF_ENDPOINT=https://hf-mirror.com` when Hugging Face Hub is blocked). PDF export uses LibreOffice or Windows Word COM. Never run `de-ai` on confidential text because blocks go to third-party translation endpoints; default term replacements remain empty unless `--terms` is passed.
 
 ### Autoresearch Skills
 
-Keep the `pi-autoresearch` package entry in object form with `skills: []` as in [settings.json](pi/settings.json). Load its extension, but expose its three Skills only through explicit-only wrappers.
+Keep `{ "source": "npm:pi-autoresearch", "skills": [] }` in [settings.json](pi/settings.json) so the extension loads without exposing bundled Skills to automatic model invocation.
 
-For each of `autoresearch-create`, `autoresearch-finalize` and `autoresearch-hooks`, render [autoresearch-skill.md](pi/autoresearch-skill.md) to `<agent-dir>/skills/<name>/SKILL.md`. Replace `{{SKILL_NAME}}` with that name and `{{UPSTREAM_SKILL_PATH}}` with the verified absolute path to `skills/<name>/SKILL.md` in the installed `pi-autoresearch` package. For managed npm installs the package normally lives at `<agent-dir>/npm/node_modules/pi-autoresearch`; verify rather than copying another host's path. Keep `disable-model-invocation: true` and preserve unrelated custom instructions in reused wrappers.
+Render [pi/autoresearch-skill.md](pi/autoresearch-skill.md) to `<agent-dir>/skills/<name>/SKILL.md` for `autoresearch-create`, `autoresearch-finalize`, and `autoresearch-hooks`:
 
-The wrappers read upstream files from the installed package, so package updates also update their workflows. Do not edit the npm Skill files directly.
+- Substitute `{{SKILL_NAME}}` with the Skill name and `{{UPSTREAM_SKILL_PATH}}` with the verified local path to `skills/<name>/SKILL.md` inside the installed `pi-autoresearch` package (typically `<agent-dir>/npm/node_modules/pi-autoresearch`, verified on this host).
+- Keep `disable-model-invocation: true`, preserve any custom user additions in existing wrappers, and never edit files inside `node_modules` directly.
 
-The extension registers `/autoresearch` independently of Skill discovery. The wrappers keep the original Skill names available to explicit `/skill:` calls and the extension's internal calls, while `disable-model-invocation: true` hides them from automatic model selection.
-
-| Bundled Skill | Purpose |
+| Wrapper Skill | Workflow |
 | --- | --- |
-| `autoresearch-create` | Define the objective, metric, commands and scope; prepare session files and begin experiments |
-| `autoresearch-finalize` | Organize kept experiments into reviewable branches |
-| `autoresearch-hooks` | Author optional before/after iteration hooks, such as notifications or research fetching |
+| `autoresearch-create` | Define objective, metric, commands, and scope, write session files, and start experiments |
+| `autoresearch-finalize` | Group kept experiments into clean reviewable branches |
+| `autoresearch-hooks` | Configure optional pre/post-iteration hooks |
 
-Use `/autoresearch <goal>` to activate experiment mode and start setup, or resume when `.auto/prompt.md` exists. Use `/autoresearch dashboard` to inspect results, `/autoresearch off` to stop while preserving records, and `/autoresearch finalize` to stop the mode before loading the finalize Skill. Do not substitute direct `/skill:autoresearch-create` or `/skill:autoresearch-finalize` calls for these lifecycle commands: the Skill calls alone do not activate or stop experiment mode. Invoke `/skill:autoresearch-hooks <request>` explicitly when hook configuration is needed.
+Use `/autoresearch <goal>` to start or resume (`.auto/prompt.md`), `/autoresearch dashboard` to inspect progress, `/autoresearch off` to stop while keeping records, and `/autoresearch finalize` to exit experiment mode before finalizing; calling `/skill:autoresearch-create` or `/skill:autoresearch-finalize` directly does not toggle experiment mode. Use `/skill:autoresearch-hooks <request>` explicitly for hooks.
 
 Do not start a loop, run benchmarks or create/revert commits during bootstrap checks.
 
 ## 4. Configuration
 
-Deploy the [file map](pi/README.md). Merge template-owned values while preserving unrelated object keys. Preserve unrelated package registrations and tool choices; do not copy machine-generated changelog versions or sync timestamps.
+Deploy the files listed in the [Pi template map](pi/README.md#template-map), merging template-owned keys while preserving unrelated settings, tools, and credentials. Omit machine-generated version stamps or sync timestamps.
 
 ### Main settings
 
-Apply [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json) and [subagents.json](pi/subagents.json):
+Merge [settings.json](pi/settings.json), [pi-btw.json](pi/pi-btw.json), [pi-high-level.json](pi/pi-high-level.json), and [subagents.json](pi/subagents.json):
 
-- Keep the specified provider, model and thinking preferences; report unavailable models without substitution.
-- Keep `pi-btw.json` free of a `model` key so `/btw` follows the session model. A configured `model` is an override, and an unavailable one falls back to the session model with only a warning.
-- Merge [pi-high-level.json](pi/pi-high-level.json) for on-demand summaries with `sub2api-mixed/deepseek-flash`, `high` thinking and a 30-second timeout. Report if the summary model is unavailable.
-- Enable codemode with `defaultTools: ["+codemode"]`, retaining existing tools and the default `codemode.mode: "on"`.
-- Set `hideThinkingBlock: false` and `theme: "catppuccin-mocha"`.
-- Apply the lean subagent template (`fallbackSubagent: "none"`, `strictAgentFiles: true`, `workflowsEnabled: true`); leave other options at package defaults and report project-level overrides.
+- Keep `defaultProvider: "sub2api-gpt-only"`, `defaultModel: "gpt-6.2-sol"`, `defaultThinkingLevel: "medium"`, and `enabledModels`; report unavailable models rather than substituting others.
+- Keep `pi-btw.json` without a `model` key so `/btw` tracks the active session model.
+- Configure `pi-high-level.json` with `sub2api-mixed/deepseek-flash`, `thinking: "high"`, `mode: "manual"`, and `timeoutMs: 30000`; report if that model is unavailable.
+- Enable `defaultTools: ["+codemode"]` (retaining standard tools and default `codemode.mode: "on"`), `hideThinkingBlock: false`, and `theme: "catppuccin-mocha"`.
+- Set `subagents.json` to `fallbackSubagent: "none"`, `strictAgentFiles: true`, and `workflowsEnabled: true`; report any project-level overrides.
 
 ### Interface
 
-Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/themes/catppuccin-mocha.json) to the same relative paths under `<agent-dir>` before selecting the theme.
+Deploy [starline.json](pi/starline.json) and [themes/catppuccin-mocha.json](pi/themes/catppuccin-mocha.json) under `<agent-dir>` before activating the theme:
 
-- Tidy: message frames on; user messages use the default rounded frame. Remove the obsolete `frameUserMessages` setting; other features use upstream defaults.
-- Theme: keep `toolSuccessBg: "base"` for red/green diff backgrounds.
-- Starline: Nerd Font icons, Mocha pastel pills, `editorPaddingY: 0`. Remove obsolete `editorMetadataFormat`, `colorSources.userMessages`, `colors.userMessageBorder` and `colors.userMessageText` settings. User-message frame borders use Tidy's `messageBorderColors.user`; body text follows the Pi theme.
-- Keep `colors.thinking` absent for automatic thinking-level colors; remove an existing fixed override.
-- Directory: `pathDisplay: { "mode": "full", "depth": 0 }`.
-- Queue pill off, leaving Pi's native pending-message text visible.
-- Keep the `pi-sync` status on the right with `/sync-settings` as the legacy command fallback; amox-pi-sync's pill bridge opens its status bubble directly.
+- Tidy uses `frameMessages: true`. Set `userMessageAlign: "right"` and `messageBorderColors.user: "syntaxKeyword"`. Remove `frameUserMessages` and the previous `finalReplyStyle` override. Tidy 0.12 uses rails by default for user messages and final replies.
+- **Theme**: Keep `toolSuccessBg: "base"` in `catppuccin-mocha.json` so red/green diff tints render against a concrete hex background.
+- **Starline**: Use Nerd Font icons, Mocha pastel pills, `editorPaddingY: 0`, `pathDisplay: { "mode": "full", "depth": 0 }`, no `queue` segment (leaving Pi's native pending-message notice visible), and `pi-sync` placed on the right with `/sync-settings` fallback. Remove obsolete `editorMetadataFormat`, `colorSources.userMessages`, `colors.userMessageBorder`, and `colors.userMessageText` keys. Keep `colors.thinking` absent (and remove any fixed override) so thinking levels color automatically.
 
-Apply **Catppuccin Mocha to both Pi and the current terminal** using the [appearance guide](pi/appearance.md) ([中文](pi/appearance.zh-CN.md)). Deploy the Pi theme, detect the actual terminal, back up its configuration, and import/select the official Mocha scheme for the active profile. Preserve unrelated settings. Registering a scheme without selecting it is not complete. If the terminal cannot be configured from this host, report terminal theme as pending, not complete.
+Apply **Catppuccin Mocha to both Pi and the current terminal** following [pi/appearance.md](pi/appearance.md) ([简体中文](pi/appearance.zh-CN.md)): deploy the Pi theme, detect the active terminal emulator, back up its config, and import/select the official Mocha scheme for the active profile while preserving other profile settings. Importing a scheme without activating it is incomplete. When the client terminal config is unreachable (for example over SSH), report terminal theme as pending, not complete.
 
-Font installation and opacity remain user-managed: **Maple Mono NF CN**, **95% opacity**.
+Font installation and opacity remain user-managed: `Maple Mono NF CN` at `95%` opacity.
 
-### Provider, search and sync
+### Provider, search, and sync
 
-- Merge [sub2api.json](pi/sub2api.json) by provider name and preserve credentials for existing entries. `sub2api-gpt-only` serves GPT models and `sub2api-mixed` serves the mixed model pool. Leave `YOUR_API_KEY` for any missing token and tell the user which provider entry in the local file to fill privately. On a single-provider installation, keep the existing `sub2api` entry and reuse its credential for a new entry only if it is confirmed to serve that model pool. Report any missing assignments before using the affected default or Router roles.
-- Deploy [web-search.json](pi/web-search.json) using the [search routing instructions](pi/README.md#search-routing): Exa first, then the relay-backed OpenAI/Codex step. It needs no separate credential because `openaiUseProviderBaseUrl` reuses the provider token Pi already resolves from `sub2api.json`; keep the GPT-only provider key and preserve unrelated fetch settings. Resolve conflicting provider overrides/native search injection with approval.
-- Deploy [Pi Sync](pi/pi-sync-setup.md) ([中文](pi/pi-sync-setup.zh-CN.md)) using the user's private SSH repository and absolute checkout path. Deploy `amox-pi-sync.json` with `mode: "manual"` and `paths: ["sessions"]`; do not carry over the old suite's chat, environment or package-sync settings. Leave missing destinations pending. Do not run sync, `/sync-setup` or cleanup during bootstrap.
-- Keep retry defaults and inspect `/retry status`.
+- **Sub2API**: Merge [sub2api.json](pi/sub2api.json) by provider key (`sub2api-gpt-only` for GPT endpoints, `sub2api-mixed` for mixed pools), preserving existing tokens. Keep `YOUR_API_KEY` where unconfigured and tell the user which local entry needs a token; on legacy single-provider setups, keep `sub2api` and copy its token into a new entry only when confirmed to serve that pool.
+- **Web search**: Deploy [web-search.json](pi/web-search.json) per the [search routing guide](pi/README.md#search-routing) (`exa` first, then `sub2api-gpt-only` via `openaiUseProviderBaseUrl: true`). Preserve unrelated fetch settings and ask before removing conflicting `provider`/`searchProvider` keys or native `serverTools.responses` `web_search` entries.
+- **Pi Sync**: Deploy [amox-pi-sync.json](pi/amox-pi-sync.json) with `mode: "manual"` and `paths: ["sessions"]` following [pi/pi-sync-setup.md](pi/pi-sync-setup.md) ([简体中文](pi/pi-sync-setup.zh-CN.md)). Do not copy legacy `pi-sync-suite` `chat`, `environment`, `policy`, or `syncLocalPackagePaths` fields. Leave missing SSH remotes pending, and do not run sync transfers, `/sync-setup`, or backup cleanup during bootstrap.
+- **Retry**: Keep `pi-retry` defaults and check `/retry status`.
 
 ## 5. Task Router
 
-Read the current [Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter guide](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Keep a stable checkout and working copy of [routing.toml](pi/routing.toml), preserving its model choices.
+Read the upstream [Task Router README](https://github.com/gfgghgftgffg/task-router) and [Pi adapter guide](https://github.com/gfgghgftgffg/task-router/blob/main/docs/pi.md). Maintain a stable Router checkout and a local copy of [pi/routing.toml](pi/routing.toml) with its configured models intact.
 
-Use `<router-checkout>/AGENTS.md` as the single shared rule file read by all Router parents and roles. Keep environment requirements in shared rules portable: use the local Conda `codex` environment and resolve executable/interpreter paths before use. Do not copy personal absolute paths or unresolved placeholders from the [Pi global instruction template](pi/AGENTS.md); only the deployed host-global file needs rendered local paths. On existing setups, preserve independently edited shared rules and merge only requested changes; do not reset the file on reruns. It is a separate editable copy, not a continuing mirror of global instructions. Generated roles reference its absolute path, so moving the checkout requires reinstalling Router. Do not replace it with another machine's unrendered paths.
+Configure `<router-checkout>/AGENTS.md` as the shared rules file read by all Router parents and roles:
 
-From the Router checkout, use the actual absolute configuration path:
+- Keep shared environment instructions portable (use the local Conda `codex` environment and resolve paths dynamically rather than copying personal paths or raw `{{...}}` placeholders from [pi/AGENTS.md](pi/AGENTS.md)).
+- On existing installations, preserve independently edited shared rules and merge only requested updates; `<router-checkout>/AGENTS.md` is an independent file, not a continuing mirror of global instructions.
+- Generated roles embed its path, so moving the checkout requires reinstalling Router.
 
-```text
+From the Router checkout, run with the verified absolute `routing.toml` path (and `--pi-home` if needed):
+
+```sh
 npm ci
 node cli.mjs doctor --host pi --config <absolute-routing-config>
 node cli.mjs install --host pi --config <absolute-routing-config>
 node cli.mjs install --host pi --config <absolute-routing-config> --apply
 ```
 
-Respect `PI_CODING_AGENT_DIR` or pass a matching `--pi-home`. Let the installer generate `agents/tr_*.md` and `skills/task-routing/`. Preserve its backups and conflict protections. Pi Router installation does not modify global `AGENTS.md` or add a managed Router block.
+The installer writes `agents/tr_*.md` and `skills/task-routing/` while preserving backups and conflict checks. Pi Router installation does not modify global `AGENTS.md`.
 
-Use the lean executor and `ext:pi-web-access-lean/web_access` search selector. All generated Pi roles must have `skills: true`, `allowed_subagents: none`, `prompt_mode: replace` and `inherit_context: false`, plus `ext:builtin:codemode/codemode` in their tool selectors. Skills load on demand; codemode can call only the role's existing permitted tools. Keep mutation limits, denied delegation tools and permission hooks unchanged. Verify the shared-file instruction, role/model settings and tool scope without dispatch. Routing activates only through `/skill:task-routing` or an explicit instruction, not merely by installation.
+Verify the generated Pi role configuration:
+
+- Uses the lean executor and `ext:pi-web-access-lean/web_access` for search.
+- Sets `skills: true`, `allowed_subagents: none`, `prompt_mode: replace`, and `inherit_context: false` on every `tr_*` role, and includes `ext:builtin:codemode/codemode` in tool selectors (scoped strictly to each role's allowed tools).
+- Keep mutation limits, denied delegation tools and permission hooks unchanged.
+- Routing runs only when invoked via `/skill:task-routing` or explicit user instruction.
 
 ## 6. Global instructions
 
-Deploy [pi/AGENTS.md](pi/AGENTS.md), substituting verified `{{CONDA_PATH}}` and `{{PYTHON_PATH}}`. On existing installations, update the corresponding sections while preserving unrelated instructions. Do not add a Router block; remove an existing `pi-task-router:start/end` block when applying this setup, preserving all surrounding text. Respect `AGENTS.override.md`. Use the optional `127.0.0.1:7897` proxy only if it exists and networking needs it.
+Deploy [pi/AGENTS.md](pi/AGENTS.md) to `<agent-dir>/AGENTS.md` with verified `{{CONDA_PATH}}` and `{{PYTHON_PATH}}` values, preserving unrelated user rules and `AGENTS.override.md`. Do not add a Router block; if an older `pi-task-router:start` / `pi-task-router:end` block is present, remove only that block and keep surrounding text. Use proxy `127.0.0.1:7897` only when present and needed.
 
 ## 7. Verification
 
-- Verify Pi, Node, Git, Bash, the `codex` interpreter and `pypdf`.
-- Check the packages in `settings.json` and their order; confirm removed UI packages are no longer registered. Keep one lean tool per name.
-- Verify the listed Skills, their required resources and invocation flags. Verify only one installed `anti-defensive-writing/SKILL.md`. Test meeting preparation on a temporary local text fixture.
-- Verify the three autoresearch wrappers are explicit-only, point to existing installed upstream Skills and retain original relative-reference resolution. Confirm the package has `skills: []`, no duplicate autoresearch Skills are loaded and no experiment loop was started.
-- Verify Router's shared `AGENTS.md` has portable environment requirements, no personal paths or unresolved placeholders, and the roles reference it; check `skills: true`, codemode selection, unchanged role permissions and no global Pi Router block.
-- Parse deployed JSON and check template values, rendered paths, Router roles and model settings without paid calls or delegation.
-- Restart Pi and check tidy diffs, starline layout and native queue text. Confirm `pi --offline --help` shows `--hl-model` to verify summary extension loading without generating a summary.
-- Verify Pi's `catppuccin-mocha` theme and the active terminal profile's Catppuccin Mocha scheme separately. Report both states; applying only the Pi theme does not complete theme setup.
-- Report installed/reused/pending/failed items, effective paths and restart requirements.
+- Check Pi, Node.js, Git, Bash, the `codex` Python 3.12 interpreter, and `pypdf`.
+- Confirm package order in `<agent-dir>/settings.json`, verify legacy UI/sync packages are removed, and ensure one lean tool registration per tool name.
+- Check all installed Skills, required subdirectories, `disable-model-invocation` flags, single `anti-defensive-writing/SKILL.md` installation, and `meeting-summary-html` text preparation on a temporary local text fixture.
+- Confirm the three `autoresearch-*` wrappers have `disable-model-invocation: true`, resolve valid upstream `SKILL.md` paths with original-directory relative path semantics, pair with `skills: []` in `settings.json`, and did not start an experiment loop.
+- Check `<router-checkout>/AGENTS.md` portability, `tr_*.md` role flags (`skills: true`, `ext:builtin:codemode/codemode`, unchanged permissions), and absence of any Router block in `<agent-dir>/AGENTS.md`.
+- Parse all deployed JSON files; restart Pi to verify `pi-tidy` right-aligned user messages and diffs, `pi-starline` pills, and native queue text, and run `pi --offline --help` to confirm `--hl-model` is registered without making model calls.
+- Verify `catppuccin-mocha` in Pi and `Catppuccin Mocha` in the active terminal profile separately; report both states along with installed, reused, pending, and failed items and any restart instructions.
 
-Repository checks: `node --test tests/*.test.cjs`.
+Offline repository tests: `node --test tests/*.test.cjs`.

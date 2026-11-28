@@ -1,44 +1,46 @@
-# Codex setup
+# Codex Setup Guide
 
-Configure Codex on Windows, macOS or Linux using the settings below. Reuse compatible installations, back up changed files and preserve unrelated configuration. Respect `CODEX_HOME` (default `~/.codex`). Keep credentials local; do not make paid calls or upload files for installation checks.
+Configure Codex on Windows, macOS, or Linux with the runtimes, Skills, Task Router profile, and settings below. Resolve `CODEX_HOME` (default `~/.codex`), reuse compatible installations, back up every file before editing it, and preserve unrelated configuration and credentials. Keep secrets on the local machine; do not run paid model calls or upload local files during installation checks.
 
-## 1. Runtime and Python
+## 1. Runtime and Python environment
 
-- Reuse Conda, or install official Miniforge in a user-owned directory.
-- Reuse the `codex` environment, or create it with Python 3.12. Use its interpreter for all Python scripts and dependencies; do not use system Python, base or `pip --user`.
-- Install `pypdf` if absent and verify its import.
-- Reuse compatible Node.js, Git and shell tools. Install missing dependencies required by the projects below, preferably through Conda or another user-level installation.
+- Reuse an existing Conda installation, or install official Miniforge in a user-owned directory.
+- Reuse the `codex` Conda environment, or create it with Python 3.12. Run all Python scripts and package installs with its interpreter rather than system Python, `base`, or `pip --user`.
+- Install `pypdf` in `codex` if missing and confirm `import pypdf` succeeds.
+- Reuse compatible Node.js, Git, and shell tools. Install any missing user-level dependencies needed by the projects below.
 
 ## 2. Projects and Skills
 
-Install complete Skills with their scripts, references and assets into the effective global Skill directory. Reuse existing copies without duplicate registrations. Keep required source checkouts in stable user-owned directories.
+Install each Skill with its complete scripts, references, and assets into the active global Codex Skill directory. Reuse existing copies without creating duplicate entries, and place required Git checkouts in stable user-owned directories.
 
-| Project / Skill | Source | Configuration |
+| Project / Skill | Source | Installation rules |
 | --- | --- | --- |
-| task-router | https://github.com/gfgghgftgffg/task-router | Install the Codex roles, `task-routing` profile and Skill through its native installer |
-| meeting-summary-html | https://github.com/gfgghgftgffg/meeting-summary-html | Include preparation scripts; use the `codex` Python interpreter |
-| create-readme | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only `skills/create-readme/` |
-| humanizer | https://github.com/blader/humanizer | Include the complete Skill |
-| anti-defensive-writing | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license |
-| taste-skill | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/`, named `design-taste-frontend` |
-| amox-grill-me | [skills/amox-grill-me/](skills/amox-grill-me/) in this repository | Install the complete directory, including `LICENSE`, as `amox-grill-me` |
-| de-ai | [skills/de-ai/](skills/de-ai/) in this repository | Install the complete directory with `scripts/`, `references/`, `projects/`, `README.md` and `LICENSE`; run its scripts with the `codex` interpreter. Accepts `.docx`, `.md` and `.txt` |
+| `task-router` | https://github.com/gfgghgftgffg/task-router | Run its native installer to set up Codex roles, the `task-routing` profile, and the Skill |
+| `meeting-summary-html` | https://github.com/gfgghgftgffg/meeting-summary-html | Install with preparation scripts; run Python scripts via the `codex` interpreter |
+| `create-readme` | https://github.com/github/awesome-copilot/tree/main/skills/create-readme | Install only `skills/create-readme/` |
+| `humanizer` | https://github.com/blader/humanizer | Install the full Skill directory |
+| `anti-defensive-writing` | https://github.com/Kiterlin/anti-defensive-writing | Install only the root `SKILL.md` and license |
+| `design-taste-frontend` | https://github.com/Leonxlnx/taste-skill | Install only `skills/taste-skill/` under the folder name `design-taste-frontend` |
+| `amox-grill-me` | [skills/amox-grill-me/](skills/amox-grill-me/) in this repository | Copy the complete directory, including `LICENSE`, as `amox-grill-me` |
+| `de-ai` | [skills/de-ai/](skills/de-ai/) in this repository | Copy the complete directory (`scripts/`, `references/`, `projects/`, `README.md`, `README.zh-CN.md`, `SKILL.md`, `LICENSE`); run scripts with the `codex` interpreter (`.docx`, `.md`, `.txt`) |
 
-Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html` and `de-ai`, including reused copies.
+Apply these invocation and dependency rules:
 
-Install `amox-grill-me` instead of the official `grilling` or legacy `grill-me` Skill. On existing installations, back up and remove those replaced Skill copies from active discovery paths; preserve unrelated Skills. Do not install or update the official Skill alongside this replacement.
+- Set `disable-model-invocation: true` in `anti-defensive-writing`, `amox-grill-me`, `meeting-summary-html`, and `de-ai`, including reused copies.
+- Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
+- Install `amox-grill-me` in place of upstream `grilling` or legacy `grill-me`. On existing setups, back up and remove those replaced Skill copies from active discovery paths while keeping unrelated Skills intact. Do not install or update the upstream copy alongside `amox-grill-me`.
+- `meeting-summary-html` text preparation runs without an ASR key; audio or video transcription requires `DASHSCOPE_API_KEY`.
+- For `de-ai`, install `skills/de-ai/scripts/requirements.txt` in the `codex` environment (`pypdf` is included). English targets also require `torch`, `transformers`, and cached `gpt2` weights; PDF export uses LibreOffice (or installed Microsoft Word on Windows). Invoke `de-ai` explicitly with a file path. Its translation chains send document text to third-party endpoints, and its default term replacement table is empty.
 
-Leave `disable-model-invocation` absent or `false` in `create-readme`, `design-taste-frontend` and `humanizer`.
+### Task Router setup
 
-Meeting text preparation needs no ASR key; audio/video transcription requires `DASHSCOPE_API_KEY`.
+Check the upstream `task-router` README before installing. All Router parents and roles read the live `<router-checkout>/AGENTS.md`:
 
-For `de-ai`, install `pypdf` plus `skills/de-ai/scripts/requirements.txt` in the `codex` environment. English documents also need `torch`, `transformers` and a cached `gpt2`; PDF export needs LibreOffice; on Windows an installed Microsoft Word also works. Raise it explicitly with the file path, since it is excluded from automatic invocation. Document text is sent to third-party translation endpoints and the default term table is empty.
+- Keep shared rules in `<router-checkout>/AGENTS.md` portable: reference the local Conda `codex` environment and resolve executable paths at runtime without hardcoding personal paths or leaving raw `{{...}}` placeholders. Exclude Router activation banners and managed Router blocks from [templates/AGENTS.md](templates/AGENTS.md). Render machine-specific Conda/Python paths only in the host-global `AGENTS.md`.
+- If the shared file is already customized or used by Pi, preserve it and merge only requested common-rule updates rather than resetting it or mirroring later host-global edits.
+- Keep `<router-checkout>` at a fixed path; moving it invalidates generated absolute references and requires reinstalling Router.
 
-### Task Router
-
-Read the current upstream installation instructions. All Router parents and roles read the live `<router-checkout>/AGENTS.md`. Keep its common rules portable, excluding Router activation text and managed Router blocks from [templates/AGENTS.md](templates/AGENTS.md). Use the local Conda `codex` environment and resolve paths before use; do not copy personal absolute paths or unresolved placeholders into the shared file. Render local Conda/Python paths only in the deployed host-global file. If the shared file is already customized or used by Pi, preserve it and merge only requested common-rule changes; do not reset it or mirror later global edits automatically. Keep the checkout stable; moving it requires reinstalling the generated absolute references.
-
-From its stable checkout, run:
+From the stable Router checkout, run:
 
 ```sh
 npm ci
@@ -47,26 +49,26 @@ node cli.mjs install
 node cli.mjs install --apply
 ```
 
-Use the effective Codex home and a stable routing configuration (`--codex-home` / `--config` when needed). Preserve existing model choices, installer backups and exactly one managed Router block.
+Pass `--codex-home` and `--config` when using non-default paths. Preserve existing model selections, installer backups, and a single managed Router block.
 
-Use V1 child communication: `multi_agent = true`, `multi_agent_v2 = false`. If a custom `model_catalog_json` is configured, its orchestrator and child models must also declare `"multi_agent_version": "v1"`. Report unsupported models/settings without substituting others.
+Keep V1 child communication (`multi_agent = true`, `multi_agent_v2 = false`). When a custom `model_catalog_json` is configured, orchestrator and child model entries must also specify `"multi_agent_version": "v1"`. Report unavailable models or unsupported settings rather than substituting alternatives.
 
-Start the profile with `codex -p task-routing`; ordinary Codex sessions do not activate it automatically.
+Launch routed sessions explicitly with `codex -p task-routing`; standard Codex sessions do not enable routing automatically.
 
 ## 3. Global instructions
 
-Deploy [templates/AGENTS.md](templates/AGENTS.md) to the effective Codex global instructions path. Substitute only verified absolute paths:
+Render [templates/AGENTS.md](templates/AGENTS.md) into the active Codex global instructions file, replacing each placeholder with a verified absolute path:
 
-- `{{CONDA_PATH}}`: Conda executable.
-- `{{PYTHON_PATH}}`: `codex` environment interpreter.
-- `{{TASK_ROUTER_CONFIG_PATH}}`: routing configuration.
-- `{{TASK_ROUTER_SOURCE_PATH}}`: Router checkout.
+- `{{CONDA_PATH}}`: Conda executable
+- `{{PYTHON_PATH}}`: `codex` environment Python interpreter
+- `{{TASK_ROUTER_CONFIG_PATH}}`: Task Router configuration file
+- `{{TASK_ROUTER_SOURCE_PATH}}`: Task Router repository checkout
 
-On existing installations, update the corresponding sections while preserving unrelated instructions and one installer-managed Router block. Respect `AGENTS.override.md`.
+On existing installations, update the template-managed sections while preserving unrelated user rules, `AGENTS.override.md`, and the single installer-managed Router block.
 
-## 4. Global config.toml
+## 4. Global `config.toml`
 
-Merge these values into `<CODEX_HOME>/config.toml`, preserving unrelated settings, profiles and credentials:
+Merge the settings below into `<CODEX_HOME>/config.toml`, keeping existing profiles, credentials, and unrelated keys intact:
 
 ```toml
 [features]
@@ -81,12 +83,12 @@ default_subagent_model = "gpt-6-luna"
 default_subagent_reasoning_effort = "medium"
 ```
 
-On **Windows only**, also set `daemon_auto_start = false` under `[features]`. Keep the specified model and reasoning level; report unavailable settings or profile overrides.
+On Windows hosts only, also set `daemon_auto_start = false` under `[features]`. Keep `gpt-6-luna` and `"medium"` unchanged; report if a setting or model is unavailable or overridden by a profile.
 
 ## 5. Verification
 
-- Verify the `codex` interpreter and `pypdf` import.
-- Verify the listed projects and Skills, their required resources and invocation flags. Verify the shared Router `AGENTS.md` and generated references.
-- Run Router's static checks and meeting preparation on a temporary local text fixture.
-- Parse `config.toml`; check template values, rendered paths and one Router block.
-- Report installed/reused/pending/failed components, effective paths and required restart/profile activation.
+- Confirm the `codex` Python interpreter runs and imports `pypdf`.
+- Check all installed Skills, their bundled directories/files, and their `disable-model-invocation` front matter. Confirm replaced `grilling`/`grill-me` copies are out of active discovery paths.
+- Check `<router-checkout>/AGENTS.md` and generated Router role references; run Router static checks and test `meeting-summary-html` text preparation against a temporary local text fixture.
+- Parse `<CODEX_HOME>/config.toml` and check `<CODEX_HOME>/AGENTS.md` for rendered paths and a single Router block.
+- Summarize installed, reused, pending, and failed items along with effective paths and any required restart or `codex -p task-routing` activation step.

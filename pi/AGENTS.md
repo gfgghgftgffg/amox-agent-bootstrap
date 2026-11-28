@@ -1,22 +1,21 @@
-- Prioritize final result quality over speed.
-
-- Python execution and dependency installation utilize the Conda `codex` environment; Conda path: `{{CONDA_PATH}}`, interpreter path: `{{PYTHON_PATH}}`. `pypdf` is installed for PDF processing.
-- Proxy at 127.0.0.1:7897. Using it if encounter network issues or slow speed.
+- Prioritize output accuracy and completeness over speed.
+- Run Python scripts and install Python packages exclusively in the Conda `codex` environment (`{{CONDA_PATH}}`, interpreter `{{PYTHON_PATH}}`). Use `pypdf` for PDF processing.
+- Use the proxy at `127.0.0.1:7897` if it is available and network requests fail or stall.
 
 # Requirement Alignment
-- Look up anything findable in the code, configs, or available tools yourself.
-- Unless user request, document should not include historical background, troubleshooting processes, or redundant explanations.
+- Inspect code, configuration files, and available tools yourself before asking for facts that exist locally.
+- Omit historical background, troubleshooting steps, and redundant explanations unless the user requests them.
 
 # Development
 - Do not add unrelated improvements, speculative features, or future-proof abstractions.
-- Add defensive code ONLY for concrete failure modes, trust boundaries, or existing guarantees. Each safeguard should enable useful rejection, recovery, or diagnosis. Fix swallowed errors, false success, and duplicate side effects; inspect unclear protections before removing them.
-- Stop when the requested result exists, required verification is complete, and no in-scope blocker remains. Do not add redundant tests, reviews, or proof artifacts.
+- Add defensive code ONLY for concrete failure modes, trust boundaries, or existing guarantees. Keep safeguards that provide actionable rejection, recovery, or diagnostics; fix swallowed errors, false-positive success paths, and duplicate side effects, and check unfamiliar guards before removing them.
+- Stop once the requested deliverable works, required checks pass, and no in-scope blocker remains. Skip unrequested extra tests, reviews, or proof artifacts.
 
 # Answering and Writing
-- State claims and scope directly. Remove hypothetical rebuttals, repeated disclaimers, stacked hedging, and unrequested process narration.
-- Preserve facts, attribution, responsibility, necessary conditions, and evidence-matched uncertainty. Narrow unsupported claims instead of surrounding them with caveats; do not invent evidence or strengthen certainty.
+- State claims and scope directly. Cut hypothetical counterarguments, repeated disclaimers, stacked hedges, and unrequested step-by-step narration.
+- Keep verified facts, attribution, ownership, preconditions, and calibrated uncertainty intact. Narrow a claim when evidence is partial instead of padding it with caveats; do not invent evidence or strengthen certainty.
 
 # Workflow
-- Track tasks of an estimated 5 or more steps with todo and clear it when done; do shorter tasks directly.
-- For hard-to-undo actions such as deleting, overwriting, force-pushing, or publishing, confirm first unless the user explicitly asked for them.
-- On errors, state the location, cause, and fix; after three consecutive failures, name the suspect assumption. Fix then continue.
+- Use `todo` to track tasks estimated at 5 or more steps and clear the list on completion; execute shorter tasks directly.
+- Before a hard-to-undo action such as deleting, overwriting, force-pushing, or publishing, confirm that the user requested it.
+- When an error occurs, report the location, root cause, and fix; after three consecutive failed attempts, state the suspect assumption before retrying.

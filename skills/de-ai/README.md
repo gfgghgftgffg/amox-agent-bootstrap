@@ -1,94 +1,85 @@
 # de-ai
 
-Rewrite a document so it stops reading like machine translation or generated text.
+English | [简体中文](README.zh-CN.md)
 
-![Python](https://img.shields.io/badge/python-3.9%2B-blue)
-![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue?style=flat-square)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)
 
-Takes `.docx`, `.md` or `.txt`, Chinese or English, and returns the same format. The prose is produced by machine translation across language families plus regex rules, never by a language model.
+[Install](#install) • [Quick start](#quick-start) • [How it works](#how-it-works) • [Translation chains](#translation-chains) • [Configuration](#configuration) • [CLI reference](#cli-reference) • [Output](#output)
 
-## Features
+Rewrite `.docx`, `.md`, or `.txt` documents in Chinese or English using cross-family machine translation chains and deterministic regex cleanup. All output prose comes from translation endpoints and seeded rule transforms rather than language-model generation.
 
-- Four translation chains through two intermediate languages, so the original word order does not survive
-- Deterministic cleanup for the leftovers translation leaves: `, -ing` tails, modal passives, stock connectives, uniform sentence length, repeated sentence openings
-- Several candidates per block, ranked by how far they moved without losing a number, a citation or an identifier
-- Engine failover that adapts to whichever translation endpoints your network can reach
-- Per-project rule probabilities and term tables in plain JSON
-- Reads and writes Word, Markdown and plain text; no external program needed except for PDF export
+> [!WARNING]
+> Target paragraphs are sent to third-party translation endpoints via [`translators`](https://github.com/UlionTse/translators). Do not run this tool on confidential or restricted documents.
 
-## Requirements
+## Install
 
-Python 3.9 or newer.
+Requires Python 3.9 or newer.
 
 ```bash
 pip install -r scripts/requirements.txt
 ```
 
-English documents also need `torch`, `transformers` and a cached GPT-2, about 3GB together.
+English target documents also use `torch`, `transformers`, and local `gpt2` weights (roughly 3 GB total) for candidate scoring and hidden-state similarity.
 
 > [!TIP]
-> Where the Hugging Face Hub is unreachable, fetch the model once through a mirror. It is cached afterwards and loads offline.
+> If Hugging Face Hub is unreachable on your network, cache `gpt2` once through a mirror before running offline:
 >
 > ```bash
-> HF_ENDPOINT=https://hf-mirror.com python -c "from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('gpt2')"
+> HF_ENDPOINT=https://hf-mirror.com python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; AutoTokenizer.from_pretrained('gpt2'); AutoModelForCausalLM.from_pretrained('gpt2')"
 > ```
 
 ## Quick start
 
 ```bash
-# Chinese in, Chinese out
+# Preview target and skipped blocks without translating
+python scripts/pipeline.py --input in.docx --out out.docx --src-lang auto --dst-lang same --dry-run
+
+# Rewrite Chinese Markdown and save it to a new file
 python scripts/pipeline.py --input in.md --out out.md --src-lang zh --dst-lang zh
 
-# English in, English out
+# Rewrite an English Word document
 python scripts/pipeline.py --input in.docx --out out.docx --src-lang en --dst-lang en
 
-# Chinese in, English out
+# Translate and clean Chinese plain text into English
 python scripts/pipeline.py --input in.txt --out out.txt --src-lang zh --dst-lang en
 ```
 
-The input file is opened read-only and the result goes to `--out`. Passing the same path for both is refused, so a run cannot destroy the original.
+`pipeline.py` opens `--input` read-only and refuses runs where `--out` resolves to the input file.
 
-List what it would touch before touching it:
-
-```bash
-python scripts/pipeline.py --input in.docx --out out.docx --src-lang auto --dst-lang same --dry-run
-```
-
-To use it as an agent skill, drop this directory into your skills path and copy the prompt template from `pi/prompts/de-ai.md` in this repository alongside it, then invoke it explicitly. It is excluded from automatic model selection on purpose.
+To use `de-ai` as an explicit-only agent Skill ([SKILL.md](SKILL.md)), install this directory into your host's Skills folder (and deploy `pi/prompts/de-ai.md` on Pi), then invoke `/de-ai <file>` or `/skill:de-ai`.
 
 ## How it works
 
-Four fixed jumps, each through two intermediate languages, ending back in the source language:
+1. **Extract blocks**: Splits `.md`/`.txt` on blank lines and reads `.docx` paragraphs, skipping headings, code blocks, tables, captions, references, and blocks shorter than `--min-words` (default `30`).
+2. **Run translation chains**: Sends each block through up to four 3-hop chains across two intermediate languages (such as Japanese, Russian, German, and French) so clause order and modifier placement rearrange before returning to the target language.
+3. **Apply regex post-processing**: Fixes punctuation, applies optional term replacements, rotates overused connectives and ordinal series, rewrites `, -ing` riders and modal passives (English) or stock frames and light verbs (Chinese), splits long sentences, varies repeated starters, and restores `[N]` citations.
+4. **Validate and rank**: Discards any candidate that drops numbers, citations, uppercase/`ns:Action` identifiers, protected terms, or term counts, introduces `forbidden` words, or falls outside the allowed length ratio (`0.70–1.45` words for English, `0.75–1.40` characters for Chinese, `0.30–1.05` English words per Chinese character for `zh -> en`). Among valid candidates, the script first prefers those that meet the similarity threshold. In same-language runs, it then prefers candidates with at least `0.10` 3-gram Jaccard overlap (`selection.min_divergence`). It ranks candidates within each group by the lowest `score` (`base + penalty`). Overlap above `0.22` adds a penalty.
 
+See [references/chains.md](references/chains.md) for the scoring formulas and rule thresholds.
+
+## Translation chains
+
+Default chains probe a `tier1` engine list first and fall back to `tier2` per hop when an endpoint is unreachable:
+
+```text
+source --[iciba]-->   de --[qqTranSmart]--> fr     --[youdao]--> target language
+source --[qqTranSmart]--> ja --[iciba]-->   de     --[youdao]--> target language
+source --[iciba]-->   ru --[qqTranSmart]--> de     --[iciba]-->  target language
+source --[reverso]--> de --[qqTranSmart]--> BRIDGE --[iciba]-->  target language
 ```
-source --[iciba]-->   German   --[qq]--> French  --[youdao]--> source language
-source --[qq]-->      Japanese --[iciba]--> German --[youdao]--> source language
-source --[iciba]-->   Russian  --[qq]--> German  --[iciba]-->  source language
-source --[reverso]--> German   --[qq]--> bridge  --[iciba]-->  source language
-```
 
-The intermediate language does the work, not the engine. Chinese or English translated straight to English keeps clause order and modifier position nearly intact; routing through Japanese or Russian rearranges them.
+`BRIDGE` resolves to the first language in `zh, en, ja, fr, de, ru` that matches neither source nor target. Reachable endpoints depend on network region (`iciba`, `qqTranSmart`, `youdao`, `baidu` in mainland China; `reverso`, `bing`, `google`, `yandex` elsewhere).
 
-After translation, each candidate goes through the cleanup rules, then a validation pass. A candidate is dropped if it loses a number, a citation or a protected identifier, breaks a term count, contains a forbidden word, or changes length outside a band: 0.70–1.45 words for English, 0.75–1.40 characters for Chinese, or 0.30–1.05 English words per Chinese character across languages. That band catches translation endpoints silently dropping the tail of a long paragraph.
-
-The surviving candidate ranked furthest from the source wins the block.
-
-## Choosing translation engines
-
-Translation runs through the free endpoints wrapped by [`translators`](https://github.com/UlionTse/translators), and which answer depends on where you run it. Inside mainland China usually `iciba`, `qqTranSmart`, `youdao` and `baidu`; elsewhere usually `reverso`, `bing`, `google` and `yandex`.
-
-Each hop carries a tier1 list, the engines the original experiment validated, and a tier2 fallback list. Every hop is probed once before the run and the first reachable engine wins:
-
-```
+```text
 chain2 zh->ja      uses qqTranSmart  [tier1]
 chain3 de->en      uses baidu        [tier2]  <- downgraded
 ```
 
 > [!NOTE]
-> A `[tier2]` line means the validated engine was unreachable, and the output may read worse. The last hop is restricted to `youdao` and `iciba` because reverso as a final hop leaves European academic phrasing behind.
+> `tier1` restricts final hops to `youdao` and `iciba` because `reverso` on the final hop leaves stiff academic phrasing; `reverso` is used only as a mid hop or `tier2` fallback.
 
-To reorder or substitute engines, override `chain_templates` in a config file. Each hop is `[language, [tier1...], [tier2...]]`, and `null` means the document's own target language:
+Override `chain_templates` in your config JSON (`[language, [tier1...], [tier2...]]`, where `null` means the document target language):
 
 ```json
 {
@@ -100,15 +91,17 @@ To reorder or substitute engines, override `chain_templates` in a config file. E
 }
 ```
 
-## Tuning the rewrite
+## Configuration
 
-Every rule fires per hit, at a probability you set. Start from `projects/rewrite.example.json` and pass your copy with `--config`:
+### Rewrite rules
+
+Copy [projects/rewrite.example.json](projects/rewrite.example.json) and pass it via `--config`:
 
 ```json
 {
   "seed": 42,
-  "max_per_word": 2,
   "ordinal_series": "auto",
+  "max_per_word": 2,
   "en": {
     "connector_swap": 1.0,
     "gerund_tail": 0.85,
@@ -129,23 +122,24 @@ Every rule fires per hit, at a probability you set. Start from `projects/rewrite
   },
   "zh_highfreq_words": ["进一步", "显著", "充分", "全面", "极大", "深入", "有效", "关键", "核心"],
   "forbidden": [],
-  "selection": { "min_sim": { "en": 0.99, "zh": 0.75 }, "min_divergence": 0.10 }
+  "selection": {
+    "min_sim": { "en": 0.99, "zh": 0.75 },
+    "require_validation": true,
+    "keep_all_candidates": true,
+    "min_divergence": 0.1
+  }
 }
 ```
 
-`0` turns a rule off, and anything under `0.3` rarely fires. `seed` fixes the draw so a rerun reproduces the same document. `max_per_word` caps how often one connective may be swapped, and `ordinal_series` pins the numbering style so `First` never meets `Secondly`.
+- Rule values (`0.0` to `1.0`) set per-match trigger probabilities (`0` disables a rule); `seed` fixes the random choices made by the cleanup rules.
+- `max_per_word` caps connective replacements (and preserves up to `max_per_word` occurrences of `zh_highfreq_words` before trimming); `ordinal_series` keeps numbering consistent (`First / Second / Last` rather than mixed series).
+- `forbidden` rejects any candidate introducing listed words. Term replacements and citation restoration run unconditionally.
 
-The English rules cover `, -ing` tails, the nine fixed modal passives, connective swaps, long-sentence splits and runs of identical sentence openings. The Chinese rules cover stock frames (`随着…的发展`, `综上所述`), light verbs (`进行了分析` → `分析了`), passives, high-frequency modifiers, trailing connectives (`，从而`, `，使得`), long sentences and repeated openings.
+### Terminology tables
 
-Two settings go beyond probabilities. `forbidden` lists words that invalidate any candidate containing them, which is how you block a mistranslation you have already seen. `selection.min_divergence` sets how far a candidate must move, measured as 3-gram overlap with the source, before it counts as a real rewrite.
+Same-language runs automatically protect camelCase identifiers, uppercase acronyms, `ns:Action` strings, subscript keys (`K_c,tgs`), version numbers, and repeated capitalized names.
 
-Term restoration and citation repair ignore all of this and always run in full.
-
-## Terminology
-
-Identifiers are protected without configuration. The script extracts camel-case names, all-caps acronyms, `ns:Action` identifiers, subscript keys, version numbers and repeated product names, then discards any candidate that loses one. This check runs when source and target language match, since identifiers are legitimately translated across languages.
-
-Replacement is opt-in, because it is a global regex and a wrong table damages the document. A table is a list of `[regex, replacement]` pairs:
+Regex term normalization is opt-in via `--terms` so unrelated prose is never altered by default:
 
 ```json
 [
@@ -158,78 +152,61 @@ Replacement is opt-in, because it is a global regex and a wrong table damages th
 python scripts/pipeline.py --input in.docx --out out.docx --terms projects/terms.example.json
 ```
 
-> [!TIP]
-> Start from `projects/terms.example.json`. A validated Kerberos and AWS table lives in `projects/terms.kerberos-aws.json`, which shows what a real table looks like for a technical paper.
+Start from [projects/terms.example.json](projects/terms.example.json) or inspect [projects/terms.kerberos-aws.json](projects/terms.kerberos-aws.json) for a full technical domain table.
 
-Run without `--terms` and nothing is replaced; the run prints a reminder.
+## CLI reference
 
-## CLI
+| Flag | Description |
+| --- | --- |
+| `--input`, `--docx` | Input path (`.docx`, `.md`, `.markdown`, `.mdown`, `.txt`) |
+| `--out`, `--out-docx` | Output path (must differ from `--input`; extension sets output format) |
+| `--src-lang auto\|en\|zh` | Source language; `auto` (default) uses `zh` when all target blocks have CJK/Latin ratio `> 0.3`, else `en` |
+| `--dst-lang same\|en\|zh` | Target language; `same` (default) matches the resolved source language |
+| `--level light\|standard\|deep` | Number of chains to run: `1`, `3` (default), or `4` |
+| `--min-words <int>` | Minimum CJK characters + English words per rewritable block (default `30`) |
+| `--config <json>` | Rule probabilities, selection thresholds, seed, and `chain_templates` |
+| `--terms <json>` | Optional `[[regex, replacement], ...]` table |
+| `--work <dir>` | Working and cache directory (default `<out>.work`) |
+| `--seed <int>` | Override config `seed` |
+| `--dry-run` | Probe chains and write `<work>/plan.json` without translating blocks |
+| `--skip-preflight` | Skip initial hop probing |
+| `--out-pdf <pdf>` | Export `.docx` output to metadata-scrubbed PDF via LibreOffice (600s timeout) or Windows Word COM (300s timeout) |
 
-| Flag | Meaning |
-|---|---|
-| `--input`, `--docx` | Input file: `.docx`, `.md`, `.markdown`, `.txt` |
-| `--out`, `--out-docx` | Output file; the extension decides the format |
-| `--src-lang auto\|en\|zh` | Default `auto`, decided per block from a CJK ratio |
-| `--dst-lang same\|en\|zh` | `same` keeps the source language |
-| `--level light\|standard\|deep` | 1, 3 or 4 chains; default `standard` |
-| `--config <json>` | Probabilities, seed and chain templates |
-| `--terms <json>` | Term table |
-| `--seed N` | Fix the draw to reproduce a run |
-| `--dry-run` | Print the plan without rewriting |
-| `--skip-preflight` | Skip engine probing |
-| `--out-pdf <pdf>` | `.docx` input only; LibreOffice first, Word as a Windows fallback |
-
-Exit codes: `0` all blocks replaced, `1` nothing to rewrite, `2` some blocks kept their original text or PDF export failed, `3` no usable chain, which means `chain_templates` needs editing.
+**Exit codes**: `0` all target blocks replaced; `1` invalid arguments or no rewritable blocks; `2` one or more blocks kept original text or PDF export failed; `3` no usable translation chain.
 
 ## Output
 
-```
-out.docx                    rewritten document, metadata scrubbed
-out.docx.work/report.md     per-block table, unrewritten reasons, skip list
-out.docx.work/result.json   every candidate, its scores, validation problems, final text
-out.docx.work/units/        raw translation per block per chain, reused on rerun
-```
-
-Each block ends in one of six states. Four are written back (`replaced`, `replaced-low-sim`, `replaced-min-change`, `replaced-worse`) and two keep the original text (`all-candidates-failed-validation`, `all-chains-failed`). All six appear in the report.
-
-The score in `report.md` ranks candidates within a block and nothing else. It is not comparable between documents, and it is not a detector reading.
-
-## Supported formats
-
-| Extension | Read | Write | Skipped |
-|---|---|---|---|
-| `.docx` | python-docx | paragraph styles kept, runs merged | headings, captions, references, monospace paragraphs, short labels |
-| `.md` `.markdown` | plain text, blocks split on blank lines | written back as-is | headings, code fences, tables, block quotes, link definitions, indented code |
-| `.txt` | plain text, blocks split on blank lines | written back as-is | very short blocks |
-
-Markdown fences are tracked line by line, so anything inside one, tables included, is left alone. Legacy `.doc` is not supported; re-save it as `.docx` first.
-
-## Project layout
-
-```
-pipeline.py         entry point: collect blocks, run chains, validate, pick, write back
-docio.py            .docx / .md / .txt behind one interface, plus PDF export
-chains.py           chain templates, per-hop engine probing and failover
-rules.py            the English and Chinese rewrite rules
-score.py            candidate scoring and the validation checks
-config_default.json default probabilities
-requirements.txt    Python dependencies
-
-references/chains.md    why the thresholds and chains look like this
-projects/               example config and term tables to copy
+```text
+out.docx                    Rewritten document (.docx core metadata scrubbed)
+out.docx.work/report.md     Per-block summary table, unreplaced blocks, and skip reasons
+out.docx.work/result.json   Full candidate outputs, feature breakdowns, and validation logs
+out.docx.work/units/        Cached raw chain translations reused on identical reruns
 ```
 
-## Notes
+Each target block finishes in one of six statuses: `replaced`, `replaced-low-sim(<min_sim)`, `replaced-min-change(<min_div)`, `replaced-worse(+Δ)` (written back), or `all-candidates-failed-validation`, `all-chains-failed` (original text kept). `Before` and `After` scores in `report.md` rank candidates within a block and are not detector probabilities.
 
-> [!WARNING]
-> Document text is sent to the third-party translation endpoints listed above. Do not point this at confidential material.
+### Format handling and limits
 
-> [!NOTE]
-> A `.docx` write merges the runs inside a paragraph, so mid-paragraph bold, italics and superscript citation numbers are lost. Check formatting after export. Markdown and plain text are unaffected.
+| Format | Read / write behavior | Skipped blocks |
+| --- | --- | --- |
+| `.docx` | Read/written via `python-docx`; keeps paragraph styles, merges runs inside replaced paragraphs, scrubs `docProps/core.xml` | Heading/Title/TOC/Caption/Bibliography styles, figure/table/reference/abstract lines, monospace paragraphs, blocks `< min-words` |
+| `.md`, `.markdown`, `.mdown` | Split on blank lines; written UTF-8 (`\n`) | Headings, fenced/indented code (including tables inside fences), tables, blockquotes, horizontal rules, images, HTML, link definitions, blocks `< min-words` |
+| `.txt` | Split on blank lines; written UTF-8 (`\n`) | Blocks `< min-words` |
 
 > [!CAUTION]
-> A full-document rewrite also touches blocks that were fine, and can leave them worse. Read the blocks the report flags as barely changed or scored worse.
+> Replacing a `.docx` paragraph merges its runs, removing inline bold, italics, and superscript formatting inside that paragraph. Review `.docx` formatting and any blocks flagged `replaced-min-change` or `replaced-worse` before finalizing. Legacy `.doc` files must be saved as `.docx` first.
 
-The block list is finite, each hop gets three attempts, and the chain count is fixed by `--level`. PDF export times out at 600 seconds for LibreOffice and 300 for Word. When an agent drives the tool it runs at most two rounds; the same limit applies by hand, since a third pass over the same block rarely changes anything.
+### Directory layout
 
-PDF export uses LibreOffice, or Microsoft Word on Windows. Everything else runs without an external program.
+```text
+scripts/
+  pipeline.py         CLI entry point, caching, candidate selection, and report generation
+  docio.py            .docx / Markdown / plain-text block I/O and PDF export
+  chains.py           Chain templates, preflight hop probing, and retries
+  rules.py            Seeded English and Chinese regex post-processing rules
+  score.py            GPT-2 / statistical scoring, term extraction, and fidelity checks
+  config_default.json Default rule probabilities and selection thresholds
+  requirements.txt    Python package dependencies
+references/chains.md  Empirical feature comparisons, scoring formulas, and chain design
+projects/             Example rewrite config and terminology tables
+```

@@ -27,7 +27,8 @@ test('codemode is additive and does not hide direct tools', () => {
   ]);
   assert.equal(settings.theme, 'catppuccin-mocha');
   assert.equal(settings.hideThinkingBlock, false);
-  assert.equal(settings.tidy.finalReplyStyle, 'off');
+  assert.equal(Object.hasOwn(settings.tidy, 'finalReplyStyle'), false);
+  assert.equal(settings.tidy.userMessageAlign, 'right');
   assert.equal(settings.tidy.frameMessages, true);
   assert.equal(Object.hasOwn(settings.tidy, 'frameUserMessages'), false);
   assert.equal(settings.tidy.messageBorderColors.user, 'syntaxKeyword');
@@ -81,7 +82,7 @@ test('autoresearch wrappers stay explicit-only and resolve upstream resources', 
 });
 
 test('instruction templates end Requirement Alignment with the document rule', () => {
-  const rule = 'Unless user request, document should not include historical background, troubleshooting processes, or redundant explanations.';
+  const rule = 'Omit historical background, troubleshooting steps, and redundant explanations unless the user requests them.';
   for (const file of ['templates/AGENTS.md', 'pi/AGENTS.md']) {
     const text = read(file);
     const section = text.split('# Requirement Alignment\n')[1].split('\n# ')[0].trim();
@@ -100,7 +101,7 @@ test('deployment guides retain the requested configuration', () => {
   ]) assert.ok(codex.includes(value), value);
   const pi = read('setup_for_pi.md');
   for (const value of [
-    'toolSuccessBg: "base"', 'default rounded frame', 'editorPaddingY: 0',
+    'toolSuccessBg: "base"', 'userMessageAlign: "right"', 'editorPaddingY: 0',
     'mode: "manual"', 'paths: ["sessions"]',
     'node cli.mjs install --host pi --config <absolute-routing-config> --apply',
   ]) assert.ok(pi.includes(value), value);

@@ -1,33 +1,44 @@
-# Pi Sync setup
+# Pi Sync Setup
 
 English | [简体中文](pi-sync-setup.zh-CN.md)
 
-Install `npm:@gfgghgftgffg/amox-pi-sync` on each computer. Use your own **private repository with SSH read/write access**, not this bootstrap repository. Remove replaced `pi-sync-suite` or local amox-pi-sync registrations; keep their files and backups. Load only one sync extension.
+Install `npm:@gfgghgftgffg/amox-pi-sync` on each machine to manually sync Pi session files through your own private Git repository over SSH. Never point Pi Sync at this public bootstrap repository.
 
-## Configuration
+If `pi-sync-suite` or a local `amox-pi-sync` path is registered in `settings.json`, remove that registration while keeping its existing data and backup directories. Load only one sync extension at a time.
 
-Deploy [amox-pi-sync.json](amox-pi-sync.json) to `<agent-dir>/amox-pi-sync.json`, where `<agent-dir>` is `PI_CODING_AGENT_DIR` or `~/.pi/agent`.
+## Configure `amox-pi-sync.json`
 
-| Field | Value |
+Back up any existing sync config, then deploy [amox-pi-sync.json](amox-pi-sync.json) to `<agent-dir>/amox-pi-sync.json` (`PI_CODING_AGENT_DIR` or `~/.pi/agent`):
+
+| Field | Value and rules |
 | --- | --- |
-| `repoUrl` | Your private repository's SSH URL; replace both `YOUR_*` placeholders |
-| `repoDir` | Replace `{{SYNC_REPO_DIR}}` with a dedicated absolute checkout path, normally `<agent-dir>/amox-pi-sync-repo` |
-| `mode` | `manual`; no startup network access |
-| `paths` | `["sessions"]`, relative to the agent directory |
-| `retention` | Keep the newest 20 backups for up to 180 days; cleanup requires manual preview/confirmation |
+| `repoUrl` | SSH URL of your private sessions repository (replace `YOUR_GITHUB_USERNAME` and `YOUR_PRIVATE_SESSIONS_REPO`) |
+| `repoDir` | Dedicated local Git checkout path; replace `{{SYNC_REPO_DIR}}` with an absolute path (typically `<agent-dir>/amox-pi-sync-repo`) |
+| `mode` | `"manual"` (no automatic pull or push on Pi startup) |
+| `paths` | `["sessions"]`, resolved relative to `<agent-dir>` |
+| `retention` | `keepBackups: 20`, `maxAgeDays: 180` under `<agent-dir>/amox-pi-sync-backups`; cleanup runs only after manual preview and confirmation |
 
-Back up existing configuration. Preserve a valid amox remote, checkout and runtime fields; each computer uses the same remote but its own local path. Missing repository details leave sync pending.
+Preserve valid existing `repoUrl`, `repoDir`, and timing settings across reruns; every machine shares the same SSH remote while using its own local `repoDir`. If the user has not created the private repository yet, leave `amox-pi-sync.json` pending rather than guessing a URL.
 
-When migrating from `pi-sync-suite.json`, preserve the SSH remote but use a new `amox-pi-sync-repo` checkout, not the old `sync-suite-repo`. If the new configuration is absent, the extension can read the legacy file without changing it; saving writes the new file. The amox schema does not use the suite's `chat`, `environment`, `policy` or `syncLocalPackagePaths` fields. Backups live in `<agent-dir>/amox-pi-sync-backups`.
+### Migrating from `pi-sync-suite`
 
-## Verification and use
+Reuse a verified SSH `repoUrl` from `pi-sync-suite.json`, and point `repoDir` to a fresh `<agent-dir>/amox-pi-sync-repo` directory instead of reusing legacy `sync-suite-repo`. When `amox-pi-sync.json` does not exist yet, `amox-pi-sync` can read `pi-sync-suite.json` read-only and writes `amox-pi-sync.json` on save. Do not copy legacy `chat`, `environment`, `policy`, or `syncLocalPackagePaths` fields.
 
-Check repository privacy and write permission in GitHub settings. SSH/read access can be checked with `ssh -T git@github.com` and `git ls-remote <your-ssh-repo-url>`. Reload Pi and inspect `/sync-status` or click the Starline `pi-sync` pill. Manual mode does not contact the remote at startup.
+## Verify and run sync
 
-- `/sync-push`: upload selected raw agent files.
-- `/sync-pull`: apply remote files; different content at the same path is backed up before replacement. Local-only files remain; active sessions cannot be overwritten.
-- `/sync-settings`: configure paths/mode, backups, diagnostics and manual cleanup.
+1. Check repository visibility and write access in GitHub settings. Verify SSH authentication and remote read access locally.
+   ```sh
+   ssh -T git@github.com
+   git ls-remote <your-ssh-repo-url>
+   ```
+2. Reload Pi and check `/sync-status` (or click the right-side `pi-sync` pill in Starline). Manual mode makes no network calls until you run a transfer command.
 
-Review sessions for secrets and back up local data before transfers. Avoid simultaneous pushes. Bootstrap does not run synchronization, setup commands or cleanup. `/sync-setup` saves configuration without transferring data; it is unnecessary for bootstrap verification. Keep credentials, sessions, checkouts and backups out of this repository.
+Available commands:
 
-[README](../README.md) · [Pi deployment](../setup_for_pi.md)
+- `/sync-push` — push configured `sessions` files to the private remote.
+- `/sync-pull` — pull remote files into `<agent-dir>`; conflicting local files are backed up to `amox-pi-sync-backups` before replacement, local-only files stay untouched, and active sessions are never overwritten.
+- `/sync-settings` — edit paths or sync mode, inspect diagnostics, view backups, or run manual backup cleanup.
+
+Check sessions for sensitive tokens and back up local data before pushing or pulling, and avoid pushing from two machines at once. Bootstrap never runs `/sync-push`, `/sync-pull`, `/sync-setup`, or cleanup (`/sync-setup` only writes config and is not needed to verify deployment). Keep real credentials, session files, sync checkouts, and backups out of this repository.
+
+Related: [README](../README.md) · [Pi setup](../setup_for_pi.md)

@@ -1,16 +1,16 @@
 ---
-description: "Rewrite a .docx/.md/.txt so it reads less like machine translation or generated text, without letting a model write the prose."
+description: "Rewrite a .docx, .md, or .txt document through cross-family translation chains and regex cleanup without model-written prose."
 argument-hint: "<file> [Chinese|English output] [--level light|standard|deep]"
 ---
-Read the `de-ai` skill's `SKILL.md` in full first, then follow its "Your steps" section exactly. The entry point is `scripts/pipeline.py` inside that skill directory.
+Read the `de-ai` skill's `SKILL.md` in full, then run its `Steps` section using `scripts/pipeline.py` inside that skill directory.
 
-Three hard constraints:
+Follow these three rules strictly:
 
-1. Never rewrite, polish or paraphrase the prose yourself. Every change must come from the scripts.
-2. Every target block either gets replaced or is reported with a reason. Never patch a failed block with text the script did not produce.
-3. Never promise a detection score. `new_score` is a candidate ranking score only.
+1. Do not write, edit, or paraphrase document prose yourself; every text change must come from `scripts/pipeline.py`.
+2. Report every target block that was skipped or kept unchanged with its recorded reason; never manually patch a block that failed translation or validation.
+3. Do not claim or estimate an AI-detector score; `chosen_score` (`After` in `report.md`) only ranks candidates within a block.
 
-The user's input:
+Request arguments:
 $ARGUMENTS
 
-If no file path is given, determine the target from the conversation. If it is still unclear, ask which file to process and do not touch unrelated documents.
+If `$ARGUMENTS` omits a file path, identify the target file from the current conversation. If the target file is still ambiguous, ask the user which file to process before touching any document.

@@ -1,7 +1,7 @@
 ---
 name: {{SKILL_NAME}}
-description: Manually invoke the installed {{SKILL_NAME}} workflow.
+description: Run the installed {{SKILL_NAME}} workflow on explicit user request.
 disable-model-invocation: true
 ---
 
-Read `{{UPSTREAM_SKILL_PATH}}` in full, then follow its instructions for the user's request. Resolve all relative file references against that original SKILL.md directory, not this wrapper directory.
+Read `{{UPSTREAM_SKILL_PATH}}` in full and execute its workflow for the current request. Resolve every relative path in those instructions against that original SKILL.md directory, not this wrapper directory.
