@@ -51,7 +51,7 @@
 | 会话同步 | `amox-pi-sync`，采用手动模式且仅同步 `sessions` 到[你自己的私有 SSH 仓库](pi/pi-sync-setup.zh-CN.md) |
 | Autoresearch | `pi-autoresearch`（`skills: []`），通过仅显式调用的包装文件与 `/autoresearch` 命令暴露 |
 
-包安装顺序、旧版界面扩展清理与 Skills 部署见 [setup_for_pi.md](setup_for_pi.md)；各模板目标路径与搜索回退细节见 [pi/README.md](pi/README.md)。
+包安装顺序与 Skills 部署见 [setup_for_pi.md](setup_for_pi.md)；各模板目标路径与搜索回退细节见 [pi/README.md](pi/README.md)。
 
 > [!IMPORTANT]
 > 缺失的 API Key 和 SSH 仓库地址直接在本机文件中填写，不要发到聊天窗口。Bootstrap 会将缺少凭据或远端的组件记为待配置，不会执行同步传输、基准测试或付费模型与生图调用。
@@ -61,7 +61,7 @@
 | 路径 | 内容 |
 | --- | --- |
 | [setup.md](setup.md) | Codex 自动部署与验收步骤 |
-| [setup_for_pi.md](setup_for_pi.md) | Pi 自动部署、包迁移与验收步骤 |
+| [setup_for_pi.md](setup_for_pi.md) | Pi 自动部署与验收步骤 |
 | [templates/AGENTS.md](templates/AGENTS.md) | Codex 全局指令模板 |
 | [pi/](pi/README.md) | Pi 配置模板、Catppuccin Mocha 主题、搜索密钥读取脚本及外观／同步指南 |
 | [skills/amox-grill-me/](skills/amox-grill-me/SKILL.md) | 内置的仅显式调用方案追问 Skill |

@@ -4,8 +4,6 @@ English | [简体中文](pi-sync-setup.zh-CN.md)
 
 Install `npm:@gfgghgftgffg/amox-pi-sync` on each machine to manually sync Pi session files through your own private Git repository over SSH. Never point Pi Sync at this public bootstrap repository.
 
-If `pi-sync-suite` or a local `amox-pi-sync` path is registered in `settings.json`, remove that registration while keeping its existing data and backup directories. Load only one sync extension at a time.
-
 ## Configure `amox-pi-sync.json`
 
 Back up any existing sync config, then deploy [amox-pi-sync.json](amox-pi-sync.json) to `<agent-dir>/amox-pi-sync.json` (`PI_CODING_AGENT_DIR` or `~/.pi/agent`):
@@ -19,10 +17,6 @@ Back up any existing sync config, then deploy [amox-pi-sync.json](amox-pi-sync.j
 | `retention` | `keepBackups: 20`, `maxAgeDays: 180` under `<agent-dir>/amox-pi-sync-backups`; cleanup runs only after manual preview and confirmation |
 
 Preserve valid existing `repoUrl`, `repoDir`, and timing settings across reruns; every machine shares the same SSH remote while using its own local `repoDir`. If the user has not created the private repository yet, leave `amox-pi-sync.json` pending rather than guessing a URL.
-
-### Migrating from `pi-sync-suite`
-
-Reuse a verified SSH `repoUrl` from `pi-sync-suite.json`, and point `repoDir` to a fresh `<agent-dir>/amox-pi-sync-repo` directory instead of reusing legacy `sync-suite-repo`. When `amox-pi-sync.json` does not exist yet, `amox-pi-sync` can read `pi-sync-suite.json` read-only and writes `amox-pi-sync.json` on save. Do not copy legacy `chat`, `environment`, `policy`, or `syncLocalPackagePaths` fields.
 
 ## Verify and run sync
 

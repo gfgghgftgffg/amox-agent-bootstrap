@@ -52,7 +52,7 @@ that still needs my input.
 | Session sync | `amox-pi-sync` in manual `sessions`-only mode using [your private SSH repository](pi/pi-sync-setup.md) |
 | Autoresearch | `pi-autoresearch` (`skills: []`) exposed via explicit-only Skill wrappers and `/autoresearch` |
 
-See [setup_for_pi.md](setup_for_pi.md) for package order, legacy UI migration, and Skill installation, and [pi/README.md](pi/README.md) for template targets and search fallback rules.
+See [setup_for_pi.md](setup_for_pi.md) for package order and Skill installation, and [pi/README.md](pi/README.md) for template targets and search fallback rules.
 
 > [!IMPORTANT]
 > Enter missing API keys and SSH remotes directly on the local machine rather than in chat. Bootstrap leaves unconfigured credentials or sync destinations pending and does not execute sync transfers, benchmarks, or paid model/image calls.
@@ -62,7 +62,7 @@ See [setup_for_pi.md](setup_for_pi.md) for package order, legacy UI migration, a
 | Path | Contents |
 | --- | --- |
 | [setup.md](setup.md) | Automated deployment and verification steps for Codex |
-| [setup_for_pi.md](setup_for_pi.md) | Automated deployment, migration, and verification steps for Pi |
+| [setup_for_pi.md](setup_for_pi.md) | Automated deployment and verification steps for Pi |
 | [templates/AGENTS.md](templates/AGENTS.md) | Global instruction template for Codex |
 | [pi/](pi/README.md) | Pi configuration templates, Catppuccin Mocha theme, search key helper, and appearance/sync guides |
 | [skills/amox-grill-me/](skills/amox-grill-me/SKILL.md) | Bundled explicit-only plan-interview Skill |

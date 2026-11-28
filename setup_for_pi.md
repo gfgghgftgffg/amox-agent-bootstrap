@@ -28,11 +28,9 @@ Install each package with `pi install npm:<name>` (no `--local`, no version pins
 | `npm:@gfgghgftgffg/amox-pi-sync` | Manual `sessions`-only raw data sync |
 | `npm:@gfgghgftgffg/amox-high-level` | On-demand `/hl` and `+hl` reply summaries with a clickable `HL` pill |
 
-Migrate legacy extensions safely:
+### Package notes
 
-- Back up `settings.json`, uninstall confirmed legacy UI packages (`@heyhuynhgiabuu/pi-pretty`, `pi-open-tui`, `@narumitw/pi-statusline`) via `pi remove <actual-source>`, and leave their old config files backed up or untouched.
 - Review the [amox lean extension docs](https://github.com/gfgghgftgffg/amox_pi_extensions_lean). Ask for approval before migrating existing `@ssk_dev` or local facade entries, and remove only replaced registrations so each tool name has one active provider without loading separate upstream engines.
-- Replace confirmed `pi-sync-suite` or local `amox-pi-sync` registrations with `npm:@gfgghgftgffg/amox-pi-sync`, keeping existing data and backups; never load two sync extensions at once.
 - Place `pi-goal-x-lean` after `pi-subagents-lean` and do not load upstream `pi-goal-x` alongside it. Only invoke `/goal <objective>` when asked by the user; parent sessions own goals, wait for tracked subagent/workflow deliveries before continuing or completing, and keep goal milestones separate from `todo`.
 - Update installed extensions later with `pi update --extensions`.
 
@@ -112,7 +110,7 @@ Font installation and opacity remain user-managed: `Maple Mono NF CN` at `95%` o
 
 - **Sub2API**: Merge [sub2api.json](pi/sub2api.json) by provider key (`sub2api-gpt-only` for GPT endpoints, `sub2api-mixed` for mixed pools), preserving existing tokens. Keep `YOUR_API_KEY` where unconfigured and tell the user which local entry needs a token; on legacy single-provider setups, keep `sub2api` and copy its token into a new entry only when confirmed to serve that pool.
 - **Web search**: Deploy [web-search.json](pi/web-search.json) per the [search routing guide](pi/README.md#search-routing) (`exa` first, then `sub2api-gpt-only` via `openaiUseProviderBaseUrl: true`). Preserve unrelated fetch settings and ask before removing conflicting `provider`/`searchProvider` keys or native `serverTools.responses` `web_search` entries.
-- **Pi Sync**: Deploy [amox-pi-sync.json](pi/amox-pi-sync.json) with `mode: "manual"` and `paths: ["sessions"]` following [pi/pi-sync-setup.md](pi/pi-sync-setup.md) ([简体中文](pi/pi-sync-setup.zh-CN.md)). Do not copy legacy `pi-sync-suite` `chat`, `environment`, `policy`, or `syncLocalPackagePaths` fields. Leave missing SSH remotes pending, and do not run sync transfers, `/sync-setup`, or backup cleanup during bootstrap.
+- **Pi Sync**: Deploy [amox-pi-sync.json](pi/amox-pi-sync.json) with `mode: "manual"` and `paths: ["sessions"]` following [pi/pi-sync-setup.md](pi/pi-sync-setup.md) ([简体中文](pi/pi-sync-setup.zh-CN.md)). Leave missing SSH remotes pending, and do not run sync transfers, `/sync-setup`, or backup cleanup during bootstrap.
 - **Retry**: Keep `pi-retry` defaults and check `/retry status`.
 
 ## 5. Task Router
@@ -150,7 +148,7 @@ Deploy [pi/AGENTS.md](pi/AGENTS.md) to `<agent-dir>/AGENTS.md` with verified `{{
 ## 7. Verification
 
 - Check Pi, Node.js, Git, Bash, the `codex` Python 3.12 interpreter, and `pypdf`.
-- Confirm package order in `<agent-dir>/settings.json`, verify legacy UI/sync packages are removed, and ensure one lean tool registration per tool name.
+- Confirm package order in `<agent-dir>/settings.json` and ensure one lean tool registration per tool name.
 - Check all installed Skills, required subdirectories, `disable-model-invocation` flags, single `anti-defensive-writing/SKILL.md` installation, and `meeting-summary-html` text preparation on a temporary local text fixture.
 - Confirm the three `autoresearch-*` wrappers have `disable-model-invocation: true`, resolve valid upstream `SKILL.md` paths with original-directory relative path semantics, pair with `skills: []` in `settings.json`, and did not start an experiment loop.
 - Check `<router-checkout>/AGENTS.md` portability, `tr_*.md` role flags (`skills: true`, `ext:builtin:codemode/codemode`, unchanged permissions), and absence of any Router block in `<agent-dir>/AGENTS.md`.
